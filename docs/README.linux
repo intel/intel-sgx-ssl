@@ -1,0 +1,63 @@
+Intel(R) SgxSSL add-on Setup
+============================
+1. Unzip the file Intel(R)_SgxSSL_sources.zip to <sgxssl_root>
+
+1.1 The easiest build option is to run the build_sgxssl.sh script, this script is doing all the steps described below and creates the tar.gz package
+
+1.2 Before running it, make sure to update the first 3 definitions in the script if needed
+
+1.3 If you choose to build manually, follow the instructions below...
+
+2. Build the SgxSSL Cryptographic library (OpenSSL crypto library)
+
+2.1. Open shell and go to the <sgxssl_root>/openssl_source directory
+
+2.2 Set environement variable OPENSSL_INSTALL_DIR=<sgxssl_root>/openssl_source/OpenSSL_install_dir_tmp
+
+2.3. Extract the OpenSSL 1.1 tar file: 'tar xvf openssl-1.1.0.tar.gz' and go into the output directory
+
+2.4. Copy the file rand_unix.c over the one that comes in the openssl:
+	cp <sgxssl_root>/openssl_source/rand_unix.c <sgxssl_root>/openssl_source/openssl-1.1.0/crypto/rand/rand_unix.c
+	
+2.5. Edit the 'Configure' file
+	replace line:	my $user_cflags="";
+	with:			my $user_cflags="-include <sgxssl_root>/openssl_source/bypass_to_sgxssl.h";
+
+2.6. Run the Configure script for the Release configuration:
+	perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui -DOPENSSL_NO_STDIO -DGETPID_IS_MEANINGLESS --prefix=`realpath $OPENSSL_INSTALL_DIR`
+
+    or run the Configure script for the Debug configuration:
+	perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui -DOPENSSL_NO_STDIO -DGETPID_IS_MEANINGLESS --prefix=`realpath $OPENSSL_INSTALL_DIR` -g
+
+2.7. Build OpenSSL for SGX
+	make
+	Note: This step fails because the bypass header file added earlier. 
+	However, the required OpenSSL crypto library should have been created successfully and can be picked up for the Intel SgxSSL.
+
+2.8. Install the library and header files
+
+2.8.1. Copy the library libcrypto.a to <sgxssl_root>/package/lib64/libsgx_tsgxssl_crypto.a
+
+2.8.2. Copy header files from <sgxssl_root>/openssl_source/include/openssl to <sgxssl_root>/package/include/openssl/
+
+3. Build and install the Intel SgxSSL trusted and untrusted libraries
+
+3.1. Go to the sgxssl directory <sgxssl_root>/sgx
+
+3.2. Build for the SGX Hardware Debug configuration:
+	make clean; make SGX_MODE=HW SGX_DEBUG=1 
+
+    or build for the SGX Hardware Release configuration:
+	make clean; make SGX_MODE=HW SGX_DEBUG=0
+
+3.3. Install the Intel SgxSSL trusted and untrusted libraries (Debug or Release build)
+
+3.3.1. Copy <sgxssl_root>/sgx/libsgx_tsgxssl/libsgx_tsgxssl.a  <sgxssl_root>/package/lib64/
+       Copy <sgxssl_root>/sgx/libsgx_usgxssl/libsgx_usgxssl.a  <sgxssl_root>/package/lib64/
+
+3.3.2. Copy <sgxssl_root>/sgx/libsgx_tsgxssl/sgx_tsgxssl.edl   <sgxssl_root>/package/include/
+       Copy <sgxssl_root>/sgx/libsgx_tsgxssl/tSgxSSL_api.h     <sgxssl_root>/package/include/
+       Copy <sgxssl_root>/sgx/openssl_source/tsgxsslio.h       <sgxssl_root>/package/include/
+
+
+
