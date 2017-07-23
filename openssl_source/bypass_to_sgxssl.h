@@ -57,6 +57,11 @@
 #define __fprintf_chk sgxssl_fprintf
 */
 
+#if defined(SGXSDK_INT_VERSION) && (SGXSDK_INT_VERSION > 18)
+	#define _longjmp longjmp
+	#define _setjmp setjmp
+#endif
+
 #define pipe sgxssl_pipe
 #define __read_alias sgxssl_read
 #define write sgxssl_write

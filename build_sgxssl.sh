@@ -39,11 +39,18 @@
 SGX_SDK_PATH=/opt/intel/sgxsdk
 
 # this variable must be set to the openssl file name (version) located in the openssl_source folder
-OPENSSL_VERSION="openssl-1.1.0e"
+OPENSSL_VERSION="openssl-1.1.0f"
 
 # this variable must be set to the SGX SSL version
 SVN_REVISION=`svn info | grep Revision | cut -d ' ' -f 2` || exit 1
-SGXSSL_VERSION="1.8.100.$SVN_REVISION"
+
+if [ "$SVN_REVISION" == "" ] 
+then
+	SVN_REVISION=99999
+fi 
+
+SGXSDK_VERSION=`strings $SGX_SDK_PATH/lib64/libsgx_trts.a | grep VERSION | cut -c 18- | grep -o -E "^[1-9]\.[0-9]"`
+SGXSSL_VERSION="$SGXSDK_VERSION.100.$SVN_REVISION"
 
 #=========================================#
 # Do not edit this script below this line #
@@ -58,13 +65,21 @@ fi
 
 CONFNAME_HEADER=/usr/include/x86_64-linux-gnu/bits/confname.h
 
-##Get OS_ID (Ubuntu/CentOS)
+##Get OS_ID (Ubuntu/CentOS), and SDK integer number version (1.8 -> 18)
 OS_NAME=`lsb_release -i | cut -d ":" -f 2 | xargs`
+SGXSDK_INT_VERSION=`echo "${SGXSDK_VERSION//.}" `
+
 OS_ID=1
 if [ $OS_NAME == 'CentOS' ] 
 then
 	OS_ID=2
 fi 
+
+##Create required directories
+mkdir -p package/lib64/release/
+mkdir -p package/lib64/debug/
+mkdir -p package/include/openssl/
+
 
 SGXSSL_ROOT="`pwd`"
 OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/openssl_source/OpenSSL_install_dir_tmp"
@@ -82,7 +97,7 @@ tar xvf $OPENSSL_VERSION.tar.gz || exit 1
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
 cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
+perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
 make build_generated libcrypto.a -j || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
@@ -100,7 +115,7 @@ tar xvf $OPENSSL_VERSION.tar.gz || exit 1
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
 cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || exit 1
+perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || exit 1
 make build_generated libcrypto.a -j || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || exit 1
 
@@ -127,7 +142,7 @@ cd $SGXSSL_ROOT || exit 1
 # generate list of tools used for creating this release
 BUILD_TOOLS_FILENAME=sgxssl.$SGXSSL_VERSION.build-tools.txt
 echo "SGX SDK version:" > $BUILD_TOOLS_FILENAME
-strings $SGX_SDK_PATH/lib64/libsgx_trts.a | grep VERSION | cut -c 18- >> $BUILD_TOOLS_FILENAME
+echo $SGXSDK_VERSION >> $BUILD_TOOLS_FILENAME
 echo "OpenSSL package version:" >> $BUILD_TOOLS_FILENAME
 echo "$OPENSSL_VERSION" >> $BUILD_TOOLS_FILENAME
 echo "SVN revision:" >> $BUILD_TOOLS_FILENAME
