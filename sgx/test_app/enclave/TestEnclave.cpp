@@ -289,7 +289,7 @@ void t_sgxssl_call_apis()
     
     printf("Start tests\n");
     
-	setPrintToStdoutStderrCB(vprintf_cb);
+	SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
     
     //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
     

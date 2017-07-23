@@ -50,7 +50,7 @@ typedef int (*PRINT_TO_STDOUT_STDERR_CB)(Stream_t stream, const char* fmt, va_li
 // to stdout or stderr and will be implemented by user to manage them as per user specific needs.
 // When there is no registered callback, the printouts will be ignored.
 //---------------------------------------------------------------------
-void setPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb);
+void SGXSSLSetPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb);
 
 typedef enum {
 	UNREACH_CODE_ABORT_ENCLAVE = 0,
@@ -63,12 +63,12 @@ typedef enum {
 // For customers, who in any case prefer to continue execution, additional mode, 
 // reporting an error through return value and/or setting last error/errno, is available.
 //---------------------------------------------------------------------
-void setUnreachableCodePolicy(UnreachableCodePolicy_t policy);
+void SGXSSLSetUnreachableCodePolicy(UnreachableCodePolicy_t policy);
 
 //---------------------------------------------------------------------
 // API function to get SgxSSL Library version.
 //---------------------------------------------------------------------
-const char * getSgxSSLVersion();
+const char * SGXSSLGetSgxSSLVersion();
 
 #ifdef __cplusplus
 }

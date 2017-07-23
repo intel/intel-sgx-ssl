@@ -37,7 +37,7 @@ PRINT_TO_STDOUT_STDERR_CB s_print_cb = NULL;
 extern "C" 
 {
 
-void setPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb)
+void SGXSSLSetPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb)
 {
 	FSTART;
 
@@ -50,7 +50,7 @@ void setPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb)
 // By default reaching unreachable code will cause an enclave to be aborted.
 UnreachableCodePolicy_t s_unreach_code_policy = UNREACH_CODE_ABORT_ENCLAVE;	
 
-void setUnreachableCodePolicy(UnreachableCodePolicy_t policy)
+void SGXSSLSetUnreachableCodePolicy(UnreachableCodePolicy_t policy)
 {
 	FSTART;
 
@@ -60,7 +60,7 @@ void setUnreachableCodePolicy(UnreachableCodePolicy_t policy)
 }
 
 extern const char* sgx_tssl_version;
-const char * getSgxSSLVersion()
+const char * SGXSSLGetSgxSSLVersion()
 {
 	return sgx_tssl_version;
 }
