@@ -98,7 +98,7 @@ cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
 cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
 perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
-make build_generated libcrypto.a -j || exit 1
+make build_generated libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 cd $SGXSSL_ROOT/openssl_source || exit 1
@@ -116,7 +116,7 @@ cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
 cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
 perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || exit 1
-make build_generated libcrypto.a -j || exit 1
+make build_generated libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || exit 1
 
 cd $SGXSSL_ROOT/openssl_source || exit 1
