@@ -46,9 +46,21 @@ ifeq ($(SGX_ARCH), x86)
 	$(error x86 build is not supported, only x64!!)
 else
 	SGX_COMMON_CFLAGS := -m64 -Wall
-	SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
-	SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
-	SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+	ifeq ($(LINUX_SGX_BUILD), 1)
+		include ../../../../buildenv.mk
+		SGX_LIBRARY_PATH := $(BUILD_DIR)
+		SGX_ENCLAVE_SIGNER := $(BUILD_DIR)/sgx_sign
+		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
+		SGX_SDK_INC := $(COMMON_DIR)/inc
+		STL_PORT_INC := $(LINUX_SDK_DIR)/tlibstdcxx
+	else
+		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+		SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
+		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+		SGX_SDK_INC := $(SGX_SDK)/include
+		STL_PORT_INC := $(SGX_SDK_INC)
+	endif
+
 endif
 
 ifeq ($(SGX_DEBUG), 1)
@@ -61,7 +73,6 @@ endif
 OPENSSL_PACKAGE := ../../package
 SGXSSL_Library_Name := sgx_tsgxssl
 OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
-#OpenSSL_SSL_Library_Name := sgx_tsgxssl_ssl
 
 ifeq ($(SGX_DEBUG), 1)
         SGX_COMMON_CFLAGS += -O0 -g
@@ -94,7 +105,7 @@ TestEnclave_C_Files := $(wildcard $(ENCLAVE_DIR)/*.c) $(wildcard $(ENCLAVE_DIR)/
 TestEnclave_Cpp_Objects := $(TestEnclave_Cpp_Files:.cpp=.o)
 TestEnclave_C_Objects := $(TestEnclave_C_Files:.c=.o)
 
-TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I$(OPENSSL_PACKAGE)/include
+TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(STL_PORT_INC)/stlport -I$(OPENSSL_PACKAGE)/include
 
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpic -fpie -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(TestEnclave_Include_Paths) -include "tsgxsslio.h"
 TestEnclave_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11
@@ -127,7 +138,7 @@ run: all
 ######## TestEnclave Objects ########
 
 $(ENCLAVE_DIR)/TestEnclave_t.c: $(SGX_EDGER8R) $(ENCLAVE_DIR)/TestEnclave.edl
-	@cd $(ENCLAVE_DIR) && $(SGX_EDGER8R) --trusted TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK)/include
+	@cd $(ENCLAVE_DIR) && $(SGX_EDGER8R) --trusted TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK_INC)
 	@echo "GEN  =>  $@"
 
 $(ENCLAVE_DIR)/TestEnclave_t.o: $(ENCLAVE_DIR)/TestEnclave_t.c

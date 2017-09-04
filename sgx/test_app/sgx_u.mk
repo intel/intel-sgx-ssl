@@ -46,9 +46,17 @@ ifeq ($(SGX_ARCH), x86)
 	$(error x86 build is not supported, only x64!!)
 else
 	SGX_COMMON_CFLAGS := -m64 -Wall
-	SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
-	SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
-	SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+	ifeq ($(LINUX_SGX_BUILD), 1)
+		include ../../../../buildenv.mk
+		SGX_LIBRARY_PATH := $(BUILD_DIR)
+		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
+		SGX_SDK_INC := $(COMMON_DIR)/inc
+		SGX_SHARED_LIB_FLAG := -Wl,-rpath,${SGX_LIBRARY_PATH}
+	else
+		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+		SGX_SDK_INC := $(SGX_SDK)/include
+	endif
 endif
 
 ifeq ($(SGX_DEBUG), 1)
@@ -74,7 +82,7 @@ endif
 App_Cpp_Files := $(UNTRUSTED_DIR)/TestApp.cpp
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
-App_Include_Paths := -I$(UNTRUSTED_DIR) -I$(SGX_SDK)/include
+App_Include_Paths := -I$(UNTRUSTED_DIR) -I$(SGX_SDK_INC)
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fpic -fpie -fstack-protector -Wformat -Wformat-security -Wno-attributes $(App_Include_Paths)
 App_Cpp_Flags := $(App_C_Flags) -std=c++11
@@ -91,7 +99,7 @@ SgxSSL_Link_Libraries := sgx_usgxssl
 
 Security_Link_Flags := -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -pie
 
-App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries) -lpthread 
+App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries) -lpthread 
 
 
 ifeq ($(SGX_MODE), HW)
@@ -116,7 +124,7 @@ endif
 ######## App Objects ########
 
 $(UNTRUSTED_DIR)/TestEnclave_u.c: $(SGX_EDGER8R) enclave/TestEnclave.edl
-	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK)/include
+	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK_INC)
 	@echo "GEN  =>  $@"
 
 $(UNTRUSTED_DIR)/TestEnclave_u.o: $(UNTRUSTED_DIR)/TestEnclave_u.c

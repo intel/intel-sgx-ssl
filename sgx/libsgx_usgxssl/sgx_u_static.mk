@@ -44,7 +44,14 @@ ifeq ($(SGX_ARCH), x86)
 	$(error x86 build is not supported, only x64!!)
 else
 	SGX_COMMON_CFLAGS := -m64 -Wall
-	SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+	ifeq ($(LINUX_SGX_BUILD), 1)
+		include ../../../../buildenv.mk
+		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
+		SGX_SDK_INC := $(COMMON_DIR)/inc
+	else
+		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+		SGX_SDK_INC := $(SGX_SDK)/include
+	endif
 endif
 
 ifeq ($(SGX_DEBUG), 1)
@@ -64,7 +71,7 @@ SGX_EDL_FILE := $(SgxSSL_Package_Include)/sgx_tsgxssl.edl
 
 ######## App Settings ########
 
-Sgx_ussl_Include_Paths := -I. -I$(SGX_SDK)/include
+Sgx_ussl_Include_Paths := -I. -I$(SGX_SDK_INC)
 
 Sgx_ussl_C_Flags := $(SGX_COMMON_CFLAGS) -fpie -fpic -fstack-protector -Wformat -Wformat-security -Wno-attributes $(Sgx_ussl_Include_Paths)
 Sgx_ussl_Cpp_Flags := $(Sgx_ussl_C_Flags) -std=c++11
@@ -84,7 +91,7 @@ all: libsgx_usgxssl.a
 
 # Lines below are NOT needed because currently the EDL file doesn't contain ECALL function.
 #$(UNTRUSTED_DIR)/sgx_tsgxssl_u.c: $(SGX_EDGER8R) $(SGX_EDL_FILE)
-#	@mkdir -p $(UNTRUSTED_DIR) && cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --header-only --untrusted $(SGX_EDL_FILE) --search-path $(SGX_SDK)/include
+#	@mkdir -p $(UNTRUSTED_DIR) && cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --header-only --untrusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC)
 #	@echo "GEN  =>  $@"
 
 sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c

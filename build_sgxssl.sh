@@ -31,37 +31,83 @@
 #
 #
 
+function clean_and_ret {
+	ret_status=$1
+	if [ $ret_status==1 ] 
+	then
+		echo "******************************************************************************"
+		echo "**                                                                          **"
+		echo "**                Build package failed, cleaning environment                **"
+		echo "**                                                                          **"
+		echo "******************************************************************************"
+	fi
+	cd $SGXSSL_ROOT/sgx/
+	make clean
+
+	cd $SGXSSL_ROOT/sgx/libsgx_tsgxssl
+	rm -f tsgxssl_version.cpp
+
+	cd $SGXSSL_ROOT/sgx/libsgx_usgxssl
+	rm -f usgxssl_version.cpp
+
+	cd $SGXSSL_ROOT/package
+	rm -rf include/openssl/*
+	rm -rf lib64/release/*
+	rm -rf lib64/debug/*
+
+	cd $SGXSSL_ROOT
+
+	exit $ret_status
+
+}
+
 # run "./build_sgxssl.sh no-clean" to leave the binaries in the package folder
+# run "./build_sgxssl.sh linux-sgx" to build in linux-sgx repository enviroment
 
 # set -x # enable this for debugging this script
 
 # this variable must be set to the path where sgx sdk is installed
-SGX_SDK_PATH=/opt/intel/sgxsdk
+if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
+	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
+	SGX_SDK_LIBS_PATH=../../build/linux
+else
+	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
+	SGX_SDK=/opt/intel/sgxsdk
+	SGX_SDK_LIBS_PATH=$SGX_SDK/lib64
+	if [ -f $SGX_SDK/environment ]; then
+		source $SGX_SDK/environment || clean_and_ret 1
+	else
+		echo "In order to run this script, Intel SGX SDK 1.7 must be installed on this machine, and SGX_SDK (in this script) must be set to the installation location"
+		clean_and_ret 1
+	fi
+fi
 
-# this variable must be set to the openssl file name (version) located in the openssl_source folder
-OPENSSL_VERSION="openssl-1.1.0f"
+#=========================================#
+# Do not edit this script below this line #
+#=========================================#
 
+SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo $SGXSSL_ROOT
+OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/openssl_source/OpenSSL_install_dir_tmp"
+OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/openssl_source/*.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
+if [ "$OPENSSL_VERSION" == "" ] 
+then
+	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
+	clean_and_ret 1
+fi
+echo $OPENSSL_VERSION
 # this variable must be set to the SGX SSL version
-SVN_REVISION=`svn info | grep Revision | cut -d ' ' -f 2` || exit 1
+SVN_REVISION=`svn info | grep Revision | cut -d ' ' -f 2` || clean_and_ret 1
 
 if [ "$SVN_REVISION" == "" ] 
 then
 	SVN_REVISION=99999
 fi 
 
-SGXSDK_VERSION=`strings $SGX_SDK_PATH/lib64/libsgx_trts.a | grep VERSION | cut -c 18- | grep -o -E "^[1-9]\.[0-9]"`
+SGXSDK_VERSION=`strings $SGX_SDK_LIBS_PATH/libsgx_trts.a | grep VERSION | cut -c 18- | grep -o -E "^[1-9]\.[0-9]"`
 SGXSSL_VERSION="$SGXSDK_VERSION.100.$SVN_REVISION"
 
-#=========================================#
-# Do not edit this script below this line #
-#=========================================#
 
-if [ -f $SGX_SDK_PATH/environment ]; then
-	source $SGX_SDK_PATH/environment || exit 1
-else
-	echo "In order to run this script, Intel SGX SDK 1.7 must be installed on this machine, and SGX_SDK_PATH (in this script) must be set to the installation location"
-	exit 1
-fi
 
 CONFNAME_HEADER=/usr/include/x86_64-linux-gnu/bits/confname.h
 
@@ -76,68 +122,84 @@ then
 fi 
 
 ##Create required directories
-mkdir -p package/lib64/release/
-mkdir -p package/lib64/debug/
-mkdir -p package/include/openssl/
+mkdir -p $SGXSSL_ROOT/package/lib64/release/
+mkdir -p $SGXSSL_ROOT/package/lib64/debug/
+mkdir -p $SGXSSL_ROOT/package/include/openssl/
 
-
-SGXSSL_ROOT="`pwd`"
-OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/openssl_source/OpenSSL_install_dir_tmp"
-
-cd $SGXSSL_ROOT/sgx/libsgx_tsgxssl || exit 1
+cd $SGXSSL_ROOT/sgx/libsgx_tsgxssl || clean_and_ret 1
 sed -e "s|#define STRFILEVER \"1.0.0.0\"|#define STRFILEVER \"$SGXSSL_VERSION\"|" tsgxssl_version.cpp.in > tsgxssl_version.cpp
 
-cd $SGXSSL_ROOT/sgx/libsgx_usgxssl || exit 1
+cd $SGXSSL_ROOT/sgx/libsgx_usgxssl || clean_and_ret 1
 sed -e "s|#define STRFILEVER \"1.0.0.0\"|#define STRFILEVER \"$SGXSSL_VERSION\"|" usgxssl_version.cpp.in > usgxssl_version.cpp
 
 # build release modules
-cd $SGXSSL_ROOT/openssl_source || exit 1
-tar xvf $OPENSSL_VERSION.tar.gz || exit 1
+cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
+tar xvf $OPENSSL_VERSION.tar.gz || clean_and_ret 1
 
-cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
-cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
-cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
-make build_generated libcrypto.a || exit 1
-cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || exit 1
-cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
-cd $SGXSSL_ROOT/openssl_source || exit 1
-rm -rf $OPENSSL_VERSION || exit 1
-cd $SGXSSL_ROOT/sgx || exit 1
-make OS_ID=$OS_ID || exit 1 # will also copy the resulting files to package
-./test_app/TestApp || exit 1 # verify everything is working ok
-make clean || exit 1
+# SGXSSL uses rd_rand, so there is no need to get a random based on time
+sed -i "s|time_t tim;||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+sed -i "s|time(&tim);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+
+cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
+cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
+cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || clean_and_ret 1
+perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || clean_and_ret 1
+make build_generated libcrypto.a || clean_and_ret 1
+cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || clean_and_ret 1
+cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || clean_and_ret 1
+cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
+rm -rf $OPENSSL_VERSION || clean_and_ret 1
+cd $SGXSSL_ROOT/sgx || clean_and_ret 1
+
+make OS_ID=$OS_ID $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
+fi
+make clean || clean_and_ret 1
+
 
 # build debug modules
-cd $SGXSSL_ROOT/openssl_source || exit 1
-tar xvf $OPENSSL_VERSION.tar.gz || exit 1
+cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
+tar xvf $OPENSSL_VERSION.tar.gz || clean_and_ret 1
+
+# SGXSSL uses rd_rand, so there is no need to get a random based on time
+sed -i "s|time_t tim;||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+sed -i "s|time(&tim);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
+
 #sed -i "s|my \$user_cflags=\"\"\;|my \$user_cflags=\"-include $SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h\"\;|" $OPENSSL_VERSION/Configure
-cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
-cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
-cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || exit 1
-make build_generated libcrypto.a || exit 1
-cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || exit 1
+cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
+cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
+cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || clean_and_ret 1
+perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || clean_and_ret 1
+make build_generated libcrypto.a || clean_and_ret 1
+cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || clean_and_ret 1
 
-cd $SGXSSL_ROOT/openssl_source || exit 1
-rm -rf $OPENSSL_VERSION || exit 1
-cd $SGXSSL_ROOT/sgx || exit 1
+cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
+rm -rf $OPENSSL_VERSION || clean_and_ret 1
+cd $SGXSSL_ROOT/sgx || clean_and_ret 1
 
-make OS_ID=$OS_ID SGX_MODE=SIM SGX_DEBUG=1 || exit 1 # will also copy the resulting files to package
-./test_app/TestApp || exit 1 # verify everything is working ok
-make clean || exit 1
+make OS_ID=$OS_ID SGX_MODE=SIM SGX_DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
+fi
+make clean || clean_and_ret 1
 
-make OS_ID=$OS_ID SGX_DEBUG=1 || exit 1 # will also copy the resulting files to package
-./test_app/TestApp || exit 1 # verify everything is working ok
-make clean || exit 1
+make OS_ID=$OS_ID SGX_DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
+fi
+make clean || clean_and_ret 1
 
 
 
-cd $SGXSSL_ROOT/package || exit 1
 
-tar -zcvf ../sgxssl.$SGXSSL_VERSION.tar.gz * || exit 1
+cd $SGXSSL_ROOT/package || clean_and_ret 1
 
-cd $SGXSSL_ROOT || exit 1
+tar -zcvf ../sgxssl.$SGXSSL_VERSION.tar.gz * || clean_and_ret 1
+
+cd $SGXSSL_ROOT || clean_and_ret 1
 
 # generate list of tools used for creating this release
 BUILD_TOOLS_FILENAME=sgxssl.$SGXSSL_VERSION.build-tools.txt
@@ -160,23 +222,11 @@ sed --version >> $BUILD_TOOLS_FILENAME
 echo "perl --version:" >> $BUILD_TOOLS_FILENAME
 perl --version >> $BUILD_TOOLS_FILENAME
 
-if [[ $# -gt 0 && $1 == "no-clean" ]]; then
+if [[ $# -gt 0 ]] && [[ $1 == "no-clean" || $2 == "no-clean" ]] ; then
 	cd $SGXSSL_ROOT || exit 1
 	exit 0
 fi
 
-cd $SGXSSL_ROOT/sgx/libsgx_tsgxssl || exit 1
-rm -f tsgxssl_version.cpp
+clean_and_ret 0
 
-cd $SGXSSL_ROOT/sgx/libsgx_usgxssl || exit 1
-rm -f usgxssl_version.cpp
-
-cd $SGXSSL_ROOT/package || exit 1
-rm -f include/openssl/*
-rm -f lib64/release/*
-rm -f lib64/debug/*
-
-cd $SGXSSL_ROOT || exit 1
-
-exit 0
 
