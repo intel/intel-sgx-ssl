@@ -33,7 +33,7 @@
 
 function clean_and_ret {
 	ret_status=$1
-	if [ $ret_status==1 ] 
+	if [ $ret_status == 1 ] 
 	then
 		echo "******************************************************************************"
 		echo "**                                                                          **"
