@@ -63,9 +63,9 @@ else
 
 endif
 
-ifeq ($(SGX_DEBUG), 1)
+ifdef DEBUG
 ifeq ($(SGX_PRERELEASE), 1)
-$(error Cannot set SGX_DEBUG and SGX_PRERELEASE at the same time!!)
+$(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
 endif
 endif
 
@@ -74,7 +74,7 @@ OPENSSL_PACKAGE := ../../package
 SGXSSL_Library_Name := sgx_tsgxssl
 OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
 
-ifeq ($(SGX_DEBUG), 1)
+ifdef DEBUG
         SGX_COMMON_CFLAGS += -O0 -g
         OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/debug/
 else
@@ -91,7 +91,7 @@ else
 endif
 
 ifeq ($(SGX_MODE), HW)
-ifneq ($(SGX_DEBUG), 1)
+ifndef DEBUG
 ifneq ($(SGX_PRERELEASE), 1)
 Build_Mode = HW_RELEASE
 endif

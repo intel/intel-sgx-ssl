@@ -54,13 +54,13 @@ else
 	endif
 endif
 
-ifeq ($(SGX_DEBUG), 1)
+ifdef DEBUG
 ifeq ($(SGX_PRERELEASE), 1)
-$(error Cannot set SGX_DEBUG and SGX_PRERELEASE at the same time!!)
+$(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
 endif
 endif
 
-ifeq ($(SGX_DEBUG), 1)
+ifdef DEBUG
         SGX_COMMON_CFLAGS += -O0 -g
 else
         SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2

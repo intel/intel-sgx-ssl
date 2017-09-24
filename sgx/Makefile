@@ -41,7 +41,7 @@ all:
 	$(foreach U_MK, $(UNTRUSTED_LIB_MK), $(MAKE) -C $(shell dirname $(U_MK))  -f $(shell basename $(U_MK)) LINUX_SGX_BUILD=$(LINUX_SGX_BUILD) $@;)
 	$(foreach T_MK, $(TRUSTED_LIB_MK), $(MAKE) -C $(shell dirname $(T_MK))  -f $(shell basename $(T_MK)) LINUX_SGX_BUILD=$(LINUX_SGX_BUILD) $@;)
 	
-ifeq ($(SGX_DEBUG), 1)
+ifdef DEBUG
 	cp libsgx_tsgxssl/libsgx_tsgxssl.a ../package/lib64/debug
 	cp libsgx_usgxssl/libsgx_usgxssl.a ../package/lib64/debug
 else
