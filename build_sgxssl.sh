@@ -141,6 +141,9 @@ sed -i "s|time_t tim;||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 sed -i "s|time(&tim);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 
+# Remove AESBS to support only AESNI and VPAES
+sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
+
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
 cd $SGXSSL_ROOT/openssl_source/$OPENSSL_VERSION || clean_and_ret 1
@@ -168,6 +171,9 @@ sed -i "s|time_t tim;||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 sed -i "s|time(&tim);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
 
+# Remove AESBS to support only AESNI and VPAES
+sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
+
 #sed -i "s|my \$user_cflags=\"\"\;|my \$user_cflags=\"-include $SGXSSL_ROOT/openssl_source/bypass_to_sgxssl.h\"\;|" $OPENSSL_VERSION/Configure
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
@@ -180,13 +186,13 @@ cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
 rm -rf $OPENSSL_VERSION || clean_and_ret 1
 cd $SGXSSL_ROOT/sgx || clean_and_ret 1
 
-make OS_ID=$OS_ID SGX_MODE=SIM SGX_DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+make OS_ID=$OS_ID SGX_MODE=SIM DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
 if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
 	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
 fi
 make clean || clean_and_ret 1
 
-make OS_ID=$OS_ID SGX_DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+make OS_ID=$OS_ID DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
 if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
 	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
 fi
