@@ -151,15 +151,11 @@ void rsa_key_gen()
 	free(buf);
 
 	BN_free(bn);
-	int do_rsa_free = 1;
-	if (evp_pkey->pkey.rsa == keypair) {
-		do_rsa_free = 0;
-	}
 
 	EVP_PKEY_free(evp_pkey);
 
-	if (do_rsa_free) {
-		RSA_free(keypair);
+	if (evp_pkey->pkey.ptr != NULL) {
+	  RSA_free(keypair);
 	}
 }
 
@@ -225,14 +221,9 @@ void ec_key_gen()
 
 	free(buf);
 
-	int do_ec_free = 1;
-	if (ec_pkey->pkey.ec == ec) {
-		do_ec_free = 0;
-	}
-
 	EVP_PKEY_free(ec_pkey);
-	if (do_ec_free) {
-		EC_KEY_free(ec);
+	if (ec_pkey->pkey.ptr != NULL) {
+	  EC_KEY_free(ec);
 	}
 }
 
