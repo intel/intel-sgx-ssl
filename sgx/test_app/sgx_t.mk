@@ -73,6 +73,10 @@ endif
 OPENSSL_PACKAGE := ../../package
 SGXSSL_Library_Name := sgx_tsgxssl
 OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
+TSETJMP_LIB := -lsgx_tsetjmp
+
+$(if $(shell [ $(SGXSDK_INT_VERSION) -ge 20 ] && echo "OK"), \
+    $(eval TSETJMP_LIB := ))
 
 ifdef DEBUG
         SGX_COMMON_CFLAGS += -O0 -g
@@ -81,6 +85,7 @@ else
         SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
         OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/release/
 endif
+
 
 ifneq ($(SGX_MODE), HW)
 	Trts_Library_Name := sgx_trts_sim
@@ -119,7 +124,7 @@ TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nod
 	$(Security_Link_Flags) \
 	$(SgxSSL_Link_Libraries) -L$(SGX_LIBRARY_PATH) \
 	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
-	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -lsgx_tcrypto -lsgx_tsetjmp -l$(Service_Library_Name) -Wl,--end-group \
+	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -lsgx_tcrypto $(TSETJMP_LIB) -l$(Service_Library_Name) -Wl,--end-group \
 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
 	-Wl,--defsym,__ImageBase=0 \

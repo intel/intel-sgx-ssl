@@ -155,8 +155,8 @@ cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
 rm -rf $OPENSSL_VERSION || clean_and_ret 1
 cd $SGXSSL_ROOT/sgx || clean_and_ret 1
 
-make OS_ID=$OS_ID $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
-if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+make OS_ID=$OS_ID SGXSDK_INT_VERSION=$SGXSDK_INT_VERSION $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
 	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
 fi
 make clean || clean_and_ret 1
@@ -186,14 +186,14 @@ cd $SGXSSL_ROOT/openssl_source || clean_and_ret 1
 rm -rf $OPENSSL_VERSION || clean_and_ret 1
 cd $SGXSSL_ROOT/sgx || clean_and_ret 1
 
-make OS_ID=$OS_ID SGX_MODE=SIM DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
-if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+make OS_ID=$OS_ID SGXSDK_INT_VERSION=$SGXSDK_INT_VERSION SGX_MODE=SIM DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
 	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
 fi
 make clean || clean_and_ret 1
 
-make OS_ID=$OS_ID DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
-if [[ $# -gt 0 && $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
+make OS_ID=$OS_ID SGXSDK_INT_VERSION=$SGXSDK_INT_VERSION DEBUG=1 $LINUX_BUILD_FLAG || clean_and_ret 1 # will also copy the resulting files to package
+if [[ $1 != "linux-sgx" && $2 != "linux-sgx" ]] ; then
 	./test_app/TestApp || clean_and_ret 1 # verify everything is working ok
 fi
 make clean || clean_and_ret 1
