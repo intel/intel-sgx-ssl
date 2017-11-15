@@ -151,15 +151,11 @@ void rsa_key_gen()
 	free(buf);
 
 	BN_free(bn);
-	int do_rsa_free = 1;
-	if (evp_pkey->pkey.rsa == keypair) {
-		do_rsa_free = 0;
-	}
 
 	EVP_PKEY_free(evp_pkey);
 
-	if (do_rsa_free) {
-		RSA_free(keypair);
+	if (evp_pkey->pkey.ptr != NULL) {
+	  RSA_free(keypair);
 	}
 }
 
@@ -225,14 +221,9 @@ void ec_key_gen()
 
 	free(buf);
 
-	int do_ec_free = 1;
-	if (ec_pkey->pkey.ec == ec) {
-		do_ec_free = 0;
-	}
-
 	EVP_PKEY_free(ec_pkey);
-	if (do_ec_free) {
-		EC_KEY_free(ec);
+	if (ec_pkey->pkey.ptr != NULL) {
+	  EC_KEY_free(ec);
 	}
 }
 
@@ -254,8 +245,6 @@ extern "C" int CRYPTO_set_mem_functions(
         void *(*m)(size_t, const char *, int),
         void *(*r)(void *, size_t, const char *, int),
         void (*f)(void *, const char *, int));
-
-
 void* priv_malloc(size_t size, const char *file, int line)
 {
 	void* addr = malloc(size);
@@ -264,7 +253,6 @@ void* priv_malloc(size_t size, const char *file, int line)
 	
 	return addr;
 }
-
 void* priv_realloc(void* old_addr, size_t new_size, const char *file, int line)
 {
 	void* new_addr = realloc(old_addr, new_size);
@@ -273,7 +261,6 @@ void* priv_realloc(void* old_addr, size_t new_size, const char *file, int line)
 	
 	return new_addr;
 }
-
 void priv_free(void* addr, const char *file, int line)
 {
 	printf("[free:%s:%d] addr: %p\n", file, line, addr);
@@ -372,5 +359,4 @@ void t_sgxssl_call_apis()
 	printf("test threads_test completed\n");
 	
 }
-
 
