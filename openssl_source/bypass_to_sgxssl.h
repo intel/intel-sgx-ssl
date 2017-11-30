@@ -28,10 +28,143 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-
+ 
 #ifndef _BYPASS_TO_SGXSSL_
 #define _BYPASS_TO_SGXSSL_
+
+#ifdef _WIN32
+#define __declspec(dllimport) 
+
+#ifndef _USE_32BIT_TIME_T
+    #define _stat64i32	sgxssl__stat64i32
+#endif /* _USE_32BIT_TIME_T */
+
+/*fileapi.h*/
+#define FindClose sgxssl_FindClose
+#define FindFirstFileA      sgxssl_FindFirstFileA
+#define FindFirstFileW      sgxssl_FindFirstFileW
+#define FindNextFileA       sgxssl_FindNextFileA
+#define FindNextFileW       sgxssl_FindNextFileW
+#define GetFileType sgxssl_GetFileType
+#define WriteFile sgxssl_WriteFile
+
+
+/*stddef.h*/
+#define _errno       sgxssl__errno
+/*stdio.h*/
+#define _vsnprintf    sgxssl__vsnprintf
+#define _snprintf     sgxssl__snprintf
+#define _vsnwprintf   sgxssl__vsnwprintf
+#define fclose        sgxssl_fclose
+#define feof    sgxssl_feof
+#define ferror sgxssl_ferror
+#define fflush        sgxssl_fflush
+#define fgets sgxssl_fgets
+#define _fileno sgxssl__fileno
+#define fopen sgxssl_fopen
+#define fputs sgxssl_fputs
+#define fread   sgxssl_fread
+#define fseek sgxssl_fseek
+#define ftell sgxssl_ftell
+#define fwrite  sgxssl_fwrite
+#define vfprintf      sgxssl_vfprintf
+#define fprintf sgxssl_fprintf
+#define printf sgxssl_printf
+#define sscanf        sgxssl_sscanf
+
+/*stdlib.h*/
+#define _exit        sgxssl__exit
+#define getenv       sgxssl_getenv
+
+/*string.h*/
+#define strerror_s   sgxssl_strerror_s
+#define _strdup      sgxssl__strdup
+#define _stricmp        sgxssl__stricmp
+#define _strnicmp       sgxssl__strnicmp
+
+/*conio.h*/
+#define _getch  sgxssl__getch
+
+/*processthreadsapi.h*/
+#define GetCurrentThreadId        sgxssl_GetCurrentThreadId
+#define TlsAlloc sgxssl_TlsAlloc
+#define TlsGetValue sgxssl_TlsGetValue
+#define TlsSetValue sgxssl_TlsSetValue
+#define TlsFree sgxssl_TlsFree
+
+/*synchapi.h*/
+#define EnterCriticalSection sgxssl_EnterCriticalSection
+#define LeaveCriticalSection sgxssl_LeaveCriticalSection
+#define InitializeCriticalSectionAndSpinCount sgxssl_InitializeCriticalSectionAndSpinCount
+#define DeleteCriticalSection sgxssl_DeleteCriticalSection
+
+
+/*WinSock2.h*/
+#define WSAGetLastError    sgxssl_WSAGetLastError
+#define closesocket        sgxssl_closesocket
+#define recv       sgxssl_recv
+#define send       sgxssl_send
+#define WSASetLastError sgxssl_WSASetLastError
+
+/*WinUser.h*/
+#define GetProcessWindowStation     sgxssl_GetProcessWindowStation
+#define GetUserObjectInformationW   sgxssl_GetUserObjectInformationW
+#define MessageBoxA sgxssl_MessageBoxA
+#define MessageBoxW sgxssl_MessageBoxW
+#define GetDesktopWindow    sgxssl_GetDesktopWindow
+
+/*WinBase.h*/
+#define DeregisterEventSource sgxssl_DeregisterEventSource
+#define RegisterEventSourceA sgxssl_RegisterEventSourceA
+#define RegisterEventSourceW sgxssl_RegisterEventSourceW
+#define ReportEventA sgxssl_ReportEventA
+#define ReportEventW sgxssl_ReportEventW
+
+
+
+/*errhandlingapi.h*/
+#define GetLastError sgxssl_GetLastError
+#define SetLastError sgxssl_SetLastError
+
+
+/*errno.h*/
+#define _errno   sgxssl__errno
+
+/*io.h*/
+#define _setmode sgxssl__setmode
+
+/*libloaderapi.h*/
+#define GetModuleHandleA       sgxssl_GetModuleHandleA
+#define GetModuleHandleW       sgxssl_GetModuleHandleW
+#define GetProcAddress sgxssl_GetProcAddress
+
+/*processenv.h*/
+#define GetStdHandle     sgxssl_GetStdHandle
+
+/*signal.h*/
+#define signal sgxssl_signal
+#define raise sgxssl_raise
+
+/*stringapiset.h*/
+#define MultiByteToWideChar sgxssl_MultiByteToWideChar
+#define WideCharToMultiByte sgxssl_WideCharToMultiByte
+/*sys/timeb.h**/
+#define _ftime64        sgxssl__ftime64
+
+/*sysinfoapi.h*/
+#define GetVersion sgxssl_GetVersion
+#define GetSystemTimeAsFileTime sgxssl_GetSystemTimeAsFileTime
+
+/*time.h*/
+#define _time64        sgxssl__time64
+#define _gmtime64      sgxssl__gmtime64
+#define _localtime64   sgxssl__localtime64
+#define _getsystime    sgxssl_getsystime
+
+/*wincon.h*/
+#define FlushConsoleInputBuffer sgxssl_FlushConsoleInputBuffer
+
+#else //_WIN32
 
 #define mmap sgxssl_mmap
 #define munmap sgxssl_munmap
@@ -129,4 +262,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #undef __REDIRECT_NTHNL
 #define __REDIRECT_NTHNL(name, proto, alias) name proto 
 
-#endif
+#endif //_WIN32
+
+#endif // _BYPASS_TO_SGXSSL_
+
