@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
+    <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+  </PropertyGroup>
+</Project>

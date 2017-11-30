@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Prerelease|Win32">
+      <Configuration>Prerelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Simulation|Win32">
+      <Configuration>Simulation</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Prerelease|x64">
+      <Configuration>Prerelease</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Simulation|x64">
+      <Configuration>Simulation</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2D7787DF-3342-474E-AC6D-01E60D7C579E}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol />
+      <NoEntryPoint>true</NoEntryPoint>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>sgx_trts_sim.lib;sgx_tstdc.lib;sgx_tservice_sim.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SGXSDKInstallPath)bin\$(Platform)\Debug</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <NoEntryPoint>true</NoEntryPoint>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol />
+      <NoEntryPoint>true</NoEntryPoint>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>generate the enclave signing material</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\Release</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <NoEntryPoint>true</NoEntryPoint>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol />
+      <NoEntryPoint>true</NoEntryPoint>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>sgx_trts_sim.lib;sgx_tstdc.lib;sgx_tservice_sim.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SGXSDKInstallPath)bin\$(Platform)\Debug</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <NoEntryPoint>true</NoEntryPoint>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol />
+      <NoEntryPoint>true</NoEntryPoint>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>generate the enclave signing material</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\package\include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libsgx_tsgxssl_crypto.lib;libsgx_tsgxssl.lib;sgx_trts.lib;sgx_tstdc.lib;sgx_tservice.lib;sgx_tcrypto.lib;sgx_tcxx.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\package\lib\$(Platform)\$(Configuration);$(SGXSDKInstallPath)bin\$(Platform)\Release</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <NoEntryPoint>true</NoEntryPoint>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+</Command>
+      <Message>sign the enclave</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="sgxssl__gmtime64_test.cpp" />
+    <ClCompile Include="TestEnclave.cpp" />
+    <ClCompile Include="TestEnclave_t.c" />
+    <ClCompile Include="tests\bntest.c">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShowIncludes>
+    </ClCompile>
+    <ClCompile Include="tests\destest.c" />
+    <ClCompile Include="tests\dhtest.c" />
+    <ClCompile Include="tests\ecdhtest.c" />
+    <ClCompile Include="tests\ecdsatest.c" />
+    <ClCompile Include="tests\ectest.c" />
+    <ClCompile Include="tests\missing_funcs.c" />
+    <ClCompile Include="tests\randtest.c" />
+    <ClCompile Include="tests\rsa_test.c" />
+    <ClCompile Include="tests\sha1test.c" />
+    <ClCompile Include="tests\sha256t.c" />
+    <ClCompile Include="tests\stdio_func.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestEnclave.h" />
+    <ClInclude Include="TestEnclave_t.h" />
+    <ClInclude Include="tests\bn_conf.h" />
+    <ClInclude Include="tests\bn_int.h" />
+    <ClInclude Include="tests\bn_lcl.h" />
+    <ClInclude Include="tests\ecdhtest_cavs.h" />
+    <ClInclude Include="tests\threads.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="TestEnclave.edl">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include;$(SolutionDir)..\package\include"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">TestEnclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
+    </CustomBuild>
+    <None Include="ClassDiagram.cd" />
+    <None Include="TestEnclave_private.pem" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="TestEnclave.config.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
