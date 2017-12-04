@@ -69,11 +69,12 @@ function clean_and_ret {
 # this variable must be set to the path where Intel® Software Guard Extensions SDK is installed
 if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
+	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" ../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
 	SGX_SDK_LIBS_PATH=../../build/linux
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
-	SGX_SDK_LIBS_PATH=$SGX_SDK/lib64
+	SGXSDK_VERSION=`/bin/grep -m 1 "Version:" $SGX_SDK/pkgconfig/libsgx_urts.pc | /bin/grep -o -E "[1-9]\.[0-9]"`
 	if [ -f $SGX_SDK/environment ]; then
 		source $SGX_SDK/environment || clean_and_ret 1
 	else
@@ -104,7 +105,6 @@ then
 	SVN_REVISION=99999
 fi 
 
-SGXSDK_VERSION=`strings $SGX_SDK_LIBS_PATH/libsgx_trts.a | grep VERSION | cut -c 18- | grep -o -E "^[1-9]\.[0-9]"`
 SGXSSL_VERSION="$SGXSDK_VERSION.100.$SVN_REVISION"
 
 
@@ -112,14 +112,19 @@ SGXSSL_VERSION="$SGXSDK_VERSION.100.$SVN_REVISION"
 CONFNAME_HEADER=/usr/include/x86_64-linux-gnu/bits/confname.h
 
 ##Get OS_ID (Ubuntu/CentOS), and SDK integer number version (1.8 -> 18)
-OS_NAME=`lsb_release -i | cut -d ":" -f 2 | xargs`
-SGXSDK_INT_VERSION=`echo "${SGXSDK_VERSION//.}" `
+SGXSDK_INT_VERSION=`/bin/echo "${SGXSDK_VERSION//.}" `
 
 OS_ID=1
-if [ $OS_NAME == 'CentOS' ] 
+if [ -f "/usr/include/x86_64-linux-gnu/bits/confname.h" ]
+then
+	OS_ID=1
+elif [ -f "/usr/include/bits/confname.h" ]
 then
 	OS_ID=2
-fi 
+else
+	echo "WARNING: Can't get OS_ID"
+fi
+
 
 ##Create required directories
 mkdir -p $SGXSSL_ROOT/package/lib64/release/
