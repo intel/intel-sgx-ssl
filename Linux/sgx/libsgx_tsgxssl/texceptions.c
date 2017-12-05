@@ -43,7 +43,6 @@ uint32_t intel_cpuid_leaf_0_ebx = 0x756e6547;	//ebx = "Genu"
 uint32_t intel_cpuid_leaf_0_ecx = 0x6c65746e;	// ecx = "ntel"
 uint32_t intel_cpuid_leaf_0_edx = 0x49656e69;	// edx = "ineI"
 
-
 #define CPUID_OPCODE 0xA20F
 #define RDTSC_OPCODE 0x310F
 
@@ -117,16 +116,44 @@ static int is_intel_cpu(uint32_t *cpuid_leaf_0)
 	return 0;	// Not Intel cpu
 }
 
-// Initialize cpuid leaves for FIPS capable OpenSSL
+// Setup cpuid leaves for FIPS capable OpenSSL
 //-------------------------------------------------
-static void init_cpuinfo(void)
+static void setup_cpuinfo(uint32_t *cpuinfo_table)
 {
 	sgx_status_t status;
+    
+    if (cpuinfo_table) {
+        // cpuid have been passed from urts
+        memcpy(cpuinfo, cpuinfo_table, sizeof(uint32_t)*8*4);
+    } else {
+        // Leaf 0
+        status = sgx_cpuid((int*)cpuinfo[0], 0);
+        if (status != SGX_SUCCESS) {
+            SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
+        }
+        
+        // Leaf 1
+        status = sgx_cpuid((int*)cpuinfo[1], 1);
+        if (status != SGX_SUCCESS) {
+            SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
+            return;
+        }
+        
+        // Leaf 4
+        status = sgx_cpuid((int*)cpuinfo[4], 4);
+        if (status != SGX_SUCCESS) {
+            SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
+        }
+        
+        // Leaf 7
+        status = sgx_cpuid((int*)cpuinfo[7], 7);
+        if (status != SGX_SUCCESS) {
+            SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
+        }
+    }
 
 	// Leaf 0
-	status = sgx_cpuid((int*)cpuinfo[0], 0);
-	if (status != SGX_SUCCESS
-		|| !is_intel_cpu(cpuinfo[0]))	{
+	if (!is_intel_cpu(cpuinfo[0]))	{
 		SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
 	}
 
@@ -136,12 +163,6 @@ static void init_cpuinfo(void)
 		&cpuinfo[1][1],
 		&cpuinfo[1][2],
 		&cpuinfo[1][3]);
-
-	// Leaf 4
-	status = sgx_cpuid((int*)cpuinfo[4], 4);
-	if (status != SGX_SUCCESS) {
-		SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
-	}
 
 	// Leaf 7
 	sgxssl_cpuid_leaf_info(7,
@@ -156,7 +177,7 @@ static void init_cpuinfo(void)
 
 static int exception_handler_initialized = 0;
 
-__attribute__((constructor)) void init_exception_handler(void)
+extern void init_exception_handler(uint32_t *cpuinfo_table)
 {	
 	if (exception_handler_initialized == 1)
 		return;
@@ -166,10 +187,16 @@ __attribute__((constructor)) void init_exception_handler(void)
 	// Prepend the exception handler to the current exception handler's chain.
 	sgx_register_exception_handler(1, sgxssl_exception_handler);
 
-	init_cpuinfo();
+	setup_cpuinfo(cpuinfo_table);
 
 	return;
 }
 
+__attribute__((constructor)) void const_init_exception_handler(void)
+{	
+	init_exception_handler(NULL);
+
+	return;
+}
 
 

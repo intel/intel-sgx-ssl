@@ -63,7 +63,6 @@ int sgxopenssl_read_rand(unsigned char *rand_buf, int length_in_bytes)
 	return retval;
 }
 
-
 extern uint64_t g_cpu_feature_indicator; // defined in trts.lib
 
 #define CPU_FEATURE_UNAVAILABLE         0xFFFFFFFFULL // Denoting that CPU features information is unavailable
@@ -194,21 +193,6 @@ static void update_feature_mask(unsigned long long* exx_feature_mask, unsigned i
 void sgxssl_cpuid_leaf_info(int leaf, uint32_t* p_eax_value, uint32_t* p_ebx_value, uint32_t* p_ecx_value, uint32_t* p_edx_value)
 {
 	FSTART;
-	
-	int cpuinfo[4] = { 0 };
-	sgx_status_t ret;
-
-	ret = sgx_cpuid(cpuinfo, leaf);
-	if (ret != SGX_SUCCESS) {
-		SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
-		FEND;
-		return;
-	}
-
-	*p_eax_value = (uint32_t)cpuinfo[0];	// EAX
-	*p_ebx_value = (uint32_t)cpuinfo[1];	// EBX
-	*p_ecx_value = (uint32_t)cpuinfo[2];	// ECX
-	*p_edx_value = (uint32_t)cpuinfo[3];	// EDX
 
 	if (leaf == 1)
 	{
