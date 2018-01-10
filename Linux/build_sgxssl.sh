@@ -150,6 +150,7 @@ sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_ra
 sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
+cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
 perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || clean_and_ret 1
@@ -181,6 +182,7 @@ sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 
 #sed -i "s|my \$user_cflags=\"\"\;|my \$user_cflags=\"-include $SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h\"\;|" $OPENSSL_VERSION/Configure
 cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
+cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
 perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || clean_and_ret 1
