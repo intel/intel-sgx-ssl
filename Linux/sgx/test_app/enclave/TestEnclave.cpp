@@ -276,9 +276,12 @@ void t_sgxssl_call_apis()
     
     printf("Start tests\n");
     
-	SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
-    
+    SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
+
     //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
+
+    // Initialize SGXSSL crypto
+    OPENSSL_init_crypto(0, NULL);
     
     rsa_key_gen();
     printf("test rsa_key_gen completed\n");
