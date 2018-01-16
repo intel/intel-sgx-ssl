@@ -67,10 +67,12 @@ function clean_and_ret {
 # set -x # enable this for debugging this script
 
 # this variable must be set to the path where Intel® Software Guard Extensions SDK is installed
+SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo $SGXSSL_ROOT
 if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
-	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" ../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
-	SGX_SDK_LIBS_PATH=../../../build/linux
+	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" $SGXSSL_ROOT/../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
+	SGX_SDK_LIBS_PATH=$SGXSSL_ROOT/../../../build/linux
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
