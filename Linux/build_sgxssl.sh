@@ -69,8 +69,8 @@ function clean_and_ret {
 # this variable must be set to the path where Intel® Software Guard Extensions SDK is installed
 if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
-	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" ../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
-	SGX_SDK_LIBS_PATH=../../build/linux
+	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" ../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
+	SGX_SDK_LIBS_PATH=../../../build/linux
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
