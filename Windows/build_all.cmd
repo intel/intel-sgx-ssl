@@ -31,7 +31,7 @@ Rem
 Rem 
 
 @echo off
-perl svn_revision.pl > sgx\libsgx_tsgxssl\tsgxssl_version.h
+
 
 set SGXSSL_VERSION=1.9.100.%errorlevel%
 
