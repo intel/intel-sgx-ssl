@@ -35,6 +35,15 @@
 #include "libsgx_tsgxssl_t.h"
 #include "string.h"
 
+
+//Weak symbol u_sgxssl_ftime64
+// 64-bit msvc will not prepend an underscore for symbols.
+#ifdef _M_X64
+#pragma comment(linker, "/alternatename:u_sgxssl_ftime64=default_u_sgxssl_ftime64")
+#else
+#pragma comment(linker, "/alternatename:_u_sgxssl_ftime64=_default_u_sgxssl_ftime64")
+#endif //_M_X64
+
 extern "C" {
 
 typedef uint64_t __time64_t;
@@ -57,6 +66,11 @@ typedef struct _SYSTEMTIME {
 	WORD wMilliseconds;
 }SYSTEMTIME;
 
+void default_u_sgxssl_ftime64(void * timeptr, uint32_t timeb64Len)
+{
+    (void)(timeptr);
+    (void)(timeb64Len);
+}
 
 void sgxssl__ftime64( 
    struct __timeb64 *timeptr 
