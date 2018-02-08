@@ -67,10 +67,12 @@ function clean_and_ret {
 # set -x # enable this for debugging this script
 
 # this variable must be set to the path where Intel® Software Guard Extensions SDK is installed
+SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo $SGXSSL_ROOT
 if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
-	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" ../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
-	SGX_SDK_LIBS_PATH=../../build/linux
+	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" $SGXSSL_ROOT/../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
+	SGX_SDK_LIBS_PATH=$SGXSSL_ROOT/../../../build/linux
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
@@ -83,6 +85,11 @@ else
 	fi
 fi
 
+##Space optimization flags.
+SPACE_OPT=
+if [[ $# -gt 0 ]] && [[ $1 == "space-opt" || $2 == "space-opt" || $3 == "space-opt" ]] ; then
+SPACE_OPT="no-rdrand no-capieng no-tls no-srtp no-gost no-comp no-blake2 no-rmd160 -DOPENSSL_SMALL_FOOTPRINT no-whirlpool no-fuzz-libfuzzer no-seed no-err no-weak-ssl-ciphers -fdata-sections -ffunction-sections -Os"
+fi
 #=========================================#
 # Do not edit this script below this line #
 #=========================================#
@@ -153,7 +160,7 @@ cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
 cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || clean_and_ret 1
+perl Configure linux-x86_64 $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || clean_and_ret 1
 make build_generated libcrypto.a || clean_and_ret 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || clean_and_ret 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || clean_and_ret 1
@@ -185,7 +192,7 @@ cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || clean_and_ret 1
 cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || clean_and_ret 1
 cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || clean_and_ret 1
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
-perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng  -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || clean_and_ret 1
+perl Configure linux-x86_64 $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || clean_and_ret 1
 make build_generated libcrypto.a || clean_and_ret 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || clean_and_ret 1
 
