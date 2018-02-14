@@ -74,7 +74,7 @@ if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
-        SGXSDK_VERSION=`/usr/bin/pkg-config --modversion $SGX_SDK/pkgconfig/libsgx_urts.pc | cut -d. -f1-2`
+        SGXSDK_VERSION=`pkg-config --modversion $SGX_SDK/pkgconfig/libsgx_urts.pc | cut -d. -f1-2`
 	if [ -f $SGX_SDK/environment ]; then
 		source $SGX_SDK/environment || clean_and_ret 1
 	else
