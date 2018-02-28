@@ -46,6 +46,9 @@ uint32_t intel_cpuid_leaf_0_edx = 0x49656e69;	// edx = "ineI"
 #define CPUID_OPCODE 0xA20F
 #define RDTSC_OPCODE 0x310F
 
+//OpenSSL initialization API
+void OPENSSL_cpuid_setup(void);
+
 void sgxssl_cpuid_leaf_info(
 	int leaf,
 	uint32_t * p_eax_value,
@@ -188,6 +191,9 @@ extern void init_exception_handler(uint32_t *cpuinfo_table)
 	sgx_register_exception_handler(1, sgxssl_exception_handler);
 
 	setup_cpuinfo(cpuinfo_table);
+
+	//Setup OpenSSL CPUID, this call replaces the original call in .init section
+	OPENSSL_cpuid_setup();
 
 	return;
 }
