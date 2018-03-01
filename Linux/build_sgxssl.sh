@@ -71,12 +71,12 @@ SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 if [[ $# -gt 0 ]] && [[ $1 == "linux-sgx" || $2 == "linux-sgx" ]] ; then
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=1
-	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" $SGXSSL_ROOT/../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]"`
+	SGXSDK_VERSION=`/bin/grep -m 1 "STRFILEVER" $SGXSSL_ROOT/../../../common/inc/internal/se_version.h | /bin/grep -o -E "[1-9]\.[0-9]" | /usr/bin/head -n 1`
 	SGX_SDK_LIBS_PATH=$SGXSSL_ROOT/../../../build/linux
 else
 	LINUX_BUILD_FLAG=LINUX_SGX_BUILD=0
 	SGX_SDK=/opt/intel/sgxsdk
-	SGXSDK_VERSION=`/bin/grep -m 1 "Version:" $SGX_SDK/pkgconfig/libsgx_urts.pc | /bin/grep -o -E "[1-9]\.[0-9]"`
+	SGXSDK_VERSION=`pkg-config --modversion $SGX_SDK/pkgconfig/libsgx_urts.pc | /usr/bin/cut -d "." -f 1-2`
 	if [ -f $SGX_SDK/environment ]; then
 		source $SGX_SDK/environment || clean_and_ret 1
 	else
@@ -163,6 +163,7 @@ cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
 perl Configure linux-x86_64 $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || clean_and_ret 1
 make build_generated libcrypto.a || clean_and_ret 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || clean_and_ret 1
+objcopy --remove-section .init $SGXSSL_ROOT/package/lib64/release/libsgx_tsgxssl_crypto.a || clean_and_ret 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || clean_and_ret 1
 cd $SGXSSL_ROOT/../openssl_source || clean_and_ret 1
 rm -rf $OPENSSL_VERSION || clean_and_ret 1
@@ -195,6 +196,7 @@ cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || clean_and_ret 1
 perl Configure linux-x86_64 $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DSGXSDK_INT_VERSION=$SGXSDK_INT_VERSION -DGETPID_IS_MEANINGLESS -DCONFNAME_HEADER=$CONFNAME_HEADER -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR -g || clean_and_ret 1
 make build_generated libcrypto.a || clean_and_ret 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || clean_and_ret 1
+objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/debug/libsgx_tsgxssl_crypto.a || clean_and_ret 1
 
 cd $SGXSSL_ROOT/../openssl_source || clean_and_ret 1
 rm -rf $OPENSSL_VERSION || clean_and_ret 1

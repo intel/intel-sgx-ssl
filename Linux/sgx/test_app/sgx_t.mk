@@ -75,8 +75,9 @@ SGXSSL_Library_Name := sgx_tsgxssl
 OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
 TSETJMP_LIB := -lsgx_tsetjmp
 
-$(if $(shell [ $(SGXSDK_INT_VERSION) -ge 20 ] && echo "OK"), \
-    $(eval TSETJMP_LIB := ))
+ifeq "20" "$(word 1, $(sort 20 $(SGXSDK_INT_VERSION)))"
+        TSETJMP_LIB:=
+endif
 
 ifdef DEBUG
         SGX_COMMON_CFLAGS += -O0 -g
