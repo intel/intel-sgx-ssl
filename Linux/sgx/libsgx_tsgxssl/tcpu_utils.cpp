@@ -200,7 +200,7 @@ void sgxssl_cpuid_leaf_info(int leaf, uint32_t* p_eax_value, uint32_t* p_ebx_val
 		update_feature_mask(leaf1_edx_features_mask, p_edx_value);
 
 		*p_edx_value &= (~(1 << 4));	// Clear EDX TSC bit #4 as RDTSC is not available inside an enclave
-		*p_edx_value |= (1 << 9);	// Set ECX SSSE3 bit #9 as SSSE3 is supported for all Intel® Software Guard Extensions supported platforms
+		*p_ecx_value |= (1 << 9);	// Set ECX SSSE3 bit #9 as SSSE3 is supported for all Intel® Software Guard Extensions supported platforms
 	}
 	else if (leaf == 7)
 	{
