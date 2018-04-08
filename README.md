@@ -52,7 +52,7 @@ Linux
 To build Intel® SGX SSL package in Linux OS:
 1. Download OpenSSL package into openssl_source/ directory. (tar.gz package, e.g. openssl-1.1.0e.tar.gz)
 2. Download and install latest SGX SDK from [01.org](https://01.org/intel-software-guard-extensions/downloads). You can find installation guide from the same website.
-3. Update the SGX_SDK_PATH variable to the path where SGX SDK is installed in build_sgxssl.sh.
+3. Update the SGX_SDK variable to the path where SGX SDK is installed in build_sgxssl.sh.
 4. Change the directory to the SGXSSL path and enter the following command:
 ```
 build_sgxssl.sh
