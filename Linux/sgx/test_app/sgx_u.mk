@@ -59,20 +59,19 @@ else
 	endif
 endif
 
-ifdef DEBUG
+ifeq ($(DEBUG), 1)
 ifeq ($(SGX_PRERELEASE), 1)
 $(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
 endif
 endif
 
-OPENSSL_PACKAGE := ../../package
-
-ifdef DEBUG
+OPENSSL_LIBRARY_PATH := $(PACKAGE_LIB)
+ifeq ($(DEBUG), 1)
         SGX_COMMON_CFLAGS += -O0 -g
-        OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/debug/
+		SgxSSL_Link_Libraries := sgx_usgxssld
 else
         SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
-        OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/release/
+		SgxSSL_Link_Libraries := sgx_usgxssl
 endif
 
 
@@ -95,48 +94,36 @@ else
 	UaeService_Library_Name := sgx_uae_service
 endif
 
-SgxSSL_Link_Libraries := sgx_usgxssl
 
 Security_Link_Flags := -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -pie
 
 App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries) -lpthread 
 
 
-ifeq ($(SGX_MODE), HW)
-ifndef DEBUG
-ifneq ($(SGX_PRERELEASE), 1)
-Build_Mode = HW_RELEASE
-endif
-endif
-endif
-
-
-.PHONY: all run
+.PHONY: all test
 
 all: TestApp
 
-run: all
-ifneq ($(Build_Mode), HW_RELEASE)
+test: all
 	@$(CURDIR)/TestApp
 	@echo "RUN  =>  TestApp [$(SGX_MODE)|$(SGX_ARCH), OK]"
-endif
 
 ######## App Objects ########
 
 $(UNTRUSTED_DIR)/TestEnclave_u.c: $(SGX_EDGER8R) enclave/TestEnclave.edl
-	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK_INC)
+	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC)
 	@echo "GEN  =>  $@"
 
 $(UNTRUSTED_DIR)/TestEnclave_u.o: $(UNTRUSTED_DIR)/TestEnclave_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
+	$(VCC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
 $(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp
-	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
+	$(VCXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
 TestApp: $(UNTRUSTED_DIR)/TestEnclave_u.o $(App_Cpp_Objects)
-	@$(CXX) $^ -o $@ $(App_Link_Flags)
+	$(VCXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 

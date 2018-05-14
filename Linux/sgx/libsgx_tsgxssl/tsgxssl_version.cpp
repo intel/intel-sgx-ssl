@@ -30,7 +30,7 @@
  */
 
 // This srting should be updated before every release!!
-#define STRFILEVER "1.0.0.0"
+#define STRFILEVER "1.1.0"
 
 #define __CONCAT(x, y) x/**/y
 

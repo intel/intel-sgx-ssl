@@ -51,10 +51,23 @@ Linux
 
 To build Intel® SGX SSL package in Linux OS:
 1. Download OpenSSL package into openssl_source/ directory. (tar.gz package, e.g. openssl-1.1.0e.tar.gz)
-2. Download and install latest SGX SDK from [01.org](https://01.org/intel-software-guard-extensions/downloads). You can find installation guide from the same website.
-3. Update the SGX_SDK variable to the path where SGX SDK is installed in build_sgxssl.sh.
-4. Change the directory to the SGXSSL path and enter the following command:
+2. Download and install latest SGX SDK from [01.org](https://01.org/intel-software-guard-extensions/downloads). You can find installation guide in the same website.
+3. Source SGX SDK's environment variables.
+4. Cd to Linux/ directory and run:
 ```
-build_sgxssl.sh
+make all test
 ```
-This will build the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/{debug|release}/.
+This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/.
+
+### Available `make` flags:
+- DEBUG={1,0}: Libraries build mode, with debug symbols or without.
+- SGX_MODE={HW,SIM}: SGX feature mode. Hardware/Simulation
+- DESTDIR=\<PATH\>: Directory realpath to install Intel® SGX SSL libraries in. Default /opt/intel/sgxssl/
+- VERBOSE={1,0}: Makefile verbose mode. Print compilation commands before executing it.
+
+To install Intel® SGX SSL libraries in Linux OS, run:
+```
+make all test
+sudo make install
+```
+
