@@ -59,10 +59,4 @@ void SGXSSLSetUnreachableCodePolicy(UnreachableCodePolicy_t policy)
 	FEND;
 }
 
-extern const char* sgx_tssl_version;
-const char * SGXSSLGetSgxSSLVersion()
-{
-	return sgx_tssl_version;
-}
-
 }

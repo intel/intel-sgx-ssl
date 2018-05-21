@@ -63,28 +63,29 @@ else
 
 endif
 
-ifdef DEBUG
+ifeq ($(DEBUG), 1)
 ifeq ($(SGX_PRERELEASE), 1)
 $(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
 endif
 endif
 
 # Added to build with SgxSSL libraries
-OPENSSL_PACKAGE := ../../package
-SGXSSL_Library_Name := sgx_tsgxssl
-OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
 TSETJMP_LIB := -lsgx_tsetjmp
+OPENSSL_LIBRARY_PATH := $(PACKAGE_LIB)/
+
 
 ifeq "20" "$(word 1, $(sort 20 $(SGXSDK_INT_VERSION)))"
         TSETJMP_LIB:=
 endif
 
-ifdef DEBUG
+ifeq ($(DEBUG), 1)
         SGX_COMMON_CFLAGS += -O0 -g
-        OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/debug/
+		SGXSSL_Library_Name := sgx_tsgxssld
+		OpenSSL_Crypto_Library_Name := sgx_tsgxssl_cryptod
 else
         SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
-        OPENSSL_LIBRARY_PATH := $(OPENSSL_PACKAGE)/lib64/release/
+		SGXSSL_Library_Name := sgx_tsgxssl
+		OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
 endif
 
 
@@ -111,7 +112,7 @@ TestEnclave_C_Files := $(wildcard $(ENCLAVE_DIR)/*.c) $(wildcard $(ENCLAVE_DIR)/
 TestEnclave_Cpp_Objects := $(TestEnclave_Cpp_Files:.cpp=.o)
 TestEnclave_C_Objects := $(TestEnclave_C_Files:.c=.o)
 
-TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(STL_PORT_INC)/stlport -I$(OPENSSL_PACKAGE)/include
+TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(STL_PORT_INC)/stlport -I$(PACKAGE_INC)
 
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpic -fpie -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(TestEnclave_Include_Paths) -include "tsgxsslio.h"
 TestEnclave_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11
@@ -132,39 +133,39 @@ TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nod
 	-Wl,--version-script=$(ENCLAVE_DIR)/TestEnclave.lds
 
 
-.PHONY: all run
+.PHONY: all test
 
 all: TestEnclave.signed.so
 # usually release mode don't sign the enclave, but here we want to run the test also in release mode
 # this is not realy a release mode as the XML file don't disable debug - we can't load real release enclaves (white list)
 
-run: all
+test: all
 
 
 ######## TestEnclave Objects ########
 
 $(ENCLAVE_DIR)/TestEnclave_t.c: $(SGX_EDGER8R) $(ENCLAVE_DIR)/TestEnclave.edl
-	@cd $(ENCLAVE_DIR) && $(SGX_EDGER8R) --trusted TestEnclave.edl --search-path ../$(OPENSSL_PACKAGE)/include --search-path $(SGX_SDK_INC)
+	@cd $(ENCLAVE_DIR) && $(SGX_EDGER8R) --trusted TestEnclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC)
 	@echo "GEN  =>  $@"
 
 $(ENCLAVE_DIR)/TestEnclave_t.o: $(ENCLAVE_DIR)/TestEnclave_t.c
-	@$(CC) $(TestEnclave_C_Flags) -c $< -o $@
+	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
 $(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.cpp
-	@$(CXX) $(TestEnclave_Cpp_Flags) -c $< -o $@
+	$(VCXX) $(TestEnclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
 $(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.c
-	@$(CC) $(TestEnclave_C_Flags) -c $< -o $@
+	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
 $(ENCLAVE_DIR)/tests/%.o: $(ENCLAVE_DIR)/tests/%.c
-	@$(CC) $(TestEnclave_C_Flags) -c $< -o $@
+	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
 TestEnclave.so: $(ENCLAVE_DIR)/TestEnclave_t.o $(TestEnclave_Cpp_Objects) $(TestEnclave_C_Objects)
-	@$(CXX) $^ -o $@ $(TestEnclave_Link_Flags)
+	$(VCXX) $^ -o $@ $(TestEnclave_Link_Flags)
 	@echo "LINK =>  $@"
 
 TestEnclave.signed.so: TestEnclave.so

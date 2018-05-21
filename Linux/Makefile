@@ -28,39 +28,32 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-include buildenv.mk
+include sgx/buildenv.mk
 LINUX_SGX_BUILD ?= 0
 
-.PHONY: all clean test
+.PHONY: clean install uninstall
 
-BUILD_OPENSSL := ../build_openssl.sh
 
-ifeq ($(SPACE_OPT), 1)
-	OPENSSL_CONFIG += space-opt
-endif
 
+all:
+	$(MAKE) -C sgx/ all
+
+clean:
+	$(MAKE) -C sgx/ clean
+	rm -rf $(PACKAGE_LIB)/$(OPENSSL_LIB) $(PACKAGE_INC)/openssl/
+test:
+	$(MAKE) -C sgx/ test
+
+install: $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB) $(PACKAGE_LIB)/$(OPENSSL_LIB)
 ifeq ($(DEBUG), 1)
-	OPENSSL_CONFIG += debug
+	@echo "WARNING: Installing Debug libraries."
 endif
+	mkdir -p $(DESTDIR)/lib64/
+	mkdir -p $(DESTDIR)/include/
+	cp $(PACKAGE_LIB)/$(OPENSSL_LIB) $(DESTDIR)/lib64/
+	cp $(PACKAGE_LIB)/$(TRUSTED_LIB) $(DESTDIR)/lib64/
+	cp $(PACKAGE_LIB)/$(UNTRUSTED_LIB) $(DESTDIR)/lib64/
+	cp -prf $(PACKAGE_INC)/* $(DESTDIR)/include/
 
-all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
-	$(MAKE) -C $(TRUSTED_LIB_DIR) all
-	$(MAKE) -C $(UNTRUSTED_LIB_DIR) all
-
-ifeq ($(LINUX_SGX_BUILD), 0)
-	$(MAKE) -C $(TEST_DIR) all
-endif
-
-$(PACKAGE_LIB)/$(OPENSSL_LIB):
-	chmod 755 $(BUILD_OPENSSL)
-	test -f $(PACKAGE_LIB)/$(OPENSSL_LIB) || $(BUILD_OPENSSL) $(OPENSSL_CONFIG)
-
-clean:	
-	$(MAKE) -C $(TRUSTED_LIB_DIR) clean
-	$(MAKE) -C $(UNTRUSTED_LIB_DIR) clean
-	$(MAKE) -C $(TEST_DIR) clean
-	rm -f $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB)
-
-test: $(PACKAGE_LIB)/$(OPENSSL_LIB) all
-	$(MAKE) -C $(TEST_DIR) test 
-
+uninstall:
+	rm -rf $(DESTDIR)/
