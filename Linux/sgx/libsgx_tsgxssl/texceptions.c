@@ -179,30 +179,34 @@ static void setup_cpuinfo(uint32_t *cpuinfo_table)
 
 
 static int exception_handler_initialized = 0;
+static int cpuid_initialized = 0;
 
 extern void init_exception_handler(uint32_t *cpuinfo_table)
-{	
-	if (exception_handler_initialized == 1)
-		return;
-		
-	exception_handler_initialized = 1;
+{
+    if (cpuid_initialized == 1)
+        return;
+    cpuid_initialized = 1;
 
-	// Prepend the exception handler to the current exception handler's chain.
-	sgx_register_exception_handler(1, sgxssl_exception_handler);
+    //initialize CPUID values
+    setup_cpuinfo(cpuinfo_table);
 
-	setup_cpuinfo(cpuinfo_table);
-
-	//Setup OpenSSL CPUID, this call replaces the original call in .init section
-	OPENSSL_cpuid_setup();
-
-	return;
+    return;
 }
 
 __attribute__((constructor)) void const_init_exception_handler(void)
-{	
-	init_exception_handler(NULL);
+{
+    if (exception_handler_initialized == 1)
+        return;
+    exception_handler_initialized = 1;
 
-	return;
+    //Prepend the exception handler to the current exception handler's chain.
+    sgx_register_exception_handler(1, sgxssl_exception_handler);
+
+    init_exception_handler(NULL);
+
+    //Setup OpenSSL CPUID, this call replaces the original call in .init section
+    OPENSSL_cpuid_setup();
+
+    return;
 }
-
 
