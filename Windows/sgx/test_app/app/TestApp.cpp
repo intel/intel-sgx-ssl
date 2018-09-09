@@ -55,7 +55,7 @@ sgx_enclave_id_t enclaveID = 0;
 #include "alog.h"
 #define TEST_RESULTS_FILE_NAME		"testResult.csv"
 #define TEST_CATEGORY_BASIC_TEST	"basic_test"
-#define ENCLAVE_FILE L"TestEnclave.signed.dll"
+#define ENCLAVE_FILE "TestEnclave.signed.dll"
 
 #include <time.h>
 

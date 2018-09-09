@@ -119,8 +119,7 @@
 #define RegisterEventSourceW sgxssl_RegisterEventSourceW
 #define ReportEventA sgxssl_ReportEventA
 #define ReportEventW sgxssl_ReportEventW
-
-
+#define GetEnvironmentVariableW sgxssl_GetEnvironmentVariableW
 
 /*errhandlingapi.h*/
 #define GetLastError sgxssl_GetLastError
@@ -158,6 +157,7 @@
 /*time.h*/
 #define _time64        sgxssl__time64
 #define _gmtime64      sgxssl__gmtime64
+#define _gmtime64_s    sgxssl__gmtime64_s
 #define _localtime64   sgxssl__localtime64
 #define _getsystime    sgxssl_getsystime
 

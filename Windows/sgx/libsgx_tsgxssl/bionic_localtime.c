@@ -37,7 +37,7 @@
 
 
 #include "time.h"
-
+#include "errno.h"
 #define FALSE	0
 #define TRUE	1
 
@@ -564,4 +564,18 @@ time_t sgxssl_mktime(struct tm *tmp)
 	time_t ret;
 	ret = time1(tmp, localsub, 0L);
 	return ret;
+}
+int sgxssl__gmtime64_s(struct tm* _tm,
+    const time_t* time)
+{
+    if (_tm == NULL || time == NULL || time < 0) {
+        errno = EINVAL;
+        return EINVAL;
+    }
+    _tm = timesub(time, 0L, &tmGlobal);
+    if (_tm == NULL) {
+        errno = EINVAL;
+        return EINVAL;
+    }
+    return 0;
 }

@@ -213,4 +213,22 @@ SIGNAL_FUNC sgxssl_signal(_In_ int sigNum, _In_opt_ SIGNAL_FUNC func)
 	return prev_func;
 }
 
+DWORD WINAPI sgxssl_GetEnvironmentVariableW(
+    _In_ const char* lpName,
+    _Out_ char*  lpBuffer,
+    _In_ DWORD   nSize
+) {
+    FSTART;
+    if (lpName == NULL) {
+        FEND;
+        return 0;
+    }
+    if (!strcmp(lpName, (const char*)L"OPENSSL_ia32cap")) {
+        FEND;
+        return 0;
+    }
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    FEND;
+    return 0;
+}
 }   // extern "C"
