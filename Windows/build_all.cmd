@@ -53,12 +53,20 @@ if %errorlevel% neq 0 (
 
 REM This variable must be set to the openssl file name (version) located in the openssl_source folder
 if "%1"=="" (
-	set OPENSSL_VERSION=openssl-1.1.0g
+	set OPENSSL_VERSION=openssl-1.1.1
 ) else (
 	set OPENSSL_VERSION=%1
 )
 
-echo "Building SGXSSL with: %OPENSSL_VERSION%  %date% %time%"
+for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version') DO (
+  for %%F in (%%B) do (
+    set PSW_VER=%%F
+	goto :break
+  )
+)
+:break
+set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION:openssl-=%
+echo "Building SGXSSL with: %OPENSSL_VERSION%  %date% %time% to %SGXSSL_VERSION%"
 
 REM *********************************************************
 REM **                     win32_debug                     **

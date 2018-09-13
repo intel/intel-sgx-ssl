@@ -63,6 +63,11 @@ struct timeval
     suseconds_t tv_usec;	// microseconds
 };
 
+struct timespec {
+    time_t   tv_sec;        /* seconds */
+    long     tv_nsec;       /* nanoseconds */
+};
+
 struct timeb
 {
    time_t         time;
@@ -80,6 +85,7 @@ struct timezone
 typedef void pthread_rwlock_t;
 
 typedef void pthread_rwlockattr_t;
+#define CLOCK_REALTIME 0
 
 // Values for the argument to `sysconf'. Only _SC_PAGESIZE is actually used.
 #define _UNISTD_H

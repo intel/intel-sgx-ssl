@@ -68,7 +68,7 @@ int WINAPI sgxssl_MultiByteToWideChar(
 #endif
 }
 
-int sgxssl_WideCharToMultiByte(
+int WINAPI sgxssl_WideCharToMultiByte(
 	_In_       UINT CodePage,
 	_In_       DWORD dwFlags,
 	_In_       wchar_t* lpWideCharStr,
@@ -213,22 +213,74 @@ SIGNAL_FUNC sgxssl_signal(_In_ int sigNum, _In_opt_ SIGNAL_FUNC func)
 	return prev_func;
 }
 
+BOOL WINAPI sgxssl_QueryPerformanceCounter(
+    _Out_ LARGE_INTEGER *lpPerformanceCount
+)
+{
+    if (lpPerformanceCount == NULL) {
+        errno = EINVAL;
+        return 0;
+    }
+    SGX_UNSUPPORTED_FUNCTION(SET_LAST_ERROR);
+    return 0;
+}
+
+DWORD WINAPI sgxssl_GetCurrentProcessId(void)
+{
+    SGX_UNSUPPORTED_FUNCTION(SET_LAST_ERROR);
+    return 8157;
+}
+
+void WINAPI sgxssl_OutputDebugStringW(
+  _In_opt_ const char* lpOutputString
+)
+{
+    (void)(lpOutputString);
+    SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+    return;
+}
+
+
+int WINAPI sgxssl_BCryptGenRandom(
+    _Inout_ void* hAlgorithm,
+    _Inout_ void*            pbBuffer,
+    _In_    ULONG             cbBuffer,
+    _In_    ULONG             dwFlags
+)
+{
+    FSTART;
+
+    SGX_UNSUPPORTED_FUNCTION(SET_LAST_ERROR);
+
+    FEND;
+    return 0;
+}
+
 DWORD WINAPI sgxssl_GetEnvironmentVariableW(
     _In_ const char* lpName,
     _Out_ char*  lpBuffer,
     _In_ DWORD   nSize
 ) {
     FSTART;
+
     if (lpName == NULL) {
         FEND;
         return 0;
     }
+
     if (!strcmp(lpName, (const char*)L"OPENSSL_ia32cap")) {
         FEND;
         return 0;
     }
+
     SGX_UNREACHABLE_CODE(SET_ERRNO);
+
     FEND;
     return 0;
+
+
+
+
 }
 }   // extern "C"

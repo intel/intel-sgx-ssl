@@ -557,7 +557,9 @@ time1(struct tm *tmp, struct tm * (*funcp)(const time_t *, long, struct tm *),
 		return t;
 	return WRONG;
 }
-
+/*****************************************************************************/
+/******Below functions are not part of the official bionic library************/
+/*****************************************************************************/
 time_t sgxssl_mktime(struct tm *tmp)
 {
 	//reduced irrelvant code from original function
@@ -565,6 +567,7 @@ time_t sgxssl_mktime(struct tm *tmp)
 	ret = time1(tmp, localsub, 0L);
 	return ret;
 }
+
 int sgxssl__gmtime64_s(struct tm* _tm,
     const time_t* time)
 {
@@ -572,10 +575,12 @@ int sgxssl__gmtime64_s(struct tm* _tm,
         errno = EINVAL;
         return EINVAL;
     }
+
     _tm = timesub(time, 0L, &tmGlobal);
     if (_tm == NULL) {
         errno = EINVAL;
         return EINVAL;
     }
+
     return 0;
 }

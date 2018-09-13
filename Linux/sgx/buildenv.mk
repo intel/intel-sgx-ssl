@@ -57,6 +57,7 @@ export TRUSTED_LIB := libsgx_tsgxssl.a
 export UNTRUSTED_LIB := libsgx_usgxssl.a
 export VCC := @$(CC)
 export VCXX := @$(CXX)
+export OBJDIR := release
 DESTDIR ?= /opt/intel/sgxssl/
 DEBUG ?= 0
 $(shell mkdir -p $(PACKAGE_LIB))
@@ -67,10 +68,12 @@ else
 	OS_ID=2
 endif
 ifeq ($(DEBUG), 1)
+	OBJDIR := debug
 	OPENSSL_LIB := libsgx_tsgxssl_cryptod.a
 	TRUSTED_LIB := libsgx_tsgxssld.a
 	UNTRUSTED_LIB := libsgx_usgxssld.a
 else
+	OBJDIR := release
 	OPENSSL_LIB := libsgx_tsgxssl_crypto.a
 	TRUSTED_LIB := libsgx_tsgxssl.a
 	UNTRUSTED_LIB := libsgx_usgxssl.a

@@ -50,7 +50,6 @@ char * sgxssl__strdup(
 }
 
 
-#ifdef __DEBUG__
 char* sgxssl_strcpy(char* dest, const char* src)
 {
 	FSTART;
@@ -58,7 +57,6 @@ char* sgxssl_strcpy(char* dest, const char* src)
 	FEND;
 	return ret;
 }
-#endif // __DEBUG__
 
 int sgxssl__strnicmp(
 	const char *string1,
@@ -153,7 +151,6 @@ int sgxssl_strerror_s(char *buf, size_t bufsz, errno_t errnum)
 	return 0;
 }
 
-#ifdef __DEBUG__
 wchar_t *sgxssl_wcscpy(
 	wchar_t *strDestination,
 	const wchar_t *strSource
@@ -179,7 +176,6 @@ char* sgxssl_strcat(char* dest, const char* src)
 	FEND;
 	return res;
 }
-#endif // __DEBUG__
 
 }
 

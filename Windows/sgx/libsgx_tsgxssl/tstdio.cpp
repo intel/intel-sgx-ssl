@@ -127,6 +127,11 @@ BOOL is_fake_stdout_stderr(void* fp)
 
 extern "C" {
 
+void sgxssl__wassert() {
+    SGX_ASSERT(0);
+    return;
+}
+
 void* sgxssl___iob_func()
 {
 	return s_iob_fake_arr;
