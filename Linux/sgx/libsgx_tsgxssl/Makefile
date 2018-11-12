@@ -48,11 +48,11 @@ else
 		include ../../../../../buildenv.mk
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
-		STL_PORT_INC := $(LINUX_SDK_DIR)/tlibstdcxx
+		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
 	else
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
-		STL_PORT_INC := $(SGX_SDK_INC)
+		LIBCXX_INC := $(SGX_SDK)/include/libcxx
 	endif
 endif
 
@@ -87,7 +87,7 @@ Sgx_tssl_Cpp_Objects := $(Sgx_tssl_Cpp_Files:.cpp=.o)
 Sgx_tssl_C_Objects := $(Sgx_tssl_C_Files:.c=.o)
 Sgx_tssl_S_Objects := $(Sgx_tssl_S_Files:.S=.o)
 
-Sgx_tssl_Include_Paths := -I. -I$(PACKAGE_INC) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(STL_PORT_INC)/stlport
+Sgx_tssl_Include_Paths := -I. -I$(PACKAGE_INC) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(LIBCXX_INC)
 
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fdata-sections -ffunction-sections -Os -Wl,--gc-sections -fvisibility=hidden -fpie -fpic -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(Sgx_tssl_Include_Paths)
 Sgx_tssl_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11

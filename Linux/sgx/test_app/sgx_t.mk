@@ -52,13 +52,13 @@ else
 		SGX_ENCLAVE_SIGNER := $(BUILD_DIR)/sgx_sign
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
-		STL_PORT_INC := $(LINUX_SDK_DIR)/tlibstdcxx
+		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
 	else
 		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
 		SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
-		STL_PORT_INC := $(SGX_SDK_INC)
+		LIBCXX_INC := $(SGX_SDK)/include/libcxx
 	endif
 
 endif
@@ -112,7 +112,7 @@ TestEnclave_C_Files := $(wildcard $(ENCLAVE_DIR)/*.c) $(wildcard $(ENCLAVE_DIR)/
 TestEnclave_Cpp_Objects := $(TestEnclave_Cpp_Files:.cpp=.o)
 TestEnclave_C_Objects := $(TestEnclave_C_Files:.c=.o)
 
-TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(STL_PORT_INC)/stlport -I$(PACKAGE_INC)
+TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)/tlibc -I$(LIBCXX_INC) -I$(PACKAGE_INC)
 
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpic -fpie -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(TestEnclave_Include_Paths) -include "tsgxsslio.h"
 TestEnclave_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11
