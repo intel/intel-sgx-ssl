@@ -250,6 +250,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define setcontext sgxssl_setcontext
 #define makecontext sgxssl_makecontext
 #define getenv	sgxssl_getenv
+#define secure_getenv	sgxssl_getenv
 #define atexit sgxssl_atexit
 #define sscanf sgxssl_sscanf
 
