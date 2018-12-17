@@ -56,11 +56,6 @@ cd $SGXSSL_ROOT/../openssl_source || exit 1
 rm -rf $OPENSSL_VERSION
 tar xvf $OPENSSL_VERSION.tar.gz || exit 1
 
-# Intel® Software Guard Extensions SSL uses rd_rand, so there is no need to get a random based on time
-sed -i "s|time_t tim;||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
-sed -i "s|time(&tim);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
-sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" $OPENSSL_VERSION/crypto/bn/bn_rand.c
-
 # Remove AESBS to support only AESNI and VPAES
 sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 
@@ -78,12 +73,11 @@ if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" ]] ; the
     ADDITIONAL_CONF="-g "
 fi
 
-
-cp rand_unix.c $OPENSSL_VERSION/crypto/rand/rand_unix.c || exit 1
+sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
 cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || exit 1
-cp md_rand.c $OPENSSL_VERSION/crypto/rand/md_rand.c || exit 1
+
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure linux-x86_64 $ADDITIONAL_CONF $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
+perl Configure linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
 make build_generated libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1

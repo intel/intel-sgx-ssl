@@ -578,6 +578,17 @@ pthread_t sgxssl_pthread_self (void)
 	return thread_self;
 }
 
+//Thread forking isn't supported inside enclave.
+int sgxssl_pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void))
+{
+    FSTART;
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+
+    FEND;
+    //Operation not permitted
+    return EPERM;
+}
+
 // Return 0 if the threads are not equal
 int sgxssl_pthread_equal (pthread_t thread1, pthread_t thread2)
 {

@@ -95,4 +95,28 @@ int sgxssl_gettimeofday(struct timeval *tv, struct timezone *tz)
 	return 0;
 }
 
+int sgxssl_clock_gettime(int clk_id, struct timespec *tp)
+{
+	struct timeval temp_tv;
+	FSTART;
+	(void)(clk_id);
+
+	if (clk_id != CLOCK_REALTIME) {
+		errno = EINVAL;
+		SGX_UNREACHABLE_CODE(SET_ERRNO);
+		FEND;
+		return -1;
+	}
+
+	if (sgxssl_gettimeofday(&temp_tv, NULL) != 0) {
+		return -1;
+	}
+
+	tp->tv_sec = temp_tv.tv_sec;
+	tp->tv_nsec = temp_tv.tv_usec / 1000;
+	FEND;
+
+	return 0;
+}
+
 }

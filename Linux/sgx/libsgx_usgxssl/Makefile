@@ -78,8 +78,9 @@ Sgx_ussl_Cpp_Flags := $(Sgx_ussl_C_Flags) -std=c++11
 Sgx_ussl_Cpp_Files := $(wildcard *.cpp)
 Sgx_ussl_C_Files := $(wildcard *.c)
 
-Sgx_ussl_Cpp_Objects := $(Sgx_ussl_Cpp_Files:.cpp=.o)
-Sgx_ussl_C_Objects := $(Sgx_ussl_C_Files:.c=.o)
+Sgx_ussl_Cpp_Objects := $(addprefix $(OBJDIR)/, $(Sgx_ussl_Cpp_Files:.cpp=.o))
+Sgx_ussl_C_Objects := $(addprefix $(OBJDIR)/, $(Sgx_ussl_C_Files:.c=.o))
+$(shell mkdir -p $(OBJDIR))
 
 
 .PHONY: all run
@@ -97,11 +98,11 @@ sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c
 	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-%.o: %.cpp
+$(OBJDIR)/%.o : %.cpp
 	$(VCC) $(Sgx_ussl_Cpp_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
-%.o: %.c
+$(OBJDIR)/%.o : %.c
 	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 

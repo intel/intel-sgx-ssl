@@ -58,4 +58,21 @@ int sgxssl_read_rand(unsigned char *rand_buf, int length_in_bytes)
 	return 0;
 }
 
+int sgx_rand_status(void) 
+{ 
+	return 1; 
+}
+
+int get_sgx_rand_bytes(unsigned char *buf, int num) 
+{
+	if (sgxssl_read_rand(buf, num) == 0) 
+	{
+		return 1;
+	} 
+	else 
+	{
+		return 0;
+	}
+}
+
 } // extern "C"

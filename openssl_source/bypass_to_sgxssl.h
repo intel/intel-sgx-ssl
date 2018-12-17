@@ -81,6 +81,10 @@
 #define _strdup      sgxssl__strdup
 #define _stricmp        sgxssl__stricmp
 #define _strnicmp       sgxssl__strnicmp
+#define strcat          sgxssl_strcat
+#define strcpy          sgxssl_strcpy
+#define _wassert        sgxssl__wassert 
+#define wcscpy		sgxssl_wcscpy
 
 /*conio.h*/
 #define _getch  sgxssl__getch
@@ -119,6 +123,10 @@
 #define RegisterEventSourceW sgxssl_RegisterEventSourceW
 #define ReportEventA sgxssl_ReportEventA
 #define ReportEventW sgxssl_ReportEventW
+#define QueryPerformanceCounter sgxssl_QueryPerformanceCounter
+#define GetCurrentProcessId sgxssl_GetCurrentProcessId
+#define BCryptGenRandom sgxssl_BCryptGenRandom
+#define OutputDebugStringW sgxssl_OutputDebugStringW
 #define GetEnvironmentVariableW sgxssl_GetEnvironmentVariableW
 
 /*errhandlingapi.h*/
@@ -227,6 +235,19 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define time sgxssl_time
 #define gmtime_r sgxssl_gmtime_r
 #define gettimeofday sgxssl_gettimeofday
+
+//openssl 1.1.1 new APIs
+//
+#define getpid sgxssl_getpid
+#define stat sgxssl_stat
+#define syscall sgxssl_syscall
+#define pthread_atfork sgxssl_pthread_atfork
+#define opendir sgxssl_opendir
+#define readdir sgxssl_readdir
+#define closedir sgxssl_closedir
+#define OPENSSL_issetugid sgxssl_OPENSSL_issetugid
+#define clock_gettime sgxssl_clock_gettime
+
 
 #define pthread_rwlock_init sgxssl_pthread_rwlock_init
 #define pthread_rwlock_rdlock sgxssl_pthread_rwlock_rdlock

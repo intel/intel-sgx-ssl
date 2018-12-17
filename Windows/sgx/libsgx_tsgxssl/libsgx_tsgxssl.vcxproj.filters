@@ -36,13 +36,13 @@
     <ClInclude Include="tSgxSSL_version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libsgx_tsgxssl_t.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sgxssl_texception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tcpu_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sgx_tsgxssl_t.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

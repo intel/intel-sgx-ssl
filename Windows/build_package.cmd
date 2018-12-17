@@ -40,38 +40,39 @@ set OPENSSL_VERSION=%2
 set TEST_MODE=%4
 set OPENSSL_INSTALL_DIR=%SGXSSL_ROOT%\..\openssl_source\OpenSSL_install_dir_tmp
 set PROCESSOR_ARCHITECTURE=AMD64
+set WIN_SDK_VER=8.1
 perl svn_revision.pl > sgx\libsgx_tsgxssl\tsgxssl_version.h
 
 set build_mode=%1
 goto %build_mode%
 
 :win32_debug
-set Configuration=Debug
-set Platform=Win32
+set my_Configuration=Debug
+set my_Platform=Win32
 set VS_CMD_PLFM=x86
-set OPENSSL_CFG_PLFM=VC-WIN32
+set OPENSSL_CFG_PLFM=VC-WIN32 --debug
 goto build_start
 
 
 :win32_release
-set Configuration=Release
-set Platform=Win32
+set my_Configuration=Release
+set my_Platform=Win32
 set VS_CMD_PLFM=x86
 set OPENSSL_CFG_PLFM=VC-WIN32
 goto build_start
 
 
 :x64_debug
-set Configuration=Debug
-set Platform=x64
+set my_Configuration=Debug
+set my_Platform=x64
 set VS_CMD_PLFM=amd64
-set OPENSSL_CFG_PLFM=VC-WIN64A
+set OPENSSL_CFG_PLFM=VC-WIN64A --debug
 goto build_start
 
 
 :x64_release
-set Configuration=Release
-set Platform=x64
+set my_Configuration=Release
+set my_Platform=x64
 set VS_CMD_PLFM=amd64
 set OPENSSL_CFG_PLFM=VC-WIN64A
 goto build_start
@@ -88,25 +89,16 @@ rmdir /s /q %OPENSSL_VERSION%
 7z.exe x -y %OPENSSL_VERSION%.tar.gz
 7z.exe x -y %OPENSSL_VERSION%.tar
 
-REM Intel® Software Guard Extensions SSL uses rd_rand, so there is no need to get a random based on time
-REM sed -i "s|time_t tim;||g" %OPENSSL_VERSION%\crypto\bn\bn_rand.c
-call powershell -Command "(get-content %OPENSSL_VERSION%\crypto\bn\bn_rand.c) -replace ('time_t tim;','') | out-file %OPENSSL_VERSION%\crypto\bn\bn_rand.c"
-REM sed -i "s|time(&tim);||g" %OPENSSL_VERSION%\crypto\bn\bn_rand.c
-call powershell -Command "(get-content %OPENSSL_VERSION%\crypto\bn\bn_rand.c) -replace ('time\(&tim\);','') | out-file %OPENSSL_VERSION%\crypto\bn\bn_rand.c"
-REM sed -i "s|RAND_add(&tim, sizeof(tim), 0.0);||g" %OPENSSL_VERSION%\crypto\bn\bn_rand.c
-call powershell -Command "(get-content %OPENSSL_VERSION%\crypto\bn\bn_rand.c) -replace ('RAND_add\(&tim, sizeof\(tim\), 0.0\);','') | out-file %OPENSSL_VERSION%\crypto\bn\bn_rand.c"
 
 REM Remove AESBS to support only AESNI and VPAES
-REM sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
-copy /y  rand_win.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
-copy /y  md_rand.c %OPENSSL_VERSION%\crypto\rand\
 
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
-call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %VS_CMD_PLFM%
-
+REM Visual Studio 2017
+REM call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
+call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %VS_CMD_PLFM% %WIN_SDK_VER%
 if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
 	)
@@ -121,30 +113,29 @@ if %errorlevel% neq 0 (
 
 
 
-xcopy /y  libcrypto.lib %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\libsgx_tsgxssl_crypto.lib*
-xcopy /y  ossl_static.pdb %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\
+xcopy /y  libcrypto.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\libsgx_tsgxssl_crypto.lib*
+xcopy /y  ossl_static.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 xcopy /y include\openssl\* %SGXSSL_ROOT%\package\include\openssl\
 
-echo "Done building OpenSSL for %Platform% | %Configuration%. Building Intel® Software Guard Extensions SSL libraries  %date% %time%"
+echo "Done building OpenSSL for %my_Platform% | %my_Configuration%. Building Intel® Software Guard Extensions SSL libraries  %date% %time%"
 cd %SGXSSL_SOLUTION%\
 
-set MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
  
-call %MSBUILD% SGXOpenSSLLibrary.sln /p:Configuration=%Configuration% /p:Platform=%Platform% /t:Rebuild
+MSBUILD SGXOpenSSLLibrary.sln /p:Configuration=%my_Configuration% /p:Platform=%my_Platform% /t:Rebuild
 if %errorlevel% neq 0 (
-	echo "Failed command: [MSBuild.exe SGXOpenSSLLibrary.sln /p:Configuration=%Configuration% /p:Platform=%Platform%  /t:Rebuild]   %date% %time%"
+	echo "Failed command: [MSBuild.exe SGXOpenSSLLibrary.sln /p:Configuration=%my_Configuration% /p:Platform=%my_Platform%  /t:Rebuild]   %date% %time%"
 	goto error
 )
-xcopy /y %Platform%\%Configuration%\libsgx_tsgxssl.lib %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\
-xcopy /y %Platform%\%Configuration%\libsgx_usgxssl.lib %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\
-if "%Configuration%"=="Debug" (
-	xcopy /y %Platform%\%Configuration%\libsgx_tsgxssl.pdb %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\
-	xcopy /y %Platform%\%Configuration%\libsgx_usgxssl.pdb %SGXSSL_ROOT%\package\lib\%Platform%\%Configuration%\
+xcopy /y %my_Platform%\%my_Configuration%\libsgx_tsgxssl.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
+xcopy /y %my_Platform%\%my_Configuration%\libsgx_usgxssl.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
+if "%my_Configuration%"=="Debug" (
+	xcopy /y %my_Platform%\%my_Configuration%\libsgx_tsgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
+	xcopy /y %my_Platform%\%my_Configuration%\libsgx_usgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 )
 
-if "%Configuration%" neq "Release" (
+if "%my_Configuration%" neq "Release" (
 	if "%TEST_MODE%" neq "SIM" (
-		cd %Platform%\%Configuration%\
+		cd %my_Platform%\%my_Configuration%\
 		call TestApp.exe
 		if %errorlevel% neq 0 (
 			echo "Failed command: app, %errorlevel%   %date% %time%"
