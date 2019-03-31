@@ -75,6 +75,7 @@
 /*stdlib.h*/
 #define _exit        sgxssl__exit
 #define getenv       sgxssl_getenv
+#define _onexit      sgxssl__onexit
 
 /*string.h*/
 #define strerror_s   sgxssl_strerror_s

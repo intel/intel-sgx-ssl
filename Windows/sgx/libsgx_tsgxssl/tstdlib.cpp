@@ -122,6 +122,17 @@ void __imp_RtlVirtualUnwind()
 }
 #endif
 
+typedef int (__cdecl* _onexit_t)(void);
+
+_onexit_t sgxssl__onexit(
+   _onexit_t function
+)
+{
+	//_onexit returns a pointer to the function if successful or NULL if there is no space to store the function pointer.
+	//This function call could be skipped in enclave since EPC memory will be recycled when destroying an enclave.
+	//
+	return function;
+}
 
 
 } // extern "C" 
