@@ -116,11 +116,13 @@ union arg {
 #define __sferror(p)   (((p)->_flags & __SERR) != 0)
 #define PAGE_SIZE	4096
 
+//This API is redundant in SGX, same API is provided by tlibc library.
+//
 // Portable code should use sysconf(_SC_PAGE_SIZE) directly instead.
-int getpagesize() {
-  // We dont use sysconf(3) here because that drags in stdio, which makes static binaries fat.
-  return PAGE_SIZE;
-}
+// int getpagesize() {
+// We dont use sysconf(3) here because that drags in stdio, which makes static binaries fat.
+// return PAGE_SIZE;
+// }
 
 void bcopy(const void* src, void* dst, size_t n) {
   memcpy(dst, src, n);
