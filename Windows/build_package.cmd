@@ -50,7 +50,7 @@ goto %build_mode%
 set my_Configuration=Debug
 set my_Platform=Win32
 set VS_CMD_PLFM=x86
-set OPENSSL_CFG_PLFM=VC-WIN32 --debug
+set OPENSSL_CFG_PLFM=sgx-VC-WIN32 --debug
 goto build_start
 
 
@@ -58,7 +58,7 @@ goto build_start
 set my_Configuration=Release
 set my_Platform=Win32
 set VS_CMD_PLFM=x86
-set OPENSSL_CFG_PLFM=VC-WIN32
+set OPENSSL_CFG_PLFM=sgx-VC-WIN32
 goto build_start
 
 
@@ -66,7 +66,7 @@ goto build_start
 set my_Configuration=Debug
 set my_Platform=x64
 set VS_CMD_PLFM=amd64
-set OPENSSL_CFG_PLFM=VC-WIN64A --debug
+set OPENSSL_CFG_PLFM=sgx-VC-WIN64A --debug
 goto build_start
 
 
@@ -74,7 +74,7 @@ goto build_start
 set my_Configuration=Release
 set my_Platform=x64
 set VS_CMD_PLFM=amd64
-set OPENSSL_CFG_PLFM=VC-WIN64A
+set OPENSSL_CFG_PLFM=sgx-VC-WIN64A
 goto build_start
 
 
@@ -94,6 +94,7 @@ REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
 copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
+copy /y  sgx_config.conf %OPENSSL_VERSION%\
 
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
 REM Visual Studio 2017
@@ -103,7 +104,7 @@ if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
 	)
 echo "PROCESSOR_ARCHITECTURE: %PROCESSOR_ARCHITECTURE%"
-perl Configure %OPENSSL_CFG_PLFM%  no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
 
 nmake build_generated libcrypto.lib
 if %errorlevel% neq 0 (
