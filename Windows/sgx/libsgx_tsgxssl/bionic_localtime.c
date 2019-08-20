@@ -575,12 +575,14 @@ int sgxssl__gmtime64_s(struct tm* _tm,
         errno = EINVAL;
         return EINVAL;
     }
+    struct tm* result;
 
-    _tm = timesub(time, 0L, &tmGlobal);
-    if (_tm == NULL) {
+    result = timesub(time, 0L, &tmGlobal);
+    if (result == NULL) {
         errno = EINVAL;
         return EINVAL;
     }
 
+    *_tm = *result;
     return 0;
 }
