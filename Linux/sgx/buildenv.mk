@@ -55,6 +55,7 @@ export OS_ID=0
 export LINUX_SGX_BUILD ?= 0
 export TRUSTED_LIB := libsgx_tsgxssl.a
 export UNTRUSTED_LIB := libsgx_usgxssl.a
+export SGX_SDK ?= /opt/intel/sgxsdk/
 export VCC := @$(CC)
 export VCXX := @$(CXX)
 export OBJDIR := release
