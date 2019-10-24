@@ -165,23 +165,24 @@ static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data
 
 }
 
-/*
+
 static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
-        PAL_PK_CONTEXT *pk_ctx)
+        EVP_PKEY *pk_ctx)
 {
 
     int ret = 0;
-    unsigned char* pub_key_buf = calloc(1, KEY_BUF_SIZE);
-    size_t size = KEY_BUF_SIZE;
+	size_t size = i2d_PublicKey(pk_ctx, NULL);
+	unsigned char *pub_key_buf = (unsigned char *) calloc (size + 1, 0);
     if (!pub_key_buf) {
         ret = -ENOMEM;
-        //z_log(Z_LOG_ERROR, "Can't alloc/ pem_key_buf memroy %d \n", ret);
+        printf("Can't alloc/ pem_key_buf memroy %d \n", ret);
         goto out;
     }
+	//unsigned char *tbuf = pub_key_buf;
 
-    ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
-                            pub_key_buf, &size);
-    //= i2d_RSAPublicKey
+    //ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
+    //                        pub_key_buf, &size);
+	ret = i2d_PublicKey(pk_ctx, &pub_key_buf);
     if (ret != 0) {
         //z_log(Z_LOG_ERROR, "Can't encode Private key in der format %d \n", ret);
         goto out;
@@ -206,14 +207,14 @@ static int init_femc_crypto (struct femc_enclave_ctx_init_args *femc_ctx_args,
         PAL_PK_CONTEXT *pk_ctx)
 {
     int ret;
-    femc_ctx_args->crypto_functions.hash_sha256 = db_femc_cb_sha256;
-    femc_ctx_args->crypto_functions.verify_sha256_rsa = db_femc_cb_verify_sha256_rsa;
+    femc_ctx_args->crypto_functions.hash_sha256 = femc_cb_sha256;
+    femc_ctx_args->crypto_functions.verify_sha256_rsa = femc_cb_verify_sha256_rsa;
     femc_ctx_args->crypto_functions.aes_cmac_128 = femc_cb_aes_cmac_128;
-    ret = db_init_femc_signer(femc_ctx_args, pk_ctx);
+    ret = init_femc_signer(femc_ctx_args, pk_ctx);
     return ret;
 }
 
-*/
+
 
 /*
 static int db_init_femc_ctx_args (struct femc_enclave_ctx_init_args *femc_ctx_args,
