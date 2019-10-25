@@ -50,6 +50,9 @@
 #include "TestEnclave_u.h"
 
 
+#include <femc_common.h>
+#include <femc_runner.h>
+
 
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
@@ -153,7 +156,7 @@ void print_error_message(sgx_status_t ret)
             break;
         }
     }
-    
+
     if (idx == ttl)
         printf("Error: Unexpected error occurred [0x%x].\n", ret);
 }
@@ -173,7 +176,7 @@ int initialize_enclave(void)
 
     /* try to get the token saved in $HOME */
     const char *home_dir = getpwuid(getuid())->pw_dir;
-    if (home_dir != NULL && 
+    if (home_dir != NULL &&
         (strlen(home_dir)+strlen("/")+sizeof(TOKEN_FILENAME)+1) <= MAX_PATH) {
         /* compose the token path */
         strncpy(token_path, home_dir, strlen(home_dir));
@@ -230,11 +233,97 @@ int initialize_enclave(void)
     return 0;
 }
 
+
+static int ocall_get_targetinfo(void *target_info)
+{
+    femc_runner_status_t ret;
+    printf("Femc rest call to get targetinfo\n");
+    // call the CPPREST function
+     struct femc_data_bytes *target_info_oe = NULL;
+    ret = femc_runner_get_target_info(&target_info_oe);
+    if (ret.err != FEMC_RUNNER_SUCCESS) {
+        printf("Failed femc_runner_get_target_info err %d, http err %d \n", ret.err, ret.http_err);
+    }
+    return ret.err;
+}
+
+/*static int sgx_ocall_free_targetinfo(void * pms)
+{
+    SGX_DBG(DBG_I, "Freeing targetinfo\n");
+    ms_ocall_get_targetinfo_t * ms = (ms_ocall_get_targetinfo_t *) pms;
+    femc_runner_free_target_info(&ms->target_info);
+    SGX_DBG(DBG_I, "Freed targetinfo\n");
+
+    return 0;
+}
+*/
+
+static int ocall_local_attest(void * pms)
+{
+    femc_runner_status_t ret;
+    printf( "Femc rest call local attest\n");
+    //ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
+    // call the CPPREST function
+    //ret = femc_runner_do_local_attestation(ms->req, &ms->rsp);
+    if (ret.err != FEMC_RUNNER_SUCCESS) {
+        printf("Failed femc_runner_do_local_attestation err %d, http err %d \n", ret.err, ret.http_err);
+    }
+    return ret.err;
+}
+
+/*
+static int sgx_ocall_free_la_rsp(void *pms)
+{
+    SGX_DBG(DBG_I, "Freeing LA Rsp\n");
+    ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
+    femc_runner_free_local_attestation(&ms->rsp);
+    ms->rsp = NULL;
+    return 0;
+}
+*/
+
+static int ocall_remote_attest(void * pms)
+{
+    femc_runner_status_t ret;
+    printf("Femc rest call remote attest\n");
+    //ms_ocall_remote_attest_t * ms = (ms_ocall_remote_attest_t *) pms;
+    // call the CPPREST function
+    //ret = femc_runner_do_remote_attestation(ms->req, &ms->rsp);
+    if (ret.err != FEMC_RUNNER_SUCCESS) {
+        printf("Failed femc_runner_do_remote_attestation err %d, http err %d \n", ret.err, ret.http_err);
+    }
+    return ret.err;
+}
+
+/*
+static int sgx_ocall_free_ra_rsp(void *pms)
+{
+    SGX_DBG(DBG_I, "Freeing LA Rsp\n");
+    ms_ocall_remote_attest_t * ms = (ms_ocall_remote_attest_t *) pms;
+    femc_runner_free_remote_attestation(&ms->rsp);
+    ms->rsp = NULL;
+    return 0;
+}
+*/
+
+static int sgx_ocall_heartbeat(void * pms)
+{
+    femc_runner_status_t ret;
+    printf("Femc rest send heart beat\n");
+    //ms_ocall_heartbeat_t *ms = (ms_ocall_heartbeat_t *)pms;
+    // call the CPPREST function
+    //ret = femc_runner_send_heartbeat(ms->req);
+    if (ret.err != FEMC_RUNNER_SUCCESS) {
+        printf("Failed femc_runner_send_heartbeat err %d, http err %d \n", ret.err, ret.http_err);
+    }
+    return ret.err;
+}
+
 /* OCall functions */
 void uprint(const char *str)
 {
-    /* Proxy/Bridge will check the length and null-terminate 
-     * the input string to prevent buffer overflow. 
+    /* Proxy/Bridge will check the length and null-terminate
+     * the input string to prevent buffer overflow.
      */
     printf("%s", str);
     fflush(stdout);
@@ -262,6 +351,8 @@ int ucreate_thread()
 }
 
 
+
+
 /* Application entry */
 int main(int argc, char *argv[])
 {
@@ -279,8 +370,8 @@ int main(int argc, char *argv[])
 
     /* Initialize the enclave */
     if (initialize_enclave() < 0)
-        return 1; 
- 
+        return 1;
+
     sgx_status_t status = t_sgxssl_call_apis(global_eid);
     if (status != SGX_SUCCESS) {
         printf("Call to t_sgxssl_call_apis has failed.\n");
@@ -288,6 +379,10 @@ int main(int argc, char *argv[])
     }
 
     sgx_destroy_enclave(global_eid);
-    
+
+    femc_runner_status_t ret = femc_runner_get_agent_version(NULL);
+
+    ocall_get_targetinfo(NULL);
+
     return 0;
 }

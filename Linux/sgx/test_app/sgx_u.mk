@@ -81,7 +81,7 @@ endif
 App_Cpp_Files := $(UNTRUSTED_DIR)/TestApp.cpp
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
-App_Include_Paths := -I$(UNTRUSTED_DIR) -I$(SGX_SDK_INC)
+App_Include_Paths := -I$(UNTRUSTED_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK)/femc/runner/includes
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fpic -fpie -fstack-protector -Wformat -Wformat-security -Wno-attributes $(App_Include_Paths)
 App_Cpp_Flags := $(App_C_Flags) -std=c++11
@@ -97,7 +97,8 @@ endif
 
 Security_Link_Flags := -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -pie
 
-App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries) -lpthread 
+App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries)  $(SGX_SDK)/femc/runner/lib/debug/libfemc_runner.a -lc -lpthread  -lprotobuf -lcpprest -lboost_system -lcrypto -lm -lssl -lstdc++
+#App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries)  $(SGX_SDK)/femc/runner/lib/debug/libfemc_runner.a -lc -lpthread  -lprotobuf -lcpprest -lboost_system -lcrypto -lm -lssl -lstdc++
 
 
 .PHONY: all test
@@ -130,5 +131,5 @@ TestApp: $(UNTRUSTED_DIR)/TestEnclave_u.o $(App_Cpp_Objects)
 .PHONY: clean
 
 clean:
-	@rm -f TestApp  $(App_Cpp_Objects) $(UNTRUSTED_DIR)/TestEnclave_u.* 
-	
+	@rm -f TestApp  $(App_Cpp_Objects) $(UNTRUSTED_DIR)/TestEnclave_u.*
+
