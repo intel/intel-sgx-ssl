@@ -234,12 +234,12 @@ int initialize_enclave(void)
 }
 
 
-static int ocall_get_targetinfo(void *target_info)
+int uocall_get_targetinfo(void *target_info)
 {
     femc_runner_status_t ret;
     printf("Femc rest call to get targetinfo\n");
     // call the CPPREST function
-     struct femc_data_bytes *target_info_oe = NULL;
+     struct femc_data_bytes *target_info_oe = (struct femc_data_bytes *)target_info;
     ret = femc_runner_get_target_info(&target_info_oe);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_get_target_info err %d, http err %d \n", ret.err, ret.http_err);
@@ -350,7 +350,12 @@ int ucreate_thread()
 	return res;
 }
 
+int ftx_test(int test)
+{
+    printf("\n ftx test %d", test);
 
+    return test;
+}
 
 
 /* Application entry */
@@ -382,7 +387,7 @@ int main(int argc, char *argv[])
 
     femc_runner_status_t ret = femc_runner_get_agent_version(NULL);
 
-    ocall_get_targetinfo(NULL);
+    //uocall_get_targetinfo(NULL);
 
     return 0;
 }

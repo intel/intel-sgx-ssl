@@ -216,14 +216,14 @@ static int init_femc_crypto (struct femc_enclave_ctx_init_args *femc_ctx_args,
 
 
 
-/*
+
 static int db_init_femc_ctx_args (struct femc_enclave_ctx_init_args *femc_ctx_args,
         PAL_PK_CONTEXT *pk_ctx, femc_req_type req_type)
 {
     femc_ctx_args->req_type = req_type;
     return init_femc_crypto(femc_ctx_args, pk_ctx);
 }
-*/
+
 static bool _sgx_is_within_enclave (const void * addr, size_t size)
 {
     if(sgx_is_within_enclave (addr, size))
@@ -267,10 +267,12 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
 
     ret = ocall_get_targetinfo(femc_ctx, &tgt_info);
     if (ret < 0) {
-        z_log(Z_LOG_ERROR, "ocall_get_targetinfo error %d\n", ret);
+        //z_log(Z_LOG_ERROR, "ocall_get_targetinfo error %d\n", ret);
         goto out;
     }
-    // Generate Local Attestation Request:
+}
+
+// Generate Local Attestation Request:
     ret = femc_generate_la_req(&la_req, &la_req_size, femc_ctx, &tgt_info,
             subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
@@ -596,6 +598,18 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 	return res;
 }
 
+int get_tgtinfo(){
+
+    struct femc_data_bytes *tgt_info = NULL;
+    int ret = 0;
+    uocall_get_targetinfo(&ret, &tgt_info);
+    if (ret < 0) {
+        printf("got tgt_info inside encalve %d", ret);
+    } else {
+        printf("ocall_get_targetinfo success %d\n", ret);
+    }
+}
+
 /*
 extern "C" int CRYPTO_set_mem_functions(
         void *(*m)(size_t, const char *, int),
@@ -672,6 +686,16 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test threads_test completed\n");
+
+    ftx_test(&ret, 0);
+	if (ret != 0)
+    {
+    	printf("test ftx_Test returned error %d\n", ret);
+    	exit(ret);
+    }
+	printf("test ftx_test completed\n");
+
+    get_tgtinfo();
 
 }
 
