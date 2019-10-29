@@ -37,6 +37,7 @@
 #include "TestEnclave_t.h"  /* print_string */
 #include "tSgxSSL_api.h"
 
+#include <mbusafecrt.h>
 #include <openssl/bn.h>
 #include <openssl/cmac.h>
 #include <openssl/ec.h>
@@ -135,6 +136,7 @@ static int64_t femc_cb_verify_sha256_rsa (uint8_t *public_key,
             signature, sig_len, pub_rsa);
     if (ret) {
         printf("Error DkPkVerify %d\n", ret);
+        goto out;
     }
     ret = 0;
 out:
@@ -162,7 +164,7 @@ static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data
     CMAC_Update(ctx, data, data_len);
     CMAC_Final(ctx, mac->mac, &mac_len);
     CMAC_CTX_free(ctx);
-
+    return 0;
 }
 
 
@@ -171,22 +173,26 @@ static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
 {
 
     int ret = 0;
-	size_t size = i2d_PublicKey(pk_ctx, NULL);
-	unsigned char *pub_key_buf = (unsigned char *) calloc (size + 1, 0);
+	int size = i2d_PublicKey(pk_ctx, NULL);
+	unsigned char *pub_key_buf = (unsigned char *) malloc(size+1);
     if (!pub_key_buf) {
         ret = -ENOMEM;
         printf("Can't alloc/ pem_key_buf memroy %d \n", ret);
         goto out;
     }
+
 	//unsigned char *tbuf = pub_key_buf;
 
     //ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
     //                        pub_key_buf, &size);
-	ret = i2d_PublicKey(pk_ctx, &pub_key_buf);
-    if (ret != 0) {
-        //z_log(Z_LOG_ERROR, "Can't encode Private key in der format %d \n", ret);
-        goto out;
-    }
+	i2d_PublicKey(pk_ctx, &pub_key_buf);
+	// print public key
+	printf ("{\"public\":\"");
+	int i;
+	for (i = 0; i < size; i++) {
+	    printf("%02x", (unsigned char) pub_key_buf[i]);
+	}
+	printf("\"}\n");
 
     args->app_public_key = pub_key_buf;
     args->app_public_key_len = size;
@@ -217,7 +223,7 @@ static int init_femc_crypto (struct femc_enclave_ctx_init_args *femc_ctx_args,
 
 
 
-static int db_init_femc_ctx_args (struct femc_enclave_ctx_init_args *femc_ctx_args,
+static int init_femc_ctx_args (struct femc_enclave_ctx_init_args *femc_ctx_args,
         PAL_PK_CONTEXT *pk_ctx, femc_req_type req_type)
 {
     femc_ctx_args->req_type = req_type;
@@ -250,56 +256,195 @@ init_femc_global_args(struct femc_enclave_global_init_args *global_args)
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 
-/*
+
+static int _copy_target_info_from_user(
+    struct femc_encl_context *ctx,
+    struct femc_data_bytes **target_info,
+    const struct femc_data_bytes *target_info_src)
+{
+    femc_encl_status_t ret;
+    int retval = 0;
+    ret = copy_tgt_info_rsp(ctx, target_info_src, target_info);
+    if (ret != FEMC_STATUS_SUCCESS) {
+        printf("copy_tgt_info_rsp error %d\n", ret);
+        retval = -EINVAL;
+    }
+    return retval;
+}
+
+
+/* Get target info */
+int ocall_get_targetinfo(struct femc_encl_context *ctx,
+                         struct femc_data_bytes ** target_info)
+{
+    int ret = 0;
+
+    struct femc_data_bytes *target_info_oe = NULL;
+    uocall_get_targetinfo(&ret, &target_info_oe);
+    if (ret < 0) {
+        printf("got tgt_info inside encalve %d", ret);
+        goto out;
+    } else {
+        //for (int i=0; i < 9; i++)
+          //  *(test+i) = *((char*)tgt_info + i);
+        printf("ocall_get_targetinfo success %d \n", ret);
+    }
+    ret = _copy_target_info_from_user(ctx, target_info, target_info_oe);
+    if (ret != 0) {
+        printf("copy_tgt_info_rsp error %d\n", ret);
+        goto out;
+    }
+    ret = 0;
+out:
+    return ret;
+}
+
+
+int get_tgtinfo() {
+
+    struct femc_data_bytes *tgt_info = NULL;
+    int ret = 0;
+    char test[10] = {'\0'};
+    // we get a user pointer back
+    uocall_get_targetinfo(&ret, &tgt_info);
+    if (ret < 0) {
+        printf("got tgt_info inside encalve %d", ret);
+    } else {
+        //for (int i=0; i < 9; i++)
+          //  *(test+i) = *((char*)tgt_info + i);
+        printf("ocall_get_targetinfo success %d with %s \n", ret, test);
+    }
+}
+
+
+static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
+                                  struct femc_la_rsp **rsp,
+                                  const struct femc_la_rsp *rsp_src)
+{
+    int retval = 0;
+    femc_encl_status_t ret;
+    // Copy la_rsp inside enclave
+    ret = copy_la_rsp(ctx, rsp_src, rsp);
+    if (ret != FEMC_STATUS_SUCCESS) {
+        printf("copy_la_rsp error %d\n", ret);
+        retval = -EINVAL;
+    }
+    return retval;
+}
+
+
+/* Sent attestation to local node
+ */
+static int ocall_local_attest(struct femc_encl_context *ctx,
+                               struct femc_la_req **req,
+                               struct femc_la_rsp **rsp, size_t *la_req_size)
+{
+    int retval = 0;
+    struct femc_la_rsp *rsp_oe;
+    // Intel SDK copies (out, size = size)
+    uocall_local_attest(&retval, *req, *la_req_size, (void**)rsp_oe);
+    if (retval) {
+        printf("ucall_local_attest error %d\n", retval);
+        retval = -EINVAL;
+        goto out;
+    }
+    retval = _copy_la_rsp_from_user(ctx, rsp, rsp_oe);
+    if (!retval) {
+        printf("copy_la_req error %d\n", retval);
+    }
+out:
+    return retval;
+}
+
+
+
 // Local attestation, Needs cert fields
 static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
-        struct femc_la_rsp **la_rsp, PAL_STR subject)
+        struct femc_la_rsp **la_rsp, const char* subject)
 {
     int ret = 0;
     struct femc_data_bytes *tgt_info = NULL;
     struct femc_la_req *la_req = NULL;
     size_t la_req_size;
-    struct femc_la_rsp *la_rsp_temp = NULL;
-
     // Generate Local Attestation Request:
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
-    ret = ocall_get_targetinfo(femc_ctx, &tgt_info);
+    uocall_get_targetinfo(&ret, &tgt_info);
     if (ret < 0) {
-        //z_log(Z_LOG_ERROR, "ocall_get_targetinfo error %d\n", ret);
+        printf("ocall_get_targetinfo error %d\n", ret);
         goto out;
     }
-}
 
-// Generate Local Attestation Request:
+    // Generate Local Attestation Request:
     ret = femc_generate_la_req(&la_req, &la_req_size, femc_ctx, &tgt_info,
             subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
-        z_log(Z_LOG_ERROR, "femc_generate_la_req error %d\n", ret);
-        ret = -PAL_ERROR_INVAL;
+        printf("femc_generate_la_req error %d\n", ret);
+        ret = -EINVAL;
         goto out;
     }
+
     // Ocall to attest with node agent
-    ret = ocall_local_attest(femc_ctx, &la_req, &la_rsp_temp, &la_req_size);
+    ret = ocall_local_attest(femc_ctx, &la_req, la_rsp, &la_req_size);
     if (ret < 0) {
-        z_log(Z_LOG_ERROR, "ocall_local_attest error %d\n", ret);
+        printf("ocall_local_attest error %d\n", ret);
         goto out;
     }
 out:
-    *la_rsp = la_rsp_temp;
-    if (la_req) {
+    // TODO free will not be needed in second version
+    /*if (la_req) {
         free_la_req(femc_ctx, &la_req);
     }
     if (tgt_info) {
         free_tgt_info_rsp(femc_ctx, &tgt_info);
-    }
+    }*/
     return ret;
 }
 
+
+static int _copy_ra_rsp_from_user(struct femc_encl_context *ctx,
+                                  struct femc_ra_rsp **rsp,
+                                  const struct femc_ra_rsp *rsp_src)
+{
+    int retval = 0;
+    femc_encl_status_t ret;
+    // Copy ra_rsp inside enclave
+    ret = copy_ra_rsp(ctx, rsp_src, rsp);
+    if (ret != FEMC_STATUS_SUCCESS) {
+        printf("copy_ra_rsp error %d\n", ret);
+        retval = -EINVAL;
+    }
+    return retval;
+}
+
+static int ocall_remote_attest(struct femc_encl_context *ctx,
+                                struct femc_ra_req **req,
+                                struct femc_ra_rsp **rsp,
+                                size_t *ra_req_size)
+{
+    int retval = 0;
+    struct femc_ra_rsp *rsp_oe = NULL;
+    uocall_remote_attest(&retval, *req, *ra_req_size, (void**)&rsp_oe);
+    if (retval) {
+        printf("ucall_local_attest error %d\n", retval);
+        retval = -EINVAL;
+        goto out;
+    }
+    retval = _copy_ra_rsp_from_user(ctx, rsp, rsp_oe);
+    if (!retval) {
+        printf("copy_ra_resp error %d\n", retval);
+    }
+out:
+    return retval;
+}
+
+
+
+
 // Remote attestation
 static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
-    struct femc_la_rsp **la_rsp, struct femc_ra_rsp **ra_rsp, PAL_STR subject)
+    struct femc_la_rsp **la_rsp, struct femc_ra_rsp **ra_rsp, const char* subject)
 {
 
     int ret = 0;
@@ -315,27 +460,27 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
     ret = femc_generate_ra_req(femc_ctx, &ra_req, &ra_req_size,
             la_rsp, subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
-        z_log(Z_LOG_ERROR, "femc_generate_ra_req error %d\n", ret);
-        ret = -PAL_ERROR_INVAL;
+        printf("femc_generate_ra_req error %d\n", ret);
+        ret = -EINVAL;
         goto out;
     }
     // Ocall to send ra_req_oe to node agent to get ra_rsp_oe
     ret = ocall_remote_attest(femc_ctx, &ra_req, &ra_rsp_tmp, &ra_req_size);
     if (ret < 0) {
-        z_log(Z_LOG_ERROR, "ocall_remote_attest error %d\n", ret);
+        printf("ocall_remote_attest error %d\n", ret);
         goto out;
     }
     // Verify ra_resp
     ret = verify_ra_rsp(femc_ctx, ra_rsp_tmp);
 
     if (ret != FEMC_STATUS_SUCCESS) {
-        z_log(Z_LOG_ERROR, "verify_ra_rsp error %d\n", ret);
-        ret = -PAL_ERROR_INVAL;
+        printf("verify_ra_rsp error %d\n", ret);
+        ret = -EINVAL;
         goto out;
     }
-
 out:
     *ra_rsp = ra_rsp_tmp;
+    /*
     if (ra_req) {
         free_ra_req(femc_ctx, &ra_req);
     }
@@ -344,14 +489,13 @@ out:
             free(*ra_rsp);
             *ra_rsp = NULL;
         }
-    }
-
+    }*/
 
     return ret;
 }
 
 
-int _DkFEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, PAL_STR subject, void **femc_cert)
+int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **femc_cert)
 {
     int ret = 0;
 
@@ -360,14 +504,14 @@ int _DkFEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, PAL_STR subject, void **fem
 
     ret = _FEMCLocalAttestation (femc_ctx, &la_rsp, subject);
     if (ret) {
-        z_log(Z_LOG_ERROR, "Femc local attestation failed \n");
-        goto out;
+        printf("Femc local attestation failed \n");
+        return ret;
     }
 
     ret = _FEMCRemoteAttestation (femc_ctx, &la_rsp, &ra_rsp, subject);
     if (ret || ra_rsp == NULL || ra_rsp->app_cert.data_len < 1) {
-        z_log(Z_LOG_ERROR, "Femc remote attestation failed \n");
-        goto out;
+        printf("Femc remote attestation failed \n");
+        return ret;
     }
 
     // Check PEM is null ternimated -> don't write the last character.
@@ -378,43 +522,50 @@ int _DkFEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, PAL_STR subject, void **fem
      // The shim is responsible of freeing this buffer after writing it
      // to file.
     void *cert_data = malloc(ra_rsp->app_cert.data_len);
-    memcpy(cert_data, ra_rsp->app_cert.pem, ra_rsp->app_cert.data_len);
+    memcpy_s(cert_data, ra_rsp->app_cert.data_len, ra_rsp->app_cert.pem, ra_rsp->app_cert.data_len);
     *femc_cert = cert_data;
 
-    SGX_DBG(DBG_I, " Femc Attestation response cert recvd: bytes  %d for cert \n  %s\n",
+    printf("Femc Attestation response cert recvd: bytes  %d for cert \n  %s\n",
         ra_rsp->app_cert.data_len, (char*)*femc_cert);
-out:
+
+//out:
+    /*
     if (la_rsp) {
         free_la_rsp(femc_ctx, &la_rsp);
     }
 
     if (ra_rsp) {
         free_ra_rsp(femc_ctx, &ra_rsp);
-    }
+    }*/
 
     return ret;
 }
-*/
+
 
 /* Init femc_context */
-int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx, int req_type)
+int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_type)
 {
     int ret = 0;
     struct femc_enclave_ctx_init_args femc_ctx_init_args;
     struct femc_enclave_global_init_args femc_global_args;
     *femc_ctx = NULL;
 
-    /*
-    ret = db_init_femc_ctx_args(&femc_ctx_init_args, (PAL_PK_CONTEXT*)pk_ctx, req_type);
+
+    ret = init_femc_ctx_args(&femc_ctx_init_args, pk_ctx, req_type);
     if (ret < 0) {
-        z_log(Z_LOG_ERROR, "db_init_femc_ctx_args error %d\n", ret);
+        printf("init_femc_ctx_args error %d\n", ret);
         goto out;
     }
-    db_init_femc_global_args(&femc_global_args);
-    */
+    printf("init_femc_ctx_args success\n");
+
+    init_femc_global_args(&femc_global_args);
+
+    printf("init_femc_global_args success\n");
+
+
     ret = femc_enclave_global_init(&femc_global_args);
     if (ret != FEMC_STATUS_SUCCESS) {
-        //z_log(Z_LOG_ERROR, "femc_enclave_global_init error %d\n", ret);
+        printf("femc_enclave_global_init error %d\n", ret);
         ret = -1;
         goto out;
 
@@ -422,11 +573,12 @@ int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx, int req_type)
 
     ret = femc_enclave_ctx_init(femc_ctx, &femc_ctx_init_args);
     if (ret != FEMC_STATUS_SUCCESS) {
-        //z_log(Z_LOG_ERROR, "femc_enclave_ctx_init error %d\n", ret);
+        printf("femc_enclave_ctx_init error %d\n", ret);
         ret = -1;
         goto out;
     }
-
+    printf("init_femc_ctx_init success\n");
+    ret = 0;
 out:
     if (ret < 0)
         *femc_ctx = NULL;
@@ -438,37 +590,37 @@ out:
  * returns 0 on sucess
  * */
 
-void rsa_key_gen(EVP_PKEY *evp_pkey);
+void rsa_key_gen(EVP_PKEY **evp_pkey);
 
 static int ftx_manager_cert_flow (const char* config_key)
 {
     int ret = 0;
     PAL_FEMC_CONTEXT   *femc_ctx  = NULL;
     PAL_PK_CONTEXT     *pk_ctx     = NULL;
-    void               *femc_cert = NULL;
-
+    //void               *femc_cert = NULL;
     //DkPkInit(&pk_ctx);
-
     //TODO verify cert validity and with the key ZIRC-2662
     // Create the cert file if it doesn't already exist
     // Generate private key and write it to file
-    rsa_key_gen(pk_ctx);
+    rsa_key_gen(&pk_ctx);
     //if (ret != 0) {
         //z_log(Z_LOG_FATAL, "Can't create private key error %d\n", ret);
     //    goto out;
     //}
+    //
 
     // Initialize FEMC context
-    ret = _FEMCInit(&femc_ctx, FEMC_REQ_ATTEST_KEY);
-    if (!ret) {
+    ret = _FEMCInit(&femc_ctx, pk_ctx, FEMC_REQ_ATTEST_KEY);
+    if (ret) {
         printf("Femc init failed error %d\n", ret);
         //goto out;
     }
+    printf("Femc init success \n");
 }
 /*
     // Fortanix certificate provisioning - uses FEMC API to connect
       to malbork and returns a buffer containing certificate data.
-    ret = DkFEMCCertProvision(femc_ctx, value, &femc_cert);
+    ret = FEMCCertProvision(femc_ctx, value, &femc_cert);
     if (!ret) {
         ret = -PAL_ERRNO;
         z_log(Z_LOG_FATAL, "Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
@@ -515,7 +667,7 @@ void printf(const char *fmt, ...)
     uprint(buf);
 }
 
-void rsa_key_gen(EVP_PKEY *evp_pkey)
+void rsa_key_gen(EVP_PKEY **evp_pkey)
 {
 	BIGNUM *bn = BN_new();
 	if (bn == NULL) {
@@ -539,18 +691,18 @@ void rsa_key_gen(EVP_PKEY *evp_pkey)
 	    return;
 	}
 
-	evp_pkey = EVP_PKEY_new();
-	if (evp_pkey == NULL) {
+	*evp_pkey = EVP_PKEY_new();
+	if (*evp_pkey == NULL) {
 		printf("EVP_PKEY_new failure: %ld\n", ERR_get_error());
 		return;
 	}
-	EVP_PKEY_assign_RSA(evp_pkey, keypair);
+	EVP_PKEY_assign_RSA(*evp_pkey, keypair);
 
 	// public key - string
-	int len = i2d_PublicKey(evp_pkey, NULL);
+	int len = i2d_PublicKey(*evp_pkey, NULL);
 	unsigned char *buf = (unsigned char *) malloc (len + 1);
 	unsigned char *tbuf = buf;
-	i2d_PublicKey(evp_pkey, &tbuf);
+	i2d_PublicKey(*evp_pkey, &tbuf);
 
 	// print public key
 	printf ("{\"public\":\"");
@@ -563,10 +715,10 @@ void rsa_key_gen(EVP_PKEY *evp_pkey)
 	free(buf);
 
 	// private key - string
-	len = i2d_PrivateKey(evp_pkey, NULL);
+	len = i2d_PrivateKey(*evp_pkey, NULL);
 	buf = (unsigned char *) malloc (len + 1);
 	tbuf = buf;
-	i2d_PrivateKey(evp_pkey, &tbuf);
+	i2d_PrivateKey(*evp_pkey, &tbuf);
 
 	// print private key
 	printf ("{\"private\":\"");
@@ -598,17 +750,6 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 	return res;
 }
 
-int get_tgtinfo(){
-
-    struct femc_data_bytes *tgt_info = NULL;
-    int ret = 0;
-    uocall_get_targetinfo(&ret, &tgt_info);
-    if (ret < 0) {
-        printf("got tgt_info inside encalve %d", ret);
-    } else {
-        printf("ocall_get_targetinfo success %d\n", ret);
-    }
-}
 
 /*
 extern "C" int CRYPTO_set_mem_functions(
@@ -660,7 +801,7 @@ void t_sgxssl_call_apis()
 
     EVP_PKEY *evp_pkey;
 
-    rsa_key_gen(evp_pkey);
+    rsa_key_gen(&evp_pkey);
     printf("test rsa_key_gen completed\n");
 
     ret = rsa_test();

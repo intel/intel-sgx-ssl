@@ -47,6 +47,8 @@ from "sgx_tsgxssl.edl" import *;
         int ftx_test(int test);
         /* what about memory should be out, sizeof targetifo*/
         int uocall_get_targetinfo([user_check]void *target_info);
+        int uocall_local_attest([out, size=req_size] void *req, unsigned req_size, [user_check]void** resp);
+        int uocall_remote_attest([out, size=req_size]void *req, unsigned req_size, [user_check]void** resp);
 
     };
 

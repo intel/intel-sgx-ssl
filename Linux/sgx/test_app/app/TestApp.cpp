@@ -258,13 +258,13 @@ int uocall_get_targetinfo(void *target_info)
 }
 */
 
-static int ocall_local_attest(void * pms)
+int uocall_local_attest(void *req, unsigned int req_size, void** rsp)
 {
     femc_runner_status_t ret;
     printf( "Femc rest call local attest\n");
     //ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
     // call the CPPREST function
-    //ret = femc_runner_do_local_attestation(ms->req, &ms->rsp);
+    ret = femc_runner_do_local_attestation((femc_la_req*)req, (femc_la_rsp**)rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_local_attestation err %d, http err %d \n", ret.err, ret.http_err);
     }
@@ -282,13 +282,13 @@ static int sgx_ocall_free_la_rsp(void *pms)
 }
 */
 
-static int ocall_remote_attest(void * pms)
+int uocall_remote_attest(void *req, unsigned int req_size, void** rsp)
 {
     femc_runner_status_t ret;
     printf("Femc rest call remote attest\n");
     //ms_ocall_remote_attest_t * ms = (ms_ocall_remote_attest_t *) pms;
     // call the CPPREST function
-    //ret = femc_runner_do_remote_attestation(ms->req, &ms->rsp);
+    ret = femc_runner_do_remote_attestation((femc_ra_req*)req, (femc_ra_rsp**)rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_remote_attestation err %d, http err %d \n", ret.err, ret.http_err);
     }
