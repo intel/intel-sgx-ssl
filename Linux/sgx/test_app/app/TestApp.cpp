@@ -234,16 +234,17 @@ int initialize_enclave(void)
 }
 
 
-int uocall_get_targetinfo(void *target_info)
+int uocall_get_targetinfo(struct femc_data_bytes **target_info)
 {
     femc_runner_status_t ret;
     printf("Femc rest call to get targetinfo\n");
     // call the CPPREST function
-     struct femc_data_bytes *target_info_oe = (struct femc_data_bytes *)target_info;
-    ret = femc_runner_get_target_info(&target_info_oe);
+    //struct femc_data_bytes *target_info_oe = (struct femc_data_bytes *)target_info;
+    ret = femc_runner_get_target_info(target_info);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_get_target_info err %d, http err %d \n", ret.err, ret.http_err);
     }
+    printf("Success femc_runner_get_target_info %d, size %d \n", ret.err, (*target_info)->data_len);
     return ret.err;
 }
 

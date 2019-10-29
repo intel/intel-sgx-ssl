@@ -273,50 +273,33 @@ static int _copy_target_info_from_user(
 }
 
 
-/* Get target info */
+/* Get target info from node agent enclave */
 int ocall_get_targetinfo(struct femc_encl_context *ctx,
                          struct femc_data_bytes ** target_info)
 {
     int ret = 0;
-
     struct femc_data_bytes *target_info_oe = NULL;
+
     uocall_get_targetinfo(&ret, &target_info_oe);
     if (ret < 0) {
         printf("got tgt_info inside encalve %d", ret);
         goto out;
     } else {
-        //for (int i=0; i < 9; i++)
-          //  *(test+i) = *((char*)tgt_info + i);
-        printf("ocall_get_targetinfo success %d \n", ret);
     }
+
     ret = _copy_target_info_from_user(ctx, target_info, target_info_oe);
     if (ret != 0) {
         printf("copy_tgt_info_rsp error %d\n", ret);
         goto out;
     }
+    printf("success copy_tgt_info_rsp %d\n", ret);
+    printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
     ret = 0;
 out:
     return ret;
 }
 
-
-int get_tgtinfo() {
-
-    struct femc_data_bytes *tgt_info = NULL;
-    int ret = 0;
-    char test[10] = {'\0'};
-    // we get a user pointer back
-    uocall_get_targetinfo(&ret, &tgt_info);
-    if (ret < 0) {
-        printf("got tgt_info inside encalve %d", ret);
-    } else {
-        //for (int i=0; i < 9; i++)
-          //  *(test+i) = *((char*)tgt_info + i);
-        printf("ocall_get_targetinfo success %d with %s \n", ret, test);
-    }
-}
-
-
+/*copy from outside enalve*/
 static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
                                   struct femc_la_rsp **rsp,
                                   const struct femc_la_rsp *rsp_src)
@@ -333,8 +316,7 @@ static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
 }
 
 
-/* Sent attestation to local node
- */
+/* Sent attestation to local node */
 static int ocall_local_attest(struct femc_encl_context *ctx,
                                struct femc_la_req **req,
                                struct femc_la_rsp **rsp, size_t *la_req_size)
@@ -348,10 +330,12 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
         retval = -EINVAL;
         goto out;
     }
+
     retval = _copy_la_rsp_from_user(ctx, rsp, rsp_oe);
     if (!retval) {
         printf("copy_la_req error %d\n", retval);
     }
+
 out:
     return retval;
 }
@@ -370,7 +354,7 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
-    uocall_get_targetinfo(&ret, &tgt_info);
+    ret = ocall_get_targetinfo(femc_ctx, &tgt_info);
     if (ret < 0) {
         printf("ocall_get_targetinfo error %d\n", ret);
         goto out;
@@ -597,59 +581,55 @@ static int ftx_manager_cert_flow (const char* config_key)
     int ret = 0;
     PAL_FEMC_CONTEXT   *femc_ctx  = NULL;
     PAL_PK_CONTEXT     *pk_ctx     = NULL;
-    //void               *femc_cert = NULL;
+    void               *femc_cert = NULL;
     //DkPkInit(&pk_ctx);
     //TODO verify cert validity and with the key ZIRC-2662
     // Create the cert file if it doesn't already exist
     // Generate private key and write it to file
     rsa_key_gen(&pk_ctx);
-    //if (ret != 0) {
-        //z_log(Z_LOG_FATAL, "Can't create private key error %d\n", ret);
-    //    goto out;
-    //}
-    //
+    if (NULL == pk_ctx) {
+        printf("Can't create private key error %d\n", ret);
+        goto out;
+    }
 
     // Initialize FEMC context
     ret = _FEMCInit(&femc_ctx, pk_ctx, FEMC_REQ_ATTEST_KEY);
     if (ret) {
         printf("Femc init failed error %d\n", ret);
-        //goto out;
+        goto out;
     }
     printf("Femc init success \n");
-}
-/*
+
     // Fortanix certificate provisioning - uses FEMC API to connect
-      to malbork and returns a buffer containing certificate data.
-    ret = FEMCCertProvision(femc_ctx, value, &femc_cert);
-    if (!ret) {
-        ret = -PAL_ERRNO;
-        z_log(Z_LOG_FATAL, "Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
+    //  to malbork and returns a buffer containing certificate data.
+    ret = _FEMCCertProvision(femc_ctx, "Test.domain.app", &femc_cert);
+    if (ret) {
+        ret = -1;
+        printf("Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
         goto out;
     }
 
     // Write the cert data to file, exclude the null character at the end
-    ret = write_all_data(shim_hdl, femc_cert, strlen(femc_cert) -1, 0);
-    if (ret < strlen(femc_cert) -1) {
-        z_log(Z_LOG_FATAL, "Can't write Cert to file %d \n", ret);
-        goto out;
-    }
-
+    printf("Can't write Cert  %s \n", femc_cert);
     ret = 0;
 
 out:
-    DkPkFree(&pk_ctx);
+
     if (femc_ctx) {
-        if (!DkFEMCExit(&femc_ctx)) {
-            z_log(Z_LOG_FATAL, "Femc exit failed\n");
-        }
+        femc_enclave_exit(&femc_ctx);
     }
+
+    EVP_PKEY_free(pk_ctx);
+    /*if (evp_pkey->pkey.ptr != NULL) {
+        RSA_free(keypair);
+    }*/
+
     if (femc_cert) {
         free(femc_cert);
     }
 
     return ret;
 }
-*/
 
 
 
@@ -787,6 +767,7 @@ void t_sgxssl_call_apis()
 
     printf("Start tests\n");
 
+
     SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
 
     //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
@@ -798,6 +779,7 @@ void t_sgxssl_call_apis()
     //int req_type = 0;
     //_FEMCInit (&femc_ctx, req_type);
     ftx_manager_cert_flow(NULL);
+    return;
 
     EVP_PKEY *evp_pkey;
 
@@ -836,7 +818,7 @@ void t_sgxssl_call_apis()
     }
 	printf("test ftx_test completed\n");
 
-    get_tgtinfo();
+    //get_tgtinfo();
 
 }
 

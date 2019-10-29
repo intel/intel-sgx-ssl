@@ -34,7 +34,7 @@
 enclave {
 
 from "sgx_tsgxssl.edl" import *;
-
+include "femc_common.h"
     /*
      * uprint - invokes OCALL to display string buffer inside the enclave.
      *  [in]: copy the string buffer to App outside.
@@ -46,9 +46,9 @@ from "sgx_tsgxssl.edl" import *;
         int ucreate_thread();
         int ftx_test(int test);
         /* what about memory should be out, sizeof targetifo*/
-        int uocall_get_targetinfo([user_check]void *target_info);
-        int uocall_local_attest([out, size=req_size] void *req, unsigned req_size, [user_check]void** resp);
-        int uocall_remote_attest([out, size=req_size]void *req, unsigned req_size, [user_check]void** resp);
+        int uocall_get_targetinfo([out]struct femc_data_bytes **target_info);
+        int uocall_local_attest([in, size=req_size] void *req, unsigned req_size, [user_check]void** resp);
+        int uocall_remote_attest([in, size=req_size]void *req, unsigned req_size, [user_check]void** resp);
 
     };
 
