@@ -205,7 +205,7 @@ int initialize_enclave(void)
     /* Step 2: call sgx_create_enclave to initialize an enclave instance */
     /* Debug Support: set 2nd parameter to 1 */
 
-    ret = sgx_create_enclave(TESTENCLAVE_FILENAME, SGX_DEBUG_FLAG, &token, &updated, &global_eid, NULL);
+    ret = sgx_create_enclave(TESTENCLAVE_FILENAME, 1, &token, &updated, &global_eid, NULL);
 
     if (ret != SGX_SUCCESS) {
         print_error_message(ret);
@@ -259,13 +259,13 @@ int uocall_get_targetinfo(struct femc_data_bytes **target_info)
 }
 */
 
-int uocall_local_attest(void *req, unsigned int req_size, void** rsp)
+int uocall_local_attest( struct femc_la_req *req, size_t req_size,  struct femc_la_rsp ** rsp)
 {
     femc_runner_status_t ret;
-    printf( "Femc rest call local attest\n");
+    printf( "Femc rest call local attest, res_size %d \n", req_size);
     //ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
     // call the CPPREST function
-    ret = femc_runner_do_local_attestation((femc_la_req*)req, (femc_la_rsp**)rsp);
+    ret = femc_runner_do_local_attestation(req, rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_local_attestation err %d, http err %d \n", ret.err, ret.http_err);
     }
@@ -283,13 +283,13 @@ static int sgx_ocall_free_la_rsp(void *pms)
 }
 */
 
-int uocall_remote_attest(void *req, unsigned int req_size, void** rsp)
+int uocall_remote_attest(struct femc_ra_req *req, size_t req_size, struct femc_ra_rsp **rsp)
 {
     femc_runner_status_t ret;
     printf("Femc rest call remote attest\n");
     //ms_ocall_remote_attest_t * ms = (ms_ocall_remote_attest_t *) pms;
     // call the CPPREST function
-    ret = femc_runner_do_remote_attestation((femc_ra_req*)req, (femc_ra_rsp**)rsp);
+    ret = femc_runner_do_remote_attestation(req, rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_remote_attestation err %d, http err %d \n", ret.err, ret.http_err);
     }

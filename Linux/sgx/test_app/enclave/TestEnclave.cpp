@@ -93,21 +93,26 @@ static int64_t femc_cb_sig (void *opaque_signing_context, uint8_t *data,
     int ret = 0;
     struct femc_sha256_digest digest;
     EVP_PKEY *pk_ctx = (EVP_PKEY*)opaque_signing_context; // needs to be a pk_handle
+
+    printf("FEMC Callback femc_cb_sig\n");
     ret = femc_cb_sha256(data_len, data, &digest);
     if (ret) {
-        //z_log(Z_LOG_ERROR, "Error db_femc_cb_sha256 %d\n", ret);
+        printf("Error db_femc_cb_sha256 %d\n", ret);
         goto out;
     }
 
     //ret = DkPkSign(ctx, md_alg, digest.md, sizeof(digest.md),
     //       (unsigned char *)&signature->sig, sig_len, db_rng, NULL);
+    unsigned int siglen;
     ret = RSA_sign(NID_sha256, digest.md, sizeof(digest.md),
-                  (unsigned char *)&signature->sig, (unsigned int*)sig_len,  EVP_PKEY_get1_RSA(pk_ctx));
+                  (unsigned char *)&signature->sig, &siglen,  EVP_PKEY_get1_RSA(pk_ctx));
     if (!ret) {
-        //z_log(Z_LOG_ERROR, "Error DkPksign %d\n", ret);
+        printf("Error FEMC sign %d\n", ret);
         goto out;
     }
+    printf("FEMC Callback femc_cb_sig success siglen %d \n", siglen);
     *algorithm = SIGN_SHA256_RSA;
+    *sig_len = siglen;
     ret = 0;
 out:
     return ret;
@@ -173,27 +178,28 @@ static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
 {
 
     int ret = 0;
-	int size = i2d_PublicKey(pk_ctx, NULL);
-	unsigned char *pub_key_buf = (unsigned char *) malloc(size+1);
+    int size = i2d_PublicKey(pk_ctx, NULL);
+    unsigned char *pub_key_buf = (unsigned char *) malloc(size+1);
+    unsigned char *tbuf = pub_key_buf;
     if (!pub_key_buf) {
         ret = -ENOMEM;
         printf("Can't alloc/ pem_key_buf memroy %d \n", ret);
         goto out;
     }
 
-	//unsigned char *tbuf = pub_key_buf;
-
     //ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
     //                        pub_key_buf, &size);
-	i2d_PublicKey(pk_ctx, &pub_key_buf);
-	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < size; i++) {
-	    printf("%02x", (unsigned char) pub_key_buf[i]);
-	}
-	printf("\"}\n");
 
+    i2d_PublicKey(pk_ctx, &tbuf);
+    /*
+    // print public key
+    printf ("{\"public\":\"");
+    int i;
+    for (i = 0; i < size; i++) {
+        printf("%02x", (unsigned char) pub_key_buf[i]);
+    }
+    printf("\"}\n");
+    */
     args->app_public_key = pub_key_buf;
     args->app_public_key_len = size;
     args->crypto_functions.signer.sign = femc_cb_sig;
@@ -324,7 +330,8 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
     int retval = 0;
     struct femc_la_rsp *rsp_oe;
     // Intel SDK copies (out, size = size)
-    uocall_local_attest(&retval, *req, *la_req_size, (void**)rsp_oe);
+    printf("execute ocall_local_attest \n");
+    uocall_local_attest(&retval, *req, *la_req_size, &rsp_oe);
     if (retval) {
         printf("ucall_local_attest error %d\n", retval);
         retval = -EINVAL;
@@ -409,7 +416,7 @@ static int ocall_remote_attest(struct femc_encl_context *ctx,
 {
     int retval = 0;
     struct femc_ra_rsp *rsp_oe = NULL;
-    uocall_remote_attest(&retval, *req, *ra_req_size, (void**)&rsp_oe);
+    uocall_remote_attest(&retval, *req, *ra_req_size, &rsp_oe);
     if (retval) {
         printf("ucall_local_attest error %d\n", retval);
         retval = -EINVAL;
@@ -602,7 +609,7 @@ static int ftx_manager_cert_flow (const char* config_key)
 
     // Fortanix certificate provisioning - uses FEMC API to connect
     //  to malbork and returns a buffer containing certificate data.
-    ret = _FEMCCertProvision(femc_ctx, "Test.domain.app", &femc_cert);
+    ret = _FEMCCertProvision(femc_ctx, "EnclaveManager", &femc_cert);
     if (ret) {
         ret = -1;
         printf("Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
@@ -694,6 +701,7 @@ void rsa_key_gen(EVP_PKEY **evp_pkey)
 
 	free(buf);
 
+    /*
 	// private key - string
 	len = i2d_PrivateKey(*evp_pkey, NULL);
 	buf = (unsigned char *) malloc (len + 1);
@@ -708,7 +716,7 @@ void rsa_key_gen(EVP_PKEY **evp_pkey)
 	printf("\"}\n");
 
 	free(buf);
-
+    */
 	BN_free(bn);
 
 	//EVP_PKEY_free(evp_pkey);
