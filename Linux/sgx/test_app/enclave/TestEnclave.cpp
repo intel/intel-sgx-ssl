@@ -56,6 +56,17 @@
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 typedef EVP_PKEY PAL_PK_CONTEXT;
+
+void print_binary(const char * tag, const char* buf, size_t len)
+{
+    printf ("{\" %s\":\"", tag);
+    size_t i;
+    for (i = 0; i < len; i++) {
+        printf("%02x", buf[i]);
+    }
+    printf("\"}\n");
+}
+
 static int64_t femc_cb_sha256 (size_t data_size, uint8_t *data,
         struct femc_sha256_digest *digest)
 {
@@ -101,9 +112,6 @@ static int64_t femc_cb_sig (void *opaque_signing_context, uint8_t *data,
         printf("Error db_femc_cb_sha256 %d\n", ret);
         goto out;
     }
-
-    //ret = DkPkSign(ctx, md_alg, digest.md, sizeof(digest.md),
-    //       (unsigned char *)&signature->sig, sig_len, db_rng, NULL);
     unsigned int siglen;
     ret = RSA_sign(NID_sha256, digest.md, sizeof(digest.md),
                   (unsigned char *)&signature->sig, &siglen,  EVP_PKEY_get1_RSA(pk_ctx));
@@ -120,8 +128,6 @@ out:
 
 
 }
-
-
 
 static int64_t femc_cb_verify_sha256_rsa (uint8_t *public_key,
         size_t public_key_len, uint8_t *data, size_t data_len,
@@ -263,88 +269,63 @@ init_femc_global_args(struct femc_enclave_global_init_args *global_args)
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 
-/*
-static int _copy_target_info_from_user(
-    struct femc_encl_context *ctx,
-    struct femc_data_bytes **target_info,
-    const struct femc_data_bytes *target_info_src)
-{
-    femc_encl_status_t ret;
-    int retval = 0;
-    ret = copy_tgt_info_rsp(ctx, target_info_src, target_info);
-    if (ret != FEMC_STATUS_SUCCESS) {
-        printf("copy_tgt_info_rsp error %d\n", ret);
-        retval = -EINVAL;
-    }
-    return retval;
-}
-*/
-
 /* Get target info from node agent enclave */
 int ocall_get_targetinfo(struct femc_encl_context *ctx,
                          struct femc_bytes *target_info)
 {
     int ret = 0;
+    unsigned char *buf = NULL;
     //ret is size of target_info
-    uocall_get_targetinfo(&ret, target_info, ENCLAVE_BUFFER_SIZE);
+    uocall_get_targetinfo(&ret, femc_bytes_data_mut(target_info), ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("Error getting target_info inside encalve %d", ret);
         goto out;
     } else {
     }
     //printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
-   if (femc_bytes_resize(target_info, ret) < 0) {
+    assert(!femc_bytes_set_len(target_info, ret));
+
+    if (femc_bytes_resize(target_info, ret) < 0) {
         printf("Error resize target_info inside encalve %d", ret);
         ret = -ENOMEM;
         goto out;
     }
+
+    print_binary("etarget info",(const char*)femc_bytes_data(target_info), ret);
+
     printf("success copy_target_info_rsp %d\n", ret);
     ret = 0;
 out:
     return ret;
 }
 
-/*copy from outside enalve*/
-/*
-static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
-                                  struct femc_la_rsp **rsp,
-                                  const struct femc_la_rsp *rsp_src)
-{
-    int retval = 0;
-    femc_encl_status_t ret;
-    // Copy la_rsp inside enclave
-    ret = copy_la_rsp(ctx, rsp_src, rsp);
-    if (ret != FEMC_STATUS_SUCCESS) {
-        printf("copy_la_rsp error %d\n", ret);
-        retval = -EINVAL;
-    }
-    return retval;
-}
-
-*/
-
 /* Sent attestation to local node */
 static int ocall_local_attest(struct femc_encl_context *ctx,
                                struct femc_bytes *req, size_t buf_size_req,
                                struct femc_bytes *rsp, size_t buf_size_rsp)
 {
-    int retval = 0;
+    int ret = 0;
+    unsigned char *buf = NULL;
     // Intel SDK copies (out, size = size)
     printf("execute ocall_local_attest \n");
-    uocall_local_attest(&retval, req, buf_size_req, rsp, buf_size_rsp);
-    if (retval < 0) {
-        printf("ucall_local_attest error %d\n", retval);
+    print_binary("trts la_req ",(const char*)femc_bytes_data(req), buf_size_req);
+
+    uocall_local_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
+    if (ret < 0) {
+        printf("ucall_local_attest error %d\n", ret);
         goto out;
     }
 
-    if (femc_bytes_resize(rsp, retval) < 0) {
-        printf("ucall_local_attest resize error %d\n", retval);
-        retval = -EINVAL;
+    assert(!femc_bytes_set_len(rsp, ret));
+    if (femc_bytes_resize(rsp, ret) < 0) {
+        printf("ucall_local_attest resize error %d\n", ret);
+        ret = -EINVAL;
         goto out;
     }
-    printf("ucall_local_attest resize success %d\n", retval);
+    print_binary("trts la_rsp ",(const char*)femc_bytes_data(rsp), ret);
+    printf("ucall_local_attest resize success %d\n", ret);
 out:
-    return retval;
+    return ret;
 }
 
 
@@ -386,6 +367,7 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         ret = -EINVAL;
         goto out;
     }
+    printf("femc_generate_la_req success %d\n", ret);
 
     buf_req_size = femc_bytes_len(la_req);
     la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
@@ -407,40 +389,40 @@ out:
     return ret;
 }
 
-/*
-static int _copy_ra_rsp_from_user(struct femc_encl_context *ctx,
-                                  struct femc_ra_rsp **rsp,
-                                  const struct femc_ra_rsp *rsp_src)
-{
-    int retval = 0;
-    femc_encl_status_t ret;
-    // Copy ra_rsp inside enclave
-    ret = copy_ra_rsp(ctx, rsp_src, rsp);
-    if (ret != FEMC_STATUS_SUCCESS) {
-        printf("copy_ra_rsp error %d\n", ret);
-        retval = -EINVAL;
-    }
-    return retval;
-}
-*/
+
 static int ocall_remote_attest(struct femc_encl_context *ctx,
                                 struct femc_bytes *req, size_t buf_size_req,
                                 struct femc_bytes *rsp, size_t buf_size_rsp)
 {
-    int retval = 0;
-    uocall_remote_attest(&retval, req, buf_size_req, rsp, buf_size_rsp);
-    if (retval < 0) {
-        printf("ucall_local_attest error %d\n", retval);
-        retval = -EINVAL;
+    int ret = 0;
+    unsigned char *buf = NULL;
+    // Intel SDK copies (out, size = size)
+    printf("execute ocall_local_attest \n");
+    uocall_remote_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
+    if (ret < 0) {
+        printf("ucall_local_attest error %d\n", ret);
         goto out;
     }
-    if (femc_bytes_resize(rsp, retval) < 0) {
-        printf("ucall_remote_attest resize error %d\n", retval);
-        retval = -EINVAL;
+
+    assert(!femc_bytes_set_len(rsp, ret));
+    if (femc_bytes_resize(rsp, ret) < 0) {
+        printf("ucall_local_attest resize error %d\n", ret);
+        ret = -EINVAL;
         goto out;
     }
+
+    buf = (unsigned char*)femc_bytes_data(rsp);
+    printf ("{\"rsp \":\"");
+    int i;
+    for (i = 0; i < ret; i++) {
+        printf("%02x", buf[i]);
+    }
+    printf("\"}\n");
+
+    printf("ucall_local_attest resize success %d\n", ret);
 out:
-    return retval;
+    return ret;
+
 }
 
 
