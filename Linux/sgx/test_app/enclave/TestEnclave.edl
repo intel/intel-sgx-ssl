@@ -46,11 +46,12 @@ include "femc_common.h"
         int ucreate_thread();
         int ftx_test(int test);
         /* what about memory should be out, sizeof targetifo*/
-        int uocall_get_targetinfo([out]struct femc_data_bytes **target_info);
-        int uocall_local_attest([in, size=req_size] struct femc_la_req *req, size_t req_size, [out] struct femc_la_rsp **resp);
-        int uocall_remote_attest([out, size=req_size]struct femc_ra_req *req,
-        size_t req_size, [user_check] struct femc_ra_rsp **resp);
-
+        int uocall_get_targetinfo([out, size=buf_size]struct femc_bytes
+        *target_info, size_t buf_size);
+        int uocall_local_attest([in, size=buf_size_req] struct femc_bytes
+        *req, size_t buf_size_req, [out, size=buf_size_rsp]struct femc_bytes *resp, size_t buf_size_rsp);
+        int uocall_remote_attest([in ,size=buf_size_req]struct femc_bytes *req,
+        size_t buf_size_req, [out, size=buf_size_rsp]struct femc_bytes *resp, size_t buf_size_rsp);
     };
 
 

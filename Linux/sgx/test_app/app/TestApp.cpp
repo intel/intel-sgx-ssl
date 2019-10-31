@@ -234,7 +234,7 @@ int initialize_enclave(void)
 }
 
 
-int uocall_get_targetinfo(struct femc_data_bytes **target_info)
+int uocall_get_targetinfo(struct femc_bytes *target_info, size_t buf_size)
 {
     femc_runner_status_t ret;
     printf("Femc rest call to get targetinfo\n");
@@ -242,48 +242,33 @@ int uocall_get_targetinfo(struct femc_data_bytes **target_info)
     //struct femc_data_bytes *target_info_oe = (struct femc_data_bytes *)target_info;
     ret = femc_runner_get_target_info(target_info);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
-        printf("Failed femc_runner_get_target_info err %d, http err %d \n", ret.err, ret.http_err);
+        printf("Failed femc_runner_get_target_info err %ld, http err %d \n", ret.err, ret.http_err);
+        return ret.err;
     }
-    printf("Success femc_runner_get_target_info %d, size %d \n", ret.err, (*target_info)->data_len);
-    return ret.err;
+    int retval = femc_bytes_len(target_info);
+    printf("Success femc_runner_get_target_info size %d \n", retval);
+    //femc_bytes_free(target_info); /* frees the femc_bytes, but not the wrapped buffer */
+    return retval;
+
 }
 
-/*static int sgx_ocall_free_targetinfo(void * pms)
-{
-    SGX_DBG(DBG_I, "Freeing targetinfo\n");
-    ms_ocall_get_targetinfo_t * ms = (ms_ocall_get_targetinfo_t *) pms;
-    femc_runner_free_target_info(&ms->target_info);
-    SGX_DBG(DBG_I, "Freed targetinfo\n");
-
-    return 0;
-}
-*/
-
-int uocall_local_attest( struct femc_la_req *req, size_t req_size,  struct femc_la_rsp ** rsp)
+int uocall_local_attest( struct femc_bytes *req, size_t buf_size_req, struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     femc_runner_status_t ret;
-    printf( "Femc rest call local attest, res_size %d \n", req_size);
+    printf( "Femc rest call local attest, res_size %ld \n", buf_size_req);
     //ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
     // call the CPPREST function
     ret = femc_runner_do_local_attestation(req, rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
-        printf("Failed femc_runner_do_local_attestation err %d, http err %d \n", ret.err, ret.http_err);
+        printf("Failed femc_runner_do_local_attestation err %ld, http err %d \n", ret.err, ret.http_err);
+        return ret.err;
     }
-    return ret.err;
+    int retval = femc_bytes_len(rsp);
+    printf("Success femc_runner_get_target_info size %d \n", retval);
+    return retval;
 }
 
-/*
-static int sgx_ocall_free_la_rsp(void *pms)
-{
-    SGX_DBG(DBG_I, "Freeing LA Rsp\n");
-    ms_ocall_local_attest_t * ms = (ms_ocall_local_attest_t *) pms;
-    femc_runner_free_local_attestation(&ms->rsp);
-    ms->rsp = NULL;
-    return 0;
-}
-*/
-
-int uocall_remote_attest(struct femc_ra_req *req, size_t req_size, struct femc_ra_rsp **rsp)
+int uocall_remote_attest(struct femc_bytes *req, size_t buf_size_req, struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     femc_runner_status_t ret;
     printf("Femc rest call remote attest\n");
@@ -291,21 +276,10 @@ int uocall_remote_attest(struct femc_ra_req *req, size_t req_size, struct femc_r
     // call the CPPREST function
     ret = femc_runner_do_remote_attestation(req, rsp);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
-        printf("Failed femc_runner_do_remote_attestation err %d, http err %d \n", ret.err, ret.http_err);
+        printf("Failed femc_runner_do_remote_attestation err %ld, http err %d \n", ret.err, ret.http_err);
     }
     return ret.err;
 }
-
-/*
-static int sgx_ocall_free_ra_rsp(void *pms)
-{
-    SGX_DBG(DBG_I, "Freeing LA Rsp\n");
-    ms_ocall_remote_attest_t * ms = (ms_ocall_remote_attest_t *) pms;
-    femc_runner_free_remote_attestation(&ms->rsp);
-    ms->rsp = NULL;
-    return 0;
-}
-*/
 
 static int sgx_ocall_heartbeat(void * pms)
 {
@@ -315,7 +289,7 @@ static int sgx_ocall_heartbeat(void * pms)
     // call the CPPREST function
     //ret = femc_runner_send_heartbeat(ms->req);
     if (ret.err != FEMC_RUNNER_SUCCESS) {
-        printf("Failed femc_runner_send_heartbeat err %d, http err %d \n", ret.err, ret.http_err);
+        printf("Failed femc_runner_send_heartbeat err %ld, http err %d \n", ret.err, ret.http_err);
     }
     return ret.err;
 }

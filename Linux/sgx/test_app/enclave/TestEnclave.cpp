@@ -52,6 +52,7 @@
 #include <femc_common.h>
 
 #include "sgx_trts.h"
+#define ENCLAVE_BUFFER_SIZE 24*1024 // 23KB buffer for enclave boundry
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 typedef EVP_PKEY PAL_PK_CONTEXT;
@@ -262,7 +263,7 @@ init_femc_global_args(struct femc_enclave_global_init_args *global_args)
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 
-
+/*
 static int _copy_target_info_from_user(
     struct femc_encl_context *ctx,
     struct femc_data_bytes **target_info,
@@ -277,35 +278,34 @@ static int _copy_target_info_from_user(
     }
     return retval;
 }
-
+*/
 
 /* Get target info from node agent enclave */
 int ocall_get_targetinfo(struct femc_encl_context *ctx,
-                         struct femc_data_bytes ** target_info)
+                         struct femc_bytes *target_info)
 {
     int ret = 0;
-    struct femc_data_bytes *target_info_oe = NULL;
-
-    uocall_get_targetinfo(&ret, &target_info_oe);
+    //ret is size of target_info
+    uocall_get_targetinfo(&ret, target_info, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
-        printf("got tgt_info inside encalve %d", ret);
+        printf("Error getting target_info inside encalve %d", ret);
         goto out;
     } else {
     }
-
-    ret = _copy_target_info_from_user(ctx, target_info, target_info_oe);
-    if (ret != 0) {
-        printf("copy_tgt_info_rsp error %d\n", ret);
+    //printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
+   if (femc_bytes_resize(target_info, ret) < 0) {
+        printf("Error resize target_info inside encalve %d", ret);
+        ret = -ENOMEM;
         goto out;
     }
-    printf("success copy_tgt_info_rsp %d\n", ret);
-    printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
+    printf("success copy_target_info_rsp %d\n", ret);
     ret = 0;
 out:
     return ret;
 }
 
 /*copy from outside enalve*/
+/*
 static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
                                   struct femc_la_rsp **rsp,
                                   const struct femc_la_rsp *rsp_src)
@@ -321,28 +321,28 @@ static int _copy_la_rsp_from_user(struct femc_encl_context *ctx,
     return retval;
 }
 
+*/
 
 /* Sent attestation to local node */
 static int ocall_local_attest(struct femc_encl_context *ctx,
-                               struct femc_la_req **req,
-                               struct femc_la_rsp **rsp, size_t *la_req_size)
+                               struct femc_bytes *req, size_t buf_size_req,
+                               struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     int retval = 0;
-    struct femc_la_rsp *rsp_oe;
     // Intel SDK copies (out, size = size)
     printf("execute ocall_local_attest \n");
-    uocall_local_attest(&retval, *req, *la_req_size, &rsp_oe);
-    if (retval) {
+    uocall_local_attest(&retval, req, buf_size_req, rsp, buf_size_rsp);
+    if (retval < 0) {
         printf("ucall_local_attest error %d\n", retval);
-        retval = -EINVAL;
         goto out;
     }
 
-    retval = _copy_la_rsp_from_user(ctx, rsp, rsp_oe);
-    if (!retval) {
-        printf("copy_la_req error %d\n", retval);
+    if (femc_bytes_resize(rsp, retval) < 0) {
+        printf("ucall_local_attest resize error %d\n", retval);
+        retval = -EINVAL;
+        goto out;
     }
-
+    printf("ucall_local_attest resize success %d\n", retval);
 out:
     return retval;
 }
@@ -351,24 +351,35 @@ out:
 
 // Local attestation, Needs cert fields
 static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
-        struct femc_la_rsp **la_rsp, const char* subject)
+        struct femc_bytes *la_rsp, const char* subject)
 {
     int ret = 0;
-    struct femc_data_bytes *tgt_info = NULL;
-    struct femc_la_req *la_req = NULL;
-    size_t la_req_size;
+    size_t buf_req_size;
+    struct femc_bytes *target_info = NULL;
+    struct femc_bytes *la_req = NULL;
     // Generate Local Attestation Request:
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
-    ret = ocall_get_targetinfo(femc_ctx, &tgt_info);
+    target_info = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
+    if (!target_info) {
+        ret = -ENOMEM;
+        goto out;
+    }
+
+    ret = ocall_get_targetinfo(femc_ctx, target_info);
     if (ret < 0) {
         printf("ocall_get_targetinfo error %d\n", ret);
         goto out;
     }
 
+    la_req = femc_bytes_new(0);
+    if (!la_req) {
+        ret = -ENOMEM;
+        goto out;
+    }
     // Generate Local Attestation Request:
-    ret = femc_generate_la_req(&la_req, &la_req_size, femc_ctx, &tgt_info,
+    ret = femc_generate_la_req(la_req, femc_ctx, target_info,
             subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
         printf("femc_generate_la_req error %d\n", ret);
@@ -376,24 +387,27 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         goto out;
     }
 
+    buf_req_size = femc_bytes_len(la_req);
+    la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
+    if (!la_rsp) {
+        printf("femc_alloc_la_rsp error %d\n", ret);
+        ret = -ENOMEM;
+        goto out;
+    }
     // Ocall to attest with node agent
-    ret = ocall_local_attest(femc_ctx, &la_req, la_rsp, &la_req_size);
+    ret = ocall_local_attest(femc_ctx, la_req, buf_req_size, la_rsp, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("ocall_local_attest error %d\n", ret);
         goto out;
     }
+
 out:
-    // TODO free will not be needed in second version
-    /*if (la_req) {
-        free_la_req(femc_ctx, &la_req);
-    }
-    if (tgt_info) {
-        free_tgt_info_rsp(femc_ctx, &tgt_info);
-    }*/
+    femc_bytes_free(target_info);
+    femc_bytes_free(la_req);
     return ret;
 }
 
-
+/*
 static int _copy_ra_rsp_from_user(struct femc_encl_context *ctx,
                                   struct femc_ra_rsp **rsp,
                                   const struct femc_ra_rsp *rsp_src)
@@ -408,23 +422,22 @@ static int _copy_ra_rsp_from_user(struct femc_encl_context *ctx,
     }
     return retval;
 }
-
+*/
 static int ocall_remote_attest(struct femc_encl_context *ctx,
-                                struct femc_ra_req **req,
-                                struct femc_ra_rsp **rsp,
-                                size_t *ra_req_size)
+                                struct femc_bytes *req, size_t buf_size_req,
+                                struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     int retval = 0;
-    struct femc_ra_rsp *rsp_oe = NULL;
-    uocall_remote_attest(&retval, *req, *ra_req_size, &rsp_oe);
-    if (retval) {
+    uocall_remote_attest(&retval, req, buf_size_req, rsp, buf_size_rsp);
+    if (retval < 0) {
         printf("ucall_local_attest error %d\n", retval);
         retval = -EINVAL;
         goto out;
     }
-    retval = _copy_ra_rsp_from_user(ctx, rsp, rsp_oe);
-    if (!retval) {
-        printf("copy_ra_resp error %d\n", retval);
+    if (femc_bytes_resize(rsp, retval) < 0) {
+        printf("ucall_remote_attest resize error %d\n", retval);
+        retval = -EINVAL;
+        goto out;
     }
 out:
     return retval;
@@ -432,103 +445,102 @@ out:
 
 
 
-
-// Remote attestation
 static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
-    struct femc_la_rsp **la_rsp, struct femc_ra_rsp **ra_rsp, const char* subject)
+    struct femc_bytes *la_rsp, struct femc_bytes *ra_rsp, const char* subject)
 {
 
     int ret = 0;
-
+    size_t buf_req_size;
+    struct femc_bytes *ra_req = NULL;
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
-    struct femc_ra_req *ra_req = NULL;
-    size_t ra_req_size;
-    struct femc_ra_rsp *ra_rsp_tmp = NULL;
+    ra_req = femc_bytes_new(0);
+    if (!ra_req) {
+        printf("femc_generate_ra_req error %d\n", ret);
+        ret = -ENOMEM;
+        goto out;
+    }
 
-    // frees la_rsp
-    ret = femc_generate_ra_req(femc_ctx, &ra_req, &ra_req_size,
+    ret = femc_generate_ra_req(femc_ctx, ra_req,
             la_rsp, subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
         printf("femc_generate_ra_req error %d\n", ret);
         ret = -EINVAL;
         goto out;
     }
-    // Ocall to send ra_req_oe to node agent to get ra_rsp_oe
-    ret = ocall_remote_attest(femc_ctx, &ra_req, &ra_rsp_tmp, &ra_req_size);
+
+    buf_req_size = femc_bytes_len(ra_req);
+    ra_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
+    if (!ra_rsp) {
+        printf("femc_alloc_ra_rsp error %d\n", ret);
+        ret = -ENOMEM;
+        goto out;
+    }
+
+    // Ocall to send ra_req to node agent to get ra_rsp
+    ret = ocall_remote_attest(femc_ctx, ra_req, buf_req_size, ra_rsp, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("ocall_remote_attest error %d\n", ret);
         goto out;
     }
-    // Verify ra_resp
-    ret = verify_ra_rsp(femc_ctx, ra_rsp_tmp);
 
+    // Verify ra_resp
+    ret = verify_ra_rsp(femc_ctx, ra_rsp);
     if (ret != FEMC_STATUS_SUCCESS) {
         printf("verify_ra_rsp error %d\n", ret);
         ret = -EINVAL;
         goto out;
     }
-out:
-    *ra_rsp = ra_rsp_tmp;
-    /*
-    if (ra_req) {
-        free_ra_req(femc_ctx, &ra_req);
-    }
-    if (ret) {
-        if (*ra_rsp) {
-            free(*ra_rsp);
-            *ra_rsp = NULL;
-        }
-    }*/
 
+out:
+    femc_bytes_free(ra_req);
     return ret;
 }
-
 
 int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **femc_cert)
 {
     int ret = 0;
 
-    struct femc_la_rsp *la_rsp = NULL;
-    struct femc_ra_rsp *ra_rsp = NULL;
+    struct femc_bytes *la_rsp = NULL;
+    struct femc_bytes *ra_rsp = NULL;
+    size_t cert_len = 0;
+    void * cert_data = NULL;
+    la_rsp = femc_bytes_new(0);
+    ra_rsp = femc_bytes_new(0);
+    if (!la_rsp || !ra_rsp) {
+        printf("Femc local attestation failed: out of memory\n");
+        ret = -ENOMEM;
+        goto out;
+    }
 
-    ret = _FEMCLocalAttestation (femc_ctx, &la_rsp, subject);
+    ret = _FEMCLocalAttestation (femc_ctx, la_rsp, subject);
     if (ret) {
         printf("Femc local attestation failed \n");
-        return ret;
+        goto out;
     }
 
-    ret = _FEMCRemoteAttestation (femc_ctx, &la_rsp, &ra_rsp, subject);
-    if (ret || ra_rsp == NULL || ra_rsp->app_cert.data_len < 1) {
+    ret = _FEMCRemoteAttestation (femc_ctx, la_rsp, ra_rsp, subject);
+    if (ret) {
         printf("Femc remote attestation failed \n");
-        return ret;
+        goto out;
     }
 
+    cert_len = femc_bytes_len(ra_rsp);
     // Check PEM is null ternimated -> don't write the last character.
-    assert(ra_rsp->app_cert.pem[ra_rsp->app_cert.data_len -1]=='\0');
+    assert(((const char *)femc_bytes_data(ra_rsp))[cert_len - 1] == '\0');
 
-    // Allocate a buffer for the certificate data and pass it
-     // to shim since shim does not have access to free_ra_rsp.
-     // The shim is responsible of freeing this buffer after writing it
-     // to file.
-    void *cert_data = malloc(ra_rsp->app_cert.data_len);
-    memcpy_s(cert_data, ra_rsp->app_cert.data_len, ra_rsp->app_cert.pem, ra_rsp->app_cert.data_len);
+    cert_data = malloc(cert_len);
+    memcpy(cert_data, femc_bytes_data(ra_rsp), cert_len);
     *femc_cert = cert_data;
 
     printf("Femc Attestation response cert recvd: bytes  %d for cert \n  %s\n",
-        ra_rsp->app_cert.data_len, (char*)*femc_cert);
-
-//out:
-    /*
-    if (la_rsp) {
-        free_la_rsp(femc_ctx, &la_rsp);
-    }
-
-    if (ra_rsp) {
-        free_ra_rsp(femc_ctx, &ra_rsp);
-    }*/
-
+        cert_len, (char*)*femc_cert);
+out:
+    femc_bytes_free(la_rsp);
+    femc_bytes_free(ra_rsp);
+    if (cert_data)
+        free(cert_data);
     return ret;
 }
 
