@@ -45,6 +45,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
+#include <openssl/x509.h>
 
 #define ADD_ENTROPY_SIZE	32
 
@@ -52,12 +53,12 @@
 #include <femc_common.h>
 
 #include "sgx_trts.h"
-#define ENCLAVE_BUFFER_SIZE 24*1024 // 23KB buffer for enclave boundry
+#define ENCLAVE_BUFFER_SIZE 24*1024 // 24KB buffer for enclave boundry
 
 typedef struct femc_encl_context PAL_FEMC_CONTEXT;
 typedef EVP_PKEY PAL_PK_CONTEXT;
 
-void print_binary(const char * tag, const char* buf, size_t len)
+void print_binary(const char * tag, const unsigned char* buf, size_t len)
 {
     printf ("{\" %s\":\"", tag);
     size_t i;
@@ -75,8 +76,9 @@ static int64_t femc_cb_sha256 (size_t data_size, uint8_t *data,
     if (sgx_ret != SGX_SUCCESS) {
         return = -1;
     }*/
+    print_binary("public key cb_sha256 ", (const unsigned char*)data, data_size);
     EVP_Digest(data, data_size, digest->md, NULL, EVP_sha256(), NULL);
-
+    print_binary("cb_sha256", (const unsigned char*)digest->md, sizeof(digest->md));
     return 0;
 }
 
@@ -114,7 +116,7 @@ static int64_t femc_cb_sig (void *opaque_signing_context, uint8_t *data,
     }
     unsigned int siglen;
     ret = RSA_sign(NID_sha256, digest.md, sizeof(digest.md),
-                  (unsigned char *)&signature->sig, &siglen,  EVP_PKEY_get1_RSA(pk_ctx));
+            (unsigned char *)&signature->sig, &siglen,  EVP_PKEY_get1_RSA(pk_ctx));
     if (!ret) {
         printf("Error FEMC sign %d\n", ret);
         goto out;
@@ -154,7 +156,6 @@ static int64_t femc_cb_verify_sha256_rsa (uint8_t *public_key,
 out:
     return ret;
 
-
 }
 
 static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data,
@@ -185,7 +186,7 @@ static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
 {
 
     int ret = 0;
-    int size = i2d_PublicKey(pk_ctx, NULL);
+    int size = i2d_PUBKEY(pk_ctx, NULL);
     unsigned char *pub_key_buf = (unsigned char *) malloc(size+1);
     unsigned char *tbuf = pub_key_buf;
     if (!pub_key_buf) {
@@ -197,20 +198,13 @@ static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
     //ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
     //                        pub_key_buf, &size);
 
-    i2d_PublicKey(pk_ctx, &tbuf);
-    /*
-    // print public key
-    printf ("{\"public\":\"");
-    int i;
-    for (i = 0; i < size; i++) {
-        printf("%02x", (unsigned char) pub_key_buf[i]);
-    }
-    printf("\"}\n");
-    */
+    i2d_PUBKEY(pk_ctx, &tbuf);
+    print_binary(" public key ", (const unsigned char*)pub_key_buf, size);
     args->app_public_key = pub_key_buf;
     args->app_public_key_len = size;
     args->crypto_functions.signer.sign = femc_cb_sig;
     args->crypto_functions.signer.opaque_signer_context = pk_ctx;
+
 out:
     if (ret) {
         // TODO This should get freed after zircon calls libexit also.
@@ -291,7 +285,7 @@ int ocall_get_targetinfo(struct femc_encl_context *ctx,
         goto out;
     }
 
-    print_binary("etarget info",(const char*)femc_bytes_data(target_info), ret);
+    //print_binary("etarget info",(const char*)femc_bytes_data(target_info), ret);
 
     printf("success copy_target_info_rsp %d\n", ret);
     ret = 0;
@@ -308,7 +302,9 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
     unsigned char *buf = NULL;
     // Intel SDK copies (out, size = size)
     printf("execute ocall_local_attest \n");
-    print_binary("trts la_req ",(const char*)femc_bytes_data(req), buf_size_req);
+    //print_binary("trts la_req ",(const char*)femc_bytes_data(req), buf_size_req);
+
+    assert(!femc_bytes_set_len(rsp, buf_size_rsp));
 
     uocall_local_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
     if (ret < 0) {
@@ -322,7 +318,7 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
         ret = -EINVAL;
         goto out;
     }
-    print_binary("trts la_rsp ",(const char*)femc_bytes_data(rsp), ret);
+    //print_binary("trts la_rsp ",(const char*)femc_bytes_data(rsp), ret);
     printf("ucall_local_attest resize success %d\n", ret);
 out:
     return ret;
@@ -382,7 +378,7 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         printf("ocall_local_attest error %d\n", ret);
         goto out;
     }
-
+    ret = 0;
 out:
     femc_bytes_free(target_info);
     femc_bytes_free(la_req);
@@ -533,6 +529,7 @@ int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_t
     int ret = 0;
     struct femc_enclave_ctx_init_args femc_ctx_init_args;
     struct femc_enclave_global_init_args femc_global_args;
+    struct femc_sha256_digest digest;
     *femc_ctx = NULL;
 
 
@@ -541,6 +538,10 @@ int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_t
         printf("init_femc_ctx_args error %d\n", ret);
         goto out;
     }
+
+    femc_cb_sha256 (femc_ctx_init_args.app_public_key_len, femc_ctx_init_args.app_public_key, &digest);
+    //print_binary(" public sha ", (const char*)digest.md, sizeof(digest.md));
+
     printf("init_femc_ctx_args success\n");
 
     init_femc_global_args(&femc_global_args);
@@ -680,36 +681,21 @@ void rsa_key_gen(EVP_PKEY **evp_pkey)
 	EVP_PKEY_assign_RSA(*evp_pkey, keypair);
 
 	// public key - string
-	int len = i2d_PublicKey(*evp_pkey, NULL);
+	int len = i2d_PUBKEY(*evp_pkey, NULL);
 	unsigned char *buf = (unsigned char *) malloc (len + 1);
 	unsigned char *tbuf = buf;
-	i2d_PublicKey(*evp_pkey, &tbuf);
-
+	i2d_PUBKEY(*evp_pkey, &tbuf);
 	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
-
+	//print_binary(" public", (const char*)buf, len);
 	free(buf);
-
     /*
 	// private key - string
 	len = i2d_PrivateKey(*evp_pkey, NULL);
 	buf = (unsigned char *) malloc (len + 1);
 	tbuf = buf;
 	i2d_PrivateKey(*evp_pkey, &tbuf);
+	//print_binary(" public", (const char*)buf, len);
 
-	// print private key
-	printf ("{\"private\":\"");
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
-
-	free(buf);
     */
 	BN_free(bn);
 

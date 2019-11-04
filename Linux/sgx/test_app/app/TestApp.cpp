@@ -264,7 +264,7 @@ int uocall_get_targetinfo(void *target_info_buf, size_t buf_size)
 
     ret = femc_bytes_len(target_info);
 
-    print_binary("urts target info",(const char*)femc_bytes_data(target_info), ret);
+    //print_binary("urts target info",(const char*)femc_bytes_data(target_info), ret);
 
     femc_bytes_free(target_info); /* frees the femc_bytes, but not the wrapped buffer */
     printf("Success femc_runner_get_target_info size %d \n", ret);
@@ -282,13 +282,13 @@ int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size
     printf( "Femc rest call local attest, req_size %ld \n", buf_size_req);
 
     struct femc_bytes *la_req = femc_bytes_with_external_buf(req_buf, buf_size_req, true);
-    struct femc_bytes *la_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_req, false);
+    struct femc_bytes *la_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_rsp, false);
     if (!la_req || !la_rsp) {
         printf("Failed Femc rest call to alloc la_req & la_rsp\n");
         ret = -1;
         goto out;
     }
-    print_binary("urts la_req ",(const char*)femc_bytes_data(la_req), buf_size_req);
+    //print_binary("urts la_req ",(const char*)femc_bytes_data(la_req), buf_size_req);
     // call the CPPREST function
     femc_ret = femc_runner_do_local_attestation(la_req, la_rsp);
     if (femc_ret.err != FEMC_RUNNER_SUCCESS) {
@@ -317,7 +317,7 @@ int uocall_remote_attest(void *req_buf, size_t buf_size_req, void *rsp_buf, size
 
     printf( "Femc rest call remote attest, req_size %ld \n", buf_size_req);
     struct femc_bytes *ra_req = femc_bytes_with_external_buf(req_buf, buf_size_req, true);
-    struct femc_bytes *ra_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_req, false);
+    struct femc_bytes *ra_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_rsp, false);
     if (!ra_req || !ra_rsp) {
         printf("Failed Femc rest call to alloc la_req & la_rsp\n");
         ret = -1;
