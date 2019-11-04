@@ -76,7 +76,7 @@ static int64_t femc_cb_sha256 (size_t data_size, uint8_t *data,
     if (sgx_ret != SGX_SUCCESS) {
         return = -1;
     }*/
-    print_binary("public key cb_sha256 ", (const unsigned char*)data, data_size);
+    //print_binary("public key cb_sha256 ", (const unsigned char*)data, data_size);
     EVP_Digest(data, data_size, digest->md, NULL, EVP_sha256(), NULL);
     print_binary("cb_sha256", (const unsigned char*)digest->md, sizeof(digest->md));
     return 0;
@@ -270,6 +270,7 @@ int ocall_get_targetinfo(struct femc_encl_context *ctx,
     int ret = 0;
     unsigned char *buf = NULL;
     //ret is size of target_info
+    //femc_bytes_capacity use it here
     uocall_get_targetinfo(&ret, femc_bytes_data_mut(target_info), ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("Error getting target_info inside encalve %d", ret);
@@ -318,7 +319,7 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
         ret = -EINVAL;
         goto out;
     }
-    //print_binary("trts la_rsp ",(const char*)femc_bytes_data(rsp), ret);
+    //print_binary("trts la_rsp ",(const unsigned char*)femc_bytes_data(rsp), ret);
     printf("ucall_local_attest resize success %d\n", ret);
 out:
     return ret;
@@ -365,19 +366,14 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
     }
     printf("femc_generate_la_req success %d\n", ret);
 
-    buf_req_size = femc_bytes_len(la_req);
-    la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
-    if (!la_rsp) {
-        printf("femc_alloc_la_rsp error %d\n", ret);
-        ret = -ENOMEM;
-        goto out;
-    }
     // Ocall to attest with node agent
-    ret = ocall_local_attest(femc_ctx, la_req, buf_req_size, la_rsp, ENCLAVE_BUFFER_SIZE);
+    ret = ocall_local_attest(femc_ctx, la_req, femc_bytes_len(la_req),
+            la_rsp, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("ocall_local_attest error %d\n", ret);
         goto out;
     }
+    printf("Success ocall_local_attest size %d \n", ret);
     ret = 0;
 out:
     femc_bytes_free(target_info);
@@ -393,7 +389,7 @@ static int ocall_remote_attest(struct femc_encl_context *ctx,
     int ret = 0;
     unsigned char *buf = NULL;
     // Intel SDK copies (out, size = size)
-    printf("execute ocall_local_attest \n");
+    printf("execute ocall_remote_attest \n");
     uocall_remote_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
     if (ret < 0) {
         printf("ucall_local_attest error %d\n", ret);
@@ -428,7 +424,7 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
 {
 
     int ret = 0;
-    size_t buf_req_size;
+    //size_t buf_req_size;
     struct femc_bytes *ra_req = NULL;
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
@@ -448,16 +444,11 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         goto out;
     }
 
-    buf_req_size = femc_bytes_len(ra_req);
-    ra_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
-    if (!ra_rsp) {
-        printf("femc_alloc_ra_rsp error %d\n", ret);
-        ret = -ENOMEM;
-        goto out;
-    }
-
+    //buf_req_size = femc_bytes_len(ra_req);
     // Ocall to send ra_req to node agent to get ra_rsp
-    ret = ocall_remote_attest(femc_ctx, ra_req, buf_req_size, ra_rsp, ENCLAVE_BUFFER_SIZE);
+    // femc_bytes_capacity
+    ret = ocall_remote_attest(femc_ctx, ra_req, femc_bytes_len(ra_req),
+            ra_rsp, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("ocall_remote_attest error %d\n", ret);
         goto out;
@@ -470,7 +461,8 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         ret = -EINVAL;
         goto out;
     }
-
+    printf("Success ocall_remote_attest size %d \n", ret);
+    ret = 0;
 out:
     femc_bytes_free(ra_req);
     return ret;
@@ -484,8 +476,8 @@ int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **f
     struct femc_bytes *ra_rsp = NULL;
     size_t cert_len = 0;
     void * cert_data = NULL;
-    la_rsp = femc_bytes_new(0);
-    ra_rsp = femc_bytes_new(0);
+    la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
+    ra_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
     if (!la_rsp || !ra_rsp) {
         printf("Femc local attestation failed: out of memory\n");
         ret = -ENOMEM;
@@ -611,8 +603,6 @@ static int ftx_manager_cert_flow (const char* config_key)
         goto out;
     }
 
-    // Write the cert data to file, exclude the null character at the end
-    printf("Can't write Cert  %s \n", femc_cert);
     ret = 0;
 
 out:
@@ -620,16 +610,16 @@ out:
     if (femc_ctx) {
         femc_enclave_exit(&femc_ctx);
     }
-
+    /*
     EVP_PKEY_free(pk_ctx);
-    /*if (evp_pkey->pkey.ptr != NULL) {
-        RSA_free(keypair);
-    }*/
+    //if (evp_pkey->pkey.ptr != NULL) {
+     //   RSA_free(keypair);
+    // }
 
     if (femc_cert) {
         free(femc_cert);
     }
-
+    */
     return ret;
 }
 
@@ -755,58 +745,13 @@ void t_sgxssl_call_apis()
 
     printf("Start tests\n");
 
-
     SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
-
-    //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
 
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
 
-    //PAL_FEMC_CONTEXT *femc_ctx;
-    //int req_type = 0;
-    //_FEMCInit (&femc_ctx, req_type);
     ftx_manager_cert_flow(NULL);
     return;
-
-    EVP_PKEY *evp_pkey;
-
-    rsa_key_gen(&evp_pkey);
-    printf("test rsa_key_gen completed\n");
-
-    ret = rsa_test();
-    if (ret != 0)
-    {
-    	printf("test rsa_test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test rsa_test completed\n");
-
-	ret = sha256_test();
-	if (ret != 0)
-    {
-    	printf("test sha256_test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test sha256_test completed\n");
-
-	ret = threads_test();
-	if (ret != 0)
-    {
-    	printf("test threads_test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test threads_test completed\n");
-
-    ftx_test(&ret, 0);
-	if (ret != 0)
-    {
-    	printf("test ftx_Test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test ftx_test completed\n");
-
-    //get_tgtinfo();
 
 }
 

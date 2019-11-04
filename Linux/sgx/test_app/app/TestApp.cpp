@@ -298,7 +298,7 @@ int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size
     }
     ret = femc_bytes_len(la_rsp);
 
-    print_binary("urts la_rsp ",(const char*)femc_bytes_data(la_rsp), ret);
+    //print_binary("urts la_rsp ",(const char*)femc_bytes_data(la_rsp), ret);
 
     printf("Success femc_runner_get_target_info size %d \n", ret);
 
