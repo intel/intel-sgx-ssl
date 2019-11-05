@@ -49,15 +49,14 @@
 
 #define ADD_ENTROPY_SIZE	32
 
-#include <femc_enclave.h>
+#include <femc_enclave.h> /*Fortanix Enclave Manager library*/
 #include <femc_common.h>
 
 #include "sgx_trts.h"
 #define ENCLAVE_BUFFER_SIZE 24*1024 // 24KB buffer for enclave boundry
 
-typedef struct femc_encl_context PAL_FEMC_CONTEXT;
-typedef EVP_PKEY PAL_PK_CONTEXT;
-
+/* print helper
+ * */
 void print_binary(const char * tag, const unsigned char* buf, size_t len)
 {
     printf ("{\" %s\":\"", tag);
@@ -71,29 +70,10 @@ void print_binary(const char * tag, const unsigned char* buf, size_t len)
 static int64_t femc_cb_sha256 (size_t data_size, uint8_t *data,
         struct femc_sha256_digest *digest)
 {
-    //print_binary("public key cb_sha256 ", (const unsigned char*)data, data_size);
     EVP_Digest(data, data_size, digest->md, NULL, EVP_sha256(), NULL);
-    print_binary("cb_sha256", (const unsigned char*)digest->md, sizeof(digest->md));
+    //print_binary("cb_sha256", (const unsigned char*)digest->md, sizeof(digest->md));
     return 0;
 }
-
-
-static int db_rng (void *rng_param, unsigned char *output_buffer,
-        size_t output_len)
-{
-    femc_encl_status_t ret;
-    // Parameter passed should be used.
-    if (rng_param) {
-        return -1;
-    }
-
-    ret = femc_random(output_buffer, output_len);
-    if (ret) {
-        return -1;
-    }
-    return 0;
-}
-
 
 static int64_t femc_cb_sig (void *opaque_signing_context, uint8_t *data,
         size_t data_len, size_t max_sig_len, struct  femc_sig *signature,
@@ -153,6 +133,8 @@ out:
 
 }
 
+/* FEMC call-back for symmetric encryption
+ * */
 static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data,
         size_t data_len, struct femc_aes_cmac_128_mac *mac)
 {
@@ -165,7 +147,7 @@ static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data
     return 0;
 }
 
-
+/*FEMC call-back for PK signing*/
 static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
         EVP_PKEY *pk_ctx)
 {
@@ -180,16 +162,12 @@ static int init_femc_signer (struct femc_enclave_ctx_init_args *args,
         goto out;
     }
 
-    //ret = DkPublicKeyEncode(PAL_ENCODE_DER, pk_ctx,
-    //                        pub_key_buf, &size);
-
     i2d_PUBKEY(pk_ctx, &tbuf);
-    print_binary(" public key ", (const unsigned char*)pub_key_buf, size);
+    //print_binary(" public key ", (const unsigned char*)pub_key_buf, size);
     args->app_public_key = pub_key_buf;
     args->app_public_key_len = size;
     args->crypto_functions.signer.sign = femc_cb_sig;
     args->crypto_functions.signer.opaque_signer_context = pk_ctx;
-
 out:
     if (ret) {
         // TODO This should get freed after zircon calls libexit also.
@@ -200,9 +178,9 @@ out:
     return ret;
 }
 
-
+/* FEMC crypto function initialization */
 static int init_femc_crypto (struct femc_enclave_ctx_init_args *femc_ctx_args,
-        PAL_PK_CONTEXT *pk_ctx)
+        EVP_PKEY *pk_ctx)
 {
     int ret;
     femc_ctx_args->crypto_functions.hash_sha256 = femc_cb_sha256;
@@ -213,10 +191,9 @@ static int init_femc_crypto (struct femc_enclave_ctx_init_args *femc_ctx_args,
 }
 
 
-
-
+/* FEMC context initialization */
 static int init_femc_ctx_args (struct femc_enclave_ctx_init_args *femc_ctx_args,
-        PAL_PK_CONTEXT *pk_ctx, femc_req_type req_type)
+        EVP_PKEY *pk_ctx, femc_req_type req_type)
 {
     femc_ctx_args->req_type = req_type;
     return init_femc_crypto(femc_ctx_args, pk_ctx);
@@ -236,6 +213,7 @@ static bool _sgx_is_outside_enclave(const void *addr, size_t size)
     return false;
 }
 
+/* FEMC helper function */
 static void
 init_femc_global_args(struct femc_enclave_global_init_args *global_args)
 {
@@ -246,52 +224,39 @@ init_femc_global_args(struct femc_enclave_global_init_args *global_args)
 }
 
 
-typedef struct femc_encl_context PAL_FEMC_CONTEXT;
-
-/* Get target info from node agent enclave */
+/* Ocall to get target info from node agent enclave */
 int ocall_get_targetinfo(struct femc_encl_context *ctx,
                          struct femc_bytes *target_info)
 {
     int ret = 0;
-    unsigned char *buf = NULL;
-    //ret is size of target_info
-    //femc_bytes_capacity use it here
     uocall_get_targetinfo(&ret, femc_bytes_data_mut(target_info), ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
         printf("Error getting target_info inside encalve %d", ret);
         goto out;
-    } else {
     }
-    //printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
     assert(!femc_bytes_set_len(target_info, ret));
+    //printf("ocall_get_targetinfo success %d and %d \n", ret, (*target_info)->data_len);
 
     if (femc_bytes_resize(target_info, ret) < 0) {
         printf("Error resize target_info inside encalve %d", ret);
         ret = -ENOMEM;
         goto out;
     }
-
     //print_binary("etarget info",(const char*)femc_bytes_data(target_info), ret);
-
     printf("success copy_target_info_rsp %d\n", ret);
     ret = 0;
 out:
     return ret;
 }
 
-/* Sent attestation to local node */
+/* Ocall for local attestation to Fortanix node agent
+ */
 static int ocall_local_attest(struct femc_encl_context *ctx,
                                struct femc_bytes *req, size_t buf_size_req,
                                struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     int ret = 0;
-    unsigned char *buf = NULL;
-    // Intel SDK copies (out, size = size)
-    printf("execute ocall_local_attest \n");
-    //print_binary("trts la_req ",(const char*)femc_bytes_data(req), buf_size_req);
-
     assert(!femc_bytes_set_len(rsp, buf_size_rsp));
-
     uocall_local_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
     if (ret < 0) {
         printf("ucall_local_attest error %d\n", ret);
@@ -304,7 +269,7 @@ static int ocall_local_attest(struct femc_encl_context *ctx,
         ret = -EINVAL;
         goto out;
     }
-    //print_binary("trts la_rsp ",(const unsigned char*)femc_bytes_data(rsp), ret);
+
     printf("ucall_local_attest resize success %d\n", ret);
 out:
     return ret;
@@ -312,24 +277,26 @@ out:
 
 
 
-// Local attestation, Needs cert fields
-static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
+/* Fortanix Enclave Manager local attestation
+ */
+static int femc_local_attestation (struct femc_encl_context *femc_ctx,
         struct femc_bytes *la_rsp, const char* subject)
 {
     int ret = 0;
-    size_t buf_req_size;
     struct femc_bytes *target_info = NULL;
     struct femc_bytes *la_req = NULL;
-    // Generate Local Attestation Request:
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
+    // Allocat encalve buffer for target info
     target_info = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
     if (!target_info) {
+        printf("Error allocation enclave buffer for target_info \n");
         ret = -ENOMEM;
         goto out;
     }
 
+    /* Ocall to get targetinfo from node agent enclave */
     ret = ocall_get_targetinfo(femc_ctx, target_info);
     if (ret < 0) {
         printf("ocall_get_targetinfo error %d\n", ret);
@@ -341,7 +308,7 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         ret = -ENOMEM;
         goto out;
     }
-    // Generate Local Attestation Request:
+    // Generate local attestation request using femc helper function
     ret = femc_generate_la_req(la_req, femc_ctx, target_info,
             subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
@@ -349,7 +316,6 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         ret = -EINVAL;
         goto out;
     }
-    printf("femc_generate_la_req success %d\n", ret);
 
     // Ocall to attest with node agent
     ret = ocall_local_attest(femc_ctx, la_req, femc_bytes_len(la_req),
@@ -358,6 +324,7 @@ static int _FEMCLocalAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         printf("ocall_local_attest error %d\n", ret);
         goto out;
     }
+
     printf("Success ocall_local_attest size %d \n", ret);
     ret = 0;
 out:
@@ -367,12 +334,12 @@ out:
 }
 
 
+/* Ocall for remote attestation to Fortanix Enclave Manager */
 static int ocall_remote_attest(struct femc_encl_context *ctx,
                                 struct femc_bytes *req, size_t buf_size_req,
                                 struct femc_bytes *rsp, size_t buf_size_rsp)
 {
     int ret = 0;
-    unsigned char *buf = NULL;
     // Intel SDK copies (out, size = size)
     printf("execute ocall_remote_attest \n");
     uocall_remote_attest(&ret, femc_bytes_data_mut(req), buf_size_req, femc_bytes_data_mut(rsp), buf_size_rsp);
@@ -387,15 +354,6 @@ static int ocall_remote_attest(struct femc_encl_context *ctx,
         ret = -EINVAL;
         goto out;
     }
-
-    buf = (unsigned char*)femc_bytes_data(rsp);
-    printf ("{\"rsp \":\"");
-    int i;
-    for (i = 0; i < ret; i++) {
-        printf("%02x", buf[i]);
-    }
-    printf("\"}\n");
-
     printf("ucall_local_attest resize success %d\n", ret);
 out:
     return ret;
@@ -403,13 +361,14 @@ out:
 }
 
 
+/* Fortanix Enclave Manager remote attestation
+ */
 
-static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
+static int femc_remote_attestation (struct femc_encl_context *femc_ctx,
     struct femc_bytes *la_rsp, struct femc_bytes *ra_rsp, const char* subject)
 {
 
     int ret = 0;
-    //size_t buf_req_size;
     struct femc_bytes *ra_req = NULL;
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
@@ -429,9 +388,6 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         goto out;
     }
 
-    //buf_req_size = femc_bytes_len(ra_req);
-    // Ocall to send ra_req to node agent to get ra_rsp
-    // femc_bytes_capacity
     ret = ocall_remote_attest(femc_ctx, ra_req, femc_bytes_len(ra_req),
             ra_rsp, ENCLAVE_BUFFER_SIZE);
     if (ret < 0) {
@@ -439,7 +395,7 @@ static int _FEMCRemoteAttestation (PAL_FEMC_CONTEXT *femc_ctx,
         goto out;
     }
 
-    // Verify ra_resp
+    // Verify remote attestation
     ret = verify_ra_rsp(femc_ctx, ra_rsp);
     if (ret != FEMC_STATUS_SUCCESS) {
         printf("verify_ra_rsp error %d\n", ret);
@@ -453,7 +409,7 @@ out:
     return ret;
 }
 
-int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **femc_cert)
+int femc_cert_provision(struct femc_encl_context *femc_ctx, const char* subject, void **femc_cert)
 {
     int ret = 0;
 
@@ -461,6 +417,8 @@ int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **f
     struct femc_bytes *ra_rsp = NULL;
     size_t cert_len = 0;
     void * cert_data = NULL;
+
+    // Allocate enclave buffer for urts responses
     la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
     ra_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
     if (!la_rsp || !ra_rsp) {
@@ -469,39 +427,37 @@ int _FEMCCertProvision(PAL_FEMC_CONTEXT *femc_ctx, const char* subject, void **f
         goto out;
     }
 
-    ret = _FEMCLocalAttestation (femc_ctx, la_rsp, subject);
+    /* Local attestation with node agent */
+    ret = femc_local_attestation (femc_ctx, la_rsp, subject);
     if (ret) {
         printf("Femc local attestation failed \n");
         goto out;
     }
 
-    ret = _FEMCRemoteAttestation (femc_ctx, la_rsp, ra_rsp, subject);
+    /* Remote attestation with Enclave Manager */
+    ret = femc_remote_attestation (femc_ctx, la_rsp, ra_rsp, subject);
     if (ret) {
         printf("Femc remote attestation failed \n");
         goto out;
     }
 
     cert_len = femc_bytes_len(ra_rsp);
-    // Check PEM is null ternimated -> don't write the last character.
+    // Check PEM is null ternimated
     assert(((const char *)femc_bytes_data(ra_rsp))[cert_len - 1] == '\0');
 
     cert_data = malloc(cert_len);
     memcpy(cert_data, femc_bytes_data(ra_rsp), cert_len);
     *femc_cert = cert_data;
 
-    printf("Femc Attestation response cert recvd: bytes  %d for cert \n  %s\n",
-        cert_len, (char*)*femc_cert);
 out:
     femc_bytes_free(la_rsp);
     femc_bytes_free(ra_rsp);
-    if (cert_data)
-        free(cert_data);
     return ret;
 }
 
 
-/* Init femc_context */
-int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_type)
+/* Initialize FEMC context */
+int femc_init (struct femc_encl_context **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_type)
 {
     int ret = 0;
     struct femc_enclave_ctx_init_args femc_ctx_init_args;
@@ -517,14 +473,7 @@ int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_t
     }
 
     femc_cb_sha256 (femc_ctx_init_args.app_public_key_len, femc_ctx_init_args.app_public_key, &digest);
-    //print_binary(" public sha ", (const char*)digest.md, sizeof(digest.md));
-
-    printf("init_femc_ctx_args success\n");
-
     init_femc_global_args(&femc_global_args);
-
-    printf("init_femc_global_args success\n");
-
 
     ret = femc_enclave_global_init(&femc_global_args);
     if (ret != FEMC_STATUS_SUCCESS) {
@@ -540,7 +489,7 @@ int _FEMCInit (PAL_FEMC_CONTEXT **femc_ctx,EVP_PKEY* pk_ctx, femc_req_type req_t
         ret = -1;
         goto out;
     }
-    printf("init_femc_ctx_init success\n");
+    printf("Initialize FEMC context success\n");
     ret = 0;
 out:
     if (ret < 0)
@@ -548,21 +497,20 @@ out:
     return ret;
 }
 
-/* Init Fortanix certificate provisioning
- * If certificate is present bail out with a message
- * returns 0 on sucess
- * */
 
 void rsa_key_gen(EVP_PKEY **evp_pkey);
 
-static int ftx_manager_cert_flow (const char* config_key)
+/* Init FEMC Enclave Manager certificate provision
+ */
+static int ftx_manager_cert_flow ()
 {
     int ret = 0;
-    PAL_FEMC_CONTEXT *femc_ctx = NULL;
-    PAL_PK_CONTEXT *pk_ctx = NULL;
+    struct femc_encl_context *femc_ctx = NULL;
+    EVP_PKEY *pk_ctx = NULL;
     void *femc_cert = NULL;
     const char *subject = "Intel SDK SGX Application";
-    // Generate private key and write it to file
+
+    // Generate RSA key pair inside openssl envelope
     rsa_key_gen(&pk_ctx);
     if (NULL == pk_ctx) {
         printf("Can't create private key error %d\n", ret);
@@ -570,54 +518,47 @@ static int ftx_manager_cert_flow (const char* config_key)
     }
 
     // Initialize FEMC context
-    ret = _FEMCInit(&femc_ctx, pk_ctx, FEMC_REQ_ATTEST_KEY);
+    ret = femc_init(&femc_ctx, pk_ctx, FEMC_REQ_ATTEST_KEY);
     if (ret) {
         printf("Femc init failed error %d\n", ret);
         goto out;
     }
-    printf("Femc init success \n");
 
-    // Fortanix certificate provisioning - uses FEMC API to connect
-    //  to malbork and returns a buffer containing certificate data.
-    ret = _FEMCCertProvision(femc_ctx, subject, &femc_cert);
+    // Fortanix certificate provisioning - uses FEMC API receive
+    // Enclave Manager certificate for the RSA key generate inside encalve
+    ret = femc_cert_provision(femc_ctx, subject, &femc_cert);
     if (ret) {
-        ret = -1;
-        printf("Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
+        printf("Fortanix certificate provisioning failed error %d\n", ret);
         goto out;
     }
 
+    printf("Received Enclave Manager certificate for application cert \n%s\n",
+            (char*)femc_cert);
     ret = 0;
-
 out:
 
     if (femc_ctx) {
         femc_enclave_exit(&femc_ctx);
     }
-    /*
-       EVP_PKEY_free(pk_ctx);
-    //if (evp_pkey->pkey.ptr != NULL) {
-    //   RSA_free(keypair);
-    // }
 
-    if (femc_cert) {
-    free(femc_cert);
+    if (pk_ctx) {
+        EVP_PKEY_free(pk_ctx);
     }
-    */
+    if (femc_cert) {
+        free(femc_cert);
+    }
     return ret;
 }
 
 int ocall_heartbeat(struct femc_encl_context *ctx,
-                         struct femc_bytes *ra_req)
+        struct femc_bytes *ra_req)
 {
     int ret = 0;
-    unsigned char *buf = NULL;
-    //ret is size of target_info
-    //femc_bytes_capacity use it here
+    /* ocall to send heartbeat to fortanix node agent */
     uocall_heartbeat(&ret, femc_bytes_data_mut(ra_req), femc_bytes_len(ra_req));
     if (ret < 0) {
         printf("Error getting target_info inside encalve %d", ret);
         goto out;
-    } else {
     }
     printf("success heartbeat %d\n", ret);
     ret = 0;
@@ -625,19 +566,19 @@ out:
     return ret;
 }
 
-static int _FEMCHeartbeatSend (PAL_FEMC_CONTEXT *femc_ctx,
+/* FEMC heart beat helper */
+static int femc_heartbeat_send (struct femc_encl_context *femc_ctx,
         struct femc_bytes *la_rsp, const char* subject)
 {
 
     int ret = 0;
     struct femc_bytes *ra_req = NULL;
-
     struct femc_data_bytes const * const extra_subject = NULL;
     struct femc_data_bytes const *extra_attr = NULL;
 
     ra_req = femc_bytes_new(0);
     if (!ra_req) {
-        printf("_FEMCHeartbeatSend: out of memory\n");
+        printf("femc_heartbeat_send: out of memory\n");
         ret = -ENOMEM;
         goto out;
     }
@@ -645,7 +586,7 @@ static int _FEMCHeartbeatSend (PAL_FEMC_CONTEXT *femc_ctx,
     ret = femc_generate_ra_req(femc_ctx, ra_req,
             la_rsp, subject, strlen(subject), extra_subject, extra_attr);
     if (ret != FEMC_STATUS_SUCCESS) {
-        printf( "_FEMCHeartbeatSend: femc_generate_ra_req error %d\n", ret);
+        printf( "femc_heartbeat_send error generating request %d\n", ret);
         ret = -EINVAL;
         goto out;
     }
@@ -661,8 +602,7 @@ out:
     return ret;
 }
 
-
-int _FEMCHeartbeatSend(PAL_FEMC_CONTEXT *ctx, const char* subject)
+int femc_heartbeat_send(struct femc_encl_context *ctx, const char* subject)
 {
 
     int ret = 0;
@@ -674,12 +614,12 @@ int _FEMCHeartbeatSend(PAL_FEMC_CONTEXT *ctx, const char* subject)
         printf("Femc local attestation failed: out of memory\n");
         goto out;
     }
-    ret = _FEMCLocalAttestation (ctx, la_rsp, subject);
+    ret = femc_local_attestation (ctx, la_rsp, subject);
     if (ret) {
         printf("Femc local attestation failed \n");
         goto out;
     }
-    ret = _FEMCHeartbeatSend(ctx, la_rsp, subject);
+    ret = femc_heartbeat_send(ctx, la_rsp, subject);
     if (ret) {
         printf("Femc Heartbeat failed \n");
         goto out;
@@ -690,12 +630,13 @@ out:
     return ret;
 }
 
-
+/* FEMC periodic heartbeat with Enclave Manager
+ * */
 static int ftx_manager_heartbeat_init()
 {
     int ret = 0;
-    PAL_FEMC_CONTEXT *femc_ctx = NULL;
-    PAL_PK_CONTEXT     *pk_ctx     = NULL;
+    struct femc_encl_context *femc_ctx = NULL;
+    EVP_PKEY     *pk_ctx     = NULL;
     const char *subject = "Intel SDK SGX Application";
 
     rsa_key_gen(&pk_ctx);
@@ -703,26 +644,22 @@ static int ftx_manager_heartbeat_init()
         printf("Can't create private key error %d\n", ret);
         goto out;
     }
+
     // Initialize FEMC context
-    ret = _FEMCInit(&femc_ctx, pk_ctx, FEMC_REQ_HEARTBEAT);
+    ret = femc_init(&femc_ctx, pk_ctx, FEMC_REQ_HEARTBEAT);
     if (ret) {
         printf("Femc init failed error %d\n", ret);
         goto out;
     }
     printf("Femc init Heart beat success \n");
 
-    ret = _FEMCHeartbeatSend(femc_ctx, subject);
-
-    ret = 0;
+    ret = femc_heartbeat_send(femc_ctx, subject);
 out:
     if (femc_ctx) {
         femc_enclave_exit(&femc_ctx);
     }
-    /*
-       EVP_PKEY_free(pk_ctx);
-    //if (evp_pkey->pkey.ptr != NULL) {
-    //   RSA_free(keypair);
-    // } */
+
+    EVP_PKEY_free(pk_ctx);
     return ret;
 }
 
@@ -742,6 +679,9 @@ void printf(const char *fmt, ...)
     uprint(buf);
 }
 
+/* rsa_key_gen:
+ * Generate rsa keypair inside enclave
+ * */
 void rsa_key_gen(EVP_PKEY **evp_pkey)
 {
 	BIGNUM *bn = BN_new();
@@ -773,30 +713,26 @@ void rsa_key_gen(EVP_PKEY **evp_pkey)
 	}
 	EVP_PKEY_assign_RSA(*evp_pkey, keypair);
 
-	// public key - string
+    /* Print public key - string
 	int len = i2d_PUBKEY(*evp_pkey, NULL);
 	unsigned char *buf = (unsigned char *) malloc (len + 1);
 	unsigned char *tbuf = buf;
 	i2d_PUBKEY(*evp_pkey, &tbuf);
-	// print public key
-	//print_binary(" public", (const char*)buf, len);
+	print public key
+	print_binary(" public", (const char*)buf, len);
 	free(buf);
-    /*
-	// private key - string
+    */
+
+    /* print private key - string
 	len = i2d_PrivateKey(*evp_pkey, NULL);
 	buf = (unsigned char *) malloc (len + 1);
 	tbuf = buf;
 	i2d_PrivateKey(*evp_pkey, &tbuf);
-	//print_binary(" public", (const char*)buf, len);
-
+	print_binary(" public", (const char*)buf, len);
+	free(buf);
     */
-	BN_free(bn);
 
-	//EVP_PKEY_free(evp_pkey);
-
-	//if (evp_pkey->pkey.ptr != NULL) {
-	// RSA_free(keypair);
-   //}
+    BN_free(bn);
 }
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
@@ -814,8 +750,6 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 
 void t_sgxssl_call_apis()
 {
-    int ret = 0;
-
     printf("Start tests\n");
 
     SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
@@ -823,13 +757,12 @@ void t_sgxssl_call_apis()
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
 
-    ftx_manager_cert_flow(NULL);
+    ftx_manager_cert_flow();
 
-    /*
-    while (1) {
-        printf("Send heartbeat to enclave manager \n");
-        ftx_manager_heartbeat_init();
-
+    /* Periodic heartbeat with Fortanix Enclave Manager
+       while (1) {
+       printf("Send heartbeat to enclave manager \n");
+       ftx_manager_heartbeat_init();
     }*/
     return;
 

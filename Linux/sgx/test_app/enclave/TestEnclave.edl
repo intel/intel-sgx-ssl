@@ -44,8 +44,6 @@ include "femc_common.h"
         void uprint([in, string] const char *str);
         void usgx_exit(int reason);
         int ucreate_thread();
-        int ftx_test(int test);
-        /* what about memory should be out, sizeof targetifo*/
         int uocall_get_targetinfo([out, size=buf_size] void *target_info_buf, size_t buf_size);
         int uocall_local_attest([in, size=buf_size_req] void *req_buf, size_t
         buf_size_req, [out, size=buf_size_rsp] void *rsp_buf, size_t buf_size_rsp);

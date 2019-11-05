@@ -243,19 +243,17 @@ int initialize_enclave(void)
     return 0;
 }
 
-
+/* Ocall to get targetinfo from another enclave for local attestation */
 int uocall_get_targetinfo(void *target_info_buf, size_t buf_size)
 {
     femc_runner_status_t femc_ret;
     int ret;
-    printf("Femc rest call to get targetinfo\n");
-    // call the CPPREST function
     struct femc_bytes *target_info = femc_bytes_with_external_buf(target_info_buf, buf_size, false);
     if (!target_info) {
         printf("Failed Femc rest call to alloc targetinfo\n");
         return -1;
     }
-    // call the CPPREST function
+
     femc_ret = femc_runner_get_target_info(target_info);
     if (femc_ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_get_target_info err %ld, http err %d \n", femc_ret.err, femc_ret.http_err);
@@ -263,22 +261,16 @@ int uocall_get_targetinfo(void *target_info_buf, size_t buf_size)
     }
 
     ret = femc_bytes_len(target_info);
-
-    //print_binary("urts target info",(const char*)femc_bytes_data(target_info), ret);
-
-    femc_bytes_free(target_info); /* frees the femc_bytes, but not the wrapped buffer */
     printf("Success femc_runner_get_target_info size %d \n", ret);
-    //femc_bytes_free(target_info); /* frees the femc_bytes, but not the wrapped buffer */
+    femc_bytes_free(target_info); /* frees the femc_bytes, but not the wrapped buffer */
     return ret;
-
 }
 
+/* Ocall to generate local attestation based cerfiticate for application encalve */
 int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size_t buf_size_rsp)
 {
     femc_runner_status_t femc_ret;
     int ret;
-    printf( "Femc rest call local attest, req_size %ld \n", buf_size_req);
-
     struct femc_bytes *la_req = femc_bytes_with_external_buf(req_buf, buf_size_req, true);
     struct femc_bytes *la_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_rsp, false);
     if (!la_req || !la_rsp) {
@@ -286,8 +278,7 @@ int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size
         ret = -1;
         goto out;
     }
-    //print_binary("urts la_req ",(const char*)femc_bytes_data(la_req), buf_size_req);
-    // call the CPPREST function
+
     femc_ret = femc_runner_do_local_attestation(la_req, la_rsp);
     if (femc_ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_local_attestation err %ld, http err %d \n", femc_ret.err, femc_ret.http_err);
@@ -295,11 +286,7 @@ int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size
         goto out;
     }
     ret = femc_bytes_len(la_rsp);
-
-    //print_binary("urts la_rsp ",(const char*)femc_bytes_data(la_rsp), ret);
-
     printf("Success femc_runner_get_target_info size %d \n", ret);
-
 out:
     /* these free the femc_bytes objects, but not the wrapped buffers */
     femc_bytes_free(la_req);
@@ -307,13 +294,11 @@ out:
     return ret;
 }
 
+/* Ocall to generate Intel remote attestation based cerfiticates for application encalve */
 int uocall_remote_attest(void *req_buf, size_t buf_size_req, void *rsp_buf, size_t buf_size_rsp)
 {
     femc_runner_status_t femc_ret;
     int ret;
-    const unsigned char *buf = NULL;
-
-    printf( "Femc rest call remote attest, req_size %ld \n", buf_size_req);
     struct femc_bytes *ra_req = femc_bytes_with_external_buf(req_buf, buf_size_req, true);
     struct femc_bytes *ra_rsp = femc_bytes_with_external_buf(rsp_buf, buf_size_rsp, false);
     if (!ra_req || !ra_rsp) {
@@ -321,25 +306,16 @@ int uocall_remote_attest(void *req_buf, size_t buf_size_req, void *rsp_buf, size
         ret = -1;
         goto out;
     }
-    // call the CPPREST function
+
     femc_ret = femc_runner_do_remote_attestation(ra_req, ra_rsp);
     if (femc_ret.err != FEMC_RUNNER_SUCCESS) {
         printf("Failed femc_runner_do_remote_attestation err %ld, http err %d \n", femc_ret.err, femc_ret.http_err);
         ret = femc_ret.err;
         goto out;
     }
+
     ret = femc_bytes_len(ra_rsp);
-
-    buf = (unsigned char*)femc_bytes_data(ra_rsp);
-    printf ("{\"otarget info\":\"");
-    int i;
-    for (i = 0; i < ret; i++) {
-        printf("%02x", buf[i]);
-    }
-    printf("\"}\n");
-
     printf("Success femc_runner_get_target_info size %d \n", ret);
-
 out:
     /* these free the femc_bytes objects, but not the wrapped buffers */
     femc_bytes_free(ra_req);
@@ -347,6 +323,7 @@ out:
     return ret;
 }
 
+/* Ocall to generate Enclave Manager heartbeat for application encalve */
 int uocall_heartbeat(void *req_buf, size_t buf_size)
 {
     femc_runner_status_t femc_ret;
@@ -367,7 +344,7 @@ int uocall_heartbeat(void *req_buf, size_t buf_size)
         goto out;
     }
     ret = 0;
-    printf("Success ocall_heartbeat size %d \n", ret);
+    printf("Success ocall_heartbeat\n");
 out:
     femc_bytes_free(ra_req);
     return ret;
@@ -438,10 +415,6 @@ int main(int argc, char *argv[])
     }
 
     sgx_destroy_enclave(global_eid);
-
-    femc_runner_status_t ret = femc_runner_get_agent_version(NULL);
-
-    //uocall_get_targetinfo(NULL);
 
     return 0;
 }
