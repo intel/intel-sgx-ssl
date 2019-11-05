@@ -71,11 +71,6 @@ void print_binary(const char * tag, const unsigned char* buf, size_t len)
 static int64_t femc_cb_sha256 (size_t data_size, uint8_t *data,
         struct femc_sha256_digest *digest)
 {
-    /*sgx_status_t sgx_ret = SGX_SUCCESS;
-    sgx_ret = sgx_sha256_msg(data, data_size, digest->md);
-    if (sgx_ret != SGX_SUCCESS) {
-        return = -1;
-    }*/
     //print_binary("public key cb_sha256 ", (const unsigned char*)data, data_size);
     EVP_Digest(data, data_size, digest->md, NULL, EVP_sha256(), NULL);
     print_binary("cb_sha256", (const unsigned char*)digest->md, sizeof(digest->md));
@@ -161,16 +156,6 @@ out:
 static int64_t femc_cb_aes_cmac_128 (femc_aes_cmac_128_key_t *key, uint8_t *data,
         size_t data_len, struct femc_aes_cmac_128_mac *mac)
 {
-    /*
-    return (int64_t) DkCipherCmac(cipher_info,
-            (unsigned char *)key->key_bytes,
-            (sizeof(key->key_bytes) *8),
-            (unsigned char *)data,
-            data_len,
-            (unsigned char *)mac);
-
-    //sgx_status_t ret = sgx_rijndael128_cmac_msg(key->key_bytes, data, data_len, mac->mac);
-    */
     size_t mac_len;
     CMAC_CTX *ctx = CMAC_CTX_new();
     CMAC_Init(ctx, key->key_bytes, 16, EVP_aes_128_cbc(), NULL);
@@ -573,12 +558,10 @@ void rsa_key_gen(EVP_PKEY **evp_pkey);
 static int ftx_manager_cert_flow (const char* config_key)
 {
     int ret = 0;
-    PAL_FEMC_CONTEXT   *femc_ctx  = NULL;
-    PAL_PK_CONTEXT     *pk_ctx     = NULL;
-    void               *femc_cert = NULL;
-    //DkPkInit(&pk_ctx);
-    //TODO verify cert validity and with the key ZIRC-2662
-    // Create the cert file if it doesn't already exist
+    PAL_FEMC_CONTEXT *femc_ctx = NULL;
+    PAL_PK_CONTEXT *pk_ctx = NULL;
+    void *femc_cert = NULL;
+    const char *subject = "Intel SDK SGX Application";
     // Generate private key and write it to file
     rsa_key_gen(&pk_ctx);
     if (NULL == pk_ctx) {
@@ -596,7 +579,7 @@ static int ftx_manager_cert_flow (const char* config_key)
 
     // Fortanix certificate provisioning - uses FEMC API to connect
     //  to malbork and returns a buffer containing certificate data.
-    ret = _FEMCCertProvision(femc_ctx, "EnclaveManager", &femc_cert);
+    ret = _FEMCCertProvision(femc_ctx, subject, &femc_cert);
     if (ret) {
         ret = -1;
         printf("Fortanix certificate provisioning failed %s error %d\n" ,config_key, ret);
@@ -611,15 +594,135 @@ out:
         femc_enclave_exit(&femc_ctx);
     }
     /*
-    EVP_PKEY_free(pk_ctx);
+       EVP_PKEY_free(pk_ctx);
     //if (evp_pkey->pkey.ptr != NULL) {
-     //   RSA_free(keypair);
+    //   RSA_free(keypair);
     // }
 
     if (femc_cert) {
-        free(femc_cert);
+    free(femc_cert);
     }
     */
+    return ret;
+}
+
+int ocall_heartbeat(struct femc_encl_context *ctx,
+                         struct femc_bytes *ra_req)
+{
+    int ret = 0;
+    unsigned char *buf = NULL;
+    //ret is size of target_info
+    //femc_bytes_capacity use it here
+    uocall_heartbeat(&ret, femc_bytes_data_mut(ra_req), femc_bytes_len(ra_req));
+    if (ret < 0) {
+        printf("Error getting target_info inside encalve %d", ret);
+        goto out;
+    } else {
+    }
+    printf("success heartbeat %d\n", ret);
+    ret = 0;
+out:
+    return ret;
+}
+
+static int _FEMCHeartbeatSend (PAL_FEMC_CONTEXT *femc_ctx,
+        struct femc_bytes *la_rsp, const char* subject)
+{
+
+    int ret = 0;
+    struct femc_bytes *ra_req = NULL;
+
+    struct femc_data_bytes const * const extra_subject = NULL;
+    struct femc_data_bytes const *extra_attr = NULL;
+
+    ra_req = femc_bytes_new(0);
+    if (!ra_req) {
+        printf("_FEMCHeartbeatSend: out of memory\n");
+        ret = -ENOMEM;
+        goto out;
+    }
+
+    ret = femc_generate_ra_req(femc_ctx, ra_req,
+            la_rsp, subject, strlen(subject), extra_subject, extra_attr);
+    if (ret != FEMC_STATUS_SUCCESS) {
+        printf( "_FEMCHeartbeatSend: femc_generate_ra_req error %d\n", ret);
+        ret = -EINVAL;
+        goto out;
+    }
+    // Ocall to send ra_req to node agent.
+    ret = ocall_heartbeat(femc_ctx, ra_req);
+    if (ret < 0) {
+        printf("ocall_heartbeat error %d\n", ret);
+        goto out;
+    }
+
+out:
+    femc_bytes_free(ra_req);
+    return ret;
+}
+
+
+int _FEMCHeartbeatSend(PAL_FEMC_CONTEXT *ctx, const char* subject)
+{
+
+    int ret = 0;
+    struct femc_bytes *la_rsp = NULL;
+
+    la_rsp = femc_bytes_new(ENCLAVE_BUFFER_SIZE);
+    if (!la_rsp) {
+        ret = -ENOMEM;
+        printf("Femc local attestation failed: out of memory\n");
+        goto out;
+    }
+    ret = _FEMCLocalAttestation (ctx, la_rsp, subject);
+    if (ret) {
+        printf("Femc local attestation failed \n");
+        goto out;
+    }
+    ret = _FEMCHeartbeatSend(ctx, la_rsp, subject);
+    if (ret) {
+        printf("Femc Heartbeat failed \n");
+        goto out;
+    }
+
+out:
+    femc_bytes_free(la_rsp);
+    return ret;
+}
+
+
+static int ftx_manager_heartbeat_init()
+{
+    int ret = 0;
+    PAL_FEMC_CONTEXT *femc_ctx = NULL;
+    PAL_PK_CONTEXT     *pk_ctx     = NULL;
+    const char *subject = "Intel SDK SGX Application";
+
+    rsa_key_gen(&pk_ctx);
+    if (NULL == pk_ctx) {
+        printf("Can't create private key error %d\n", ret);
+        goto out;
+    }
+    // Initialize FEMC context
+    ret = _FEMCInit(&femc_ctx, pk_ctx, FEMC_REQ_HEARTBEAT);
+    if (ret) {
+        printf("Femc init failed error %d\n", ret);
+        goto out;
+    }
+    printf("Femc init Heart beat success \n");
+
+    ret = _FEMCHeartbeatSend(femc_ctx, subject);
+
+    ret = 0;
+out:
+    if (femc_ctx) {
+        femc_enclave_exit(&femc_ctx);
+    }
+    /*
+       EVP_PKEY_free(pk_ctx);
+    //if (evp_pkey->pkey.ptr != NULL) {
+    //   RSA_free(keypair);
+    // } */
     return ret;
 }
 
@@ -709,36 +812,6 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 }
 
 
-/*
-extern "C" int CRYPTO_set_mem_functions(
-        void *(*m)(size_t, const char *, int),
-        void *(*r)(void *, size_t, const char *, int),
-        void (*f)(void *, const char *, int));
-void* priv_malloc(size_t size, const char *file, int line)
-{
-	void* addr = malloc(size);
-
-	printf("[malloc:%s:%d] size: %d, addr: %p\n", file, line, size, addr);
-
-	return addr;
-}
-void* priv_realloc(void* old_addr, size_t new_size, const char *file, int line)
-{
-	void* new_addr = realloc(old_addr, new_size);
-
-	printf("[realloc:%s:%d] old_addr: %p, new_size: %d, new_addr: %p\n", file, line, old_addr, new_size, new_addr);
-
-	return new_addr;
-}
-void priv_free(void* addr, const char *file, int line)
-{
-	printf("[free:%s:%d] addr: %p\n", file, line, addr);
-
-	free(addr);
-}
-*/
-
-
 void t_sgxssl_call_apis()
 {
     int ret = 0;
@@ -751,6 +824,13 @@ void t_sgxssl_call_apis()
     OPENSSL_init_crypto(0, NULL);
 
     ftx_manager_cert_flow(NULL);
+
+    /*
+    while (1) {
+        printf("Send heartbeat to enclave manager \n");
+        ftx_manager_heartbeat_init();
+
+    }*/
     return;
 
 }

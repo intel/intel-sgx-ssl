@@ -277,8 +277,6 @@ int uocall_local_attest( void *req_buf, size_t buf_size_req, void *rsp_buf, size
 {
     femc_runner_status_t femc_ret;
     int ret;
-    const unsigned char *buf = NULL;
-
     printf( "Femc rest call local attest, req_size %ld \n", buf_size_req);
 
     struct femc_bytes *la_req = femc_bytes_with_external_buf(req_buf, buf_size_req, true);
@@ -349,17 +347,30 @@ out:
     return ret;
 }
 
-static int sgx_ocall_heartbeat(void * pms)
+int uocall_heartbeat(void *req_buf, size_t buf_size)
 {
-    femc_runner_status_t ret;
+    femc_runner_status_t femc_ret;
+    int ret;
     printf("Femc rest send heart beat\n");
-    //ms_ocall_heartbeat_t *ms = (ms_ocall_heartbeat_t *)pms;
-    // call the CPPREST function
-    //ret = femc_runner_send_heartbeat(ms->req);
-    if (ret.err != FEMC_RUNNER_SUCCESS) {
-        printf("Failed femc_runner_send_heartbeat err %ld, http err %d \n", ret.err, ret.http_err);
+
+    struct femc_bytes *ra_req = femc_bytes_with_external_buf(req_buf, buf_size, true);
+    if (!ra_req) {
+        printf("Femc rest send heart beat error malloc \n");
+        ret = -1;
+        goto out;
     }
-    return ret.err;
+
+    femc_ret = femc_runner_send_heartbeat(ra_req);
+    if (femc_ret.err != FEMC_RUNNER_SUCCESS) {
+        printf("Failed femc_runner_send_heartbeat err %ld, http err %d \n", femc_ret.err, femc_ret.http_err);
+        ret = femc_ret.err;
+        goto out;
+    }
+    ret = 0;
+    printf("Success ocall_heartbeat size %d \n", ret);
+out:
+    femc_bytes_free(ra_req);
+    return ret;
 }
 
 /* OCall functions */
