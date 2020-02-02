@@ -1,0 +1,10 @@
+
+Run build_package.cmd in order to "configure" and build the way sgx ssl requires. Read build_package.cmd to see usage. One usage is .\build_package x64_release. 
+
+I changed Configure to Configure4sgxssl, not because I actually changed the file, but because you shouldn't run Configure directly, run build_package.cmd.
+
+The resulting make file will be hard-coded to apply full lvi mitigation to handwritten assembly and, as of now, no mitigation to C/C++ code.
+
+Thanks,
+MarkG
+

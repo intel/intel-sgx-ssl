@@ -1,0 +1,6 @@
+
+Run build_openssl.sh in order to "configure" and build the way sgx ssl requires. Read build_openssl.sh to see usage. One usage is ./build_openssl.sh full, which 1) builds openssl the way sgx ssl requires and 2) applies full lvi mitigation. I changed Configure to Configure4sgxssl, not because I actually changed the file, but because you shouldn't run Configure directly, run build_openssl.sh.
+
+Thanks,
+MarkG
+
