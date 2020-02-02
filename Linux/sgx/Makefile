@@ -52,8 +52,9 @@ ifeq ($(LINUX_SGX_BUILD), 0)
 endif
 
 $(PACKAGE_LIB)/$(OPENSSL_LIB):
-	chmod 755 $(BUILD_OPENSSL)
-	test -f $(PACKAGE_LIB)/$(OPENSSL_LIB) || $(BUILD_OPENSSL) $(OPENSSL_CONFIG)
+	#chmod 755 $(BUILD_OPENSSL)
+	mkdir -p $(PACKAGE_LIB)
+	cp ../libcrypto.a $(PACKAGE_LIB)/$(OPENSSL_LIB)
 
 clean:	
 	$(MAKE) -C $(TRUSTED_LIB_DIR) clean
