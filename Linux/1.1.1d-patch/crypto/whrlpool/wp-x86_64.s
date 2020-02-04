@@ -609,6 +609,8 @@ whirlpool_block:
 .size	whirlpool_block,.-whirlpool_block
 
 .align	64
+
+.title "begin table"
 .type	.Ltable,@object
 .Ltable:
 .byte	24,24,96,24,192,120,48,216,24,24,96,24,192,120,48,216
@@ -877,3 +879,5 @@ whirlpool_block:
 .byte	228,39,65,139,167,125,149,216
 .byte	251,238,124,102,221,23,71,158
 .byte	202,45,191,7,173,90,131,51
+.title "end table"
+
