@@ -398,6 +398,7 @@ rsaz_1024_sqr_avx2:
 	vpaddq	%ymm11,%ymm4,%ymm4
 	vpmuludq	%ymm13,%ymm10,%ymm10
 .byte	0xc4,0x41,0x7e,0x6f,0x9d,0x58,0x00,0x00,0x00
+	lfence
 	andl	$0x1fffffff,%eax
 	vpaddq	%ymm10,%ymm5,%ymm5
 	vpmuludq	%ymm13,%ymm14,%ymm14
@@ -423,6 +424,7 @@ rsaz_1024_sqr_avx2:
 	vpmuludq	%ymm0,%ymm13,%ymm13
 	vpmuludq	%ymm12,%ymm11,%ymm11
 .byte	0xc4,0x41,0x7e,0x6f,0xb5,0xf0,0xff,0xff,0xff
+	lfence
 	vpaddq	%ymm1,%ymm13,%ymm13
 	vpaddq	%ymm11,%ymm2,%ymm2
 	vpmuludq	%ymm12,%ymm10,%ymm10
@@ -1731,6 +1733,8 @@ rsaz_avx2_eligible:
 .size	rsaz_avx2_eligible,.-rsaz_avx2_eligible
 
 .align	64
+
+.title "begin table"
 .Land_mask:
 .quad	0x1fffffff,0x1fffffff,0x1fffffff,0x1fffffff
 .Lscatter_permd:
@@ -1741,4 +1745,6 @@ rsaz_avx2_eligible:
 .long	0,0,0,0, 1,1,1,1
 .long	2,2,2,2, 3,3,3,3
 .long	4,4,4,4, 4,4,4,4
+.title "end table"
+
 .align	64

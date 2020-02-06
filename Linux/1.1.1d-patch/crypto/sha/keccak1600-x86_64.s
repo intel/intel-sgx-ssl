@@ -476,6 +476,7 @@ SHA3_squeeze:
 	movq	%r12,%rdi
 	movq	%r13,%rcx
 .byte	0xf3,0xa4
+	lfence
 
 .Ldone_squeeze:
 	popq	%r14
@@ -491,6 +492,8 @@ SHA3_squeeze:
 .cfi_endproc	
 .size	SHA3_squeeze,.-SHA3_squeeze
 .align	256
+
+.title "begin table"
 .quad	0,0,0,0,0,0,0,0
 .type	iotas,@object
 iotas:
@@ -520,3 +523,5 @@ iotas:
 .quad	0x8000000080008008
 .size	iotas,.-iotas
 .byte	75,101,99,99,97,107,45,49,54,48,48,32,97,98,115,111,114,98,32,97,110,100,32,115,113,117,101,101,122,101,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
+.title "end table"
+

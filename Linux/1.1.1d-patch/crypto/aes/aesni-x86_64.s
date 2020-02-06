@@ -1835,15 +1835,21 @@ aesni_xts_encrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,221,84,36,0
+	lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,221,92,36,16
+	lfence
 .byte	102,15,56,221,100,36,32
+	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,221,108,36,48
+	lfence
 .byte	102,15,56,221,116,36,64
+	lfence
 .byte	102,15,56,221,124,36,80
+	lfence
 	pxor	%xmm9,%xmm15
 
 	leaq	96(%rsi),%rsi
@@ -2311,15 +2317,21 @@ aesni_xts_decrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,223,84,36,0
+	lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,223,92,36,16
+	lfence
 .byte	102,15,56,223,100,36,32
+	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,223,108,36,48
+	lfence
 .byte	102,15,56,223,116,36,64
+	lfence
 .byte	102,15,56,223,124,36,80
+	lfence
 	pxor	%xmm9,%xmm15
 
 	leaq	96(%rsi),%rsi
@@ -3479,10 +3491,12 @@ aesni_cbc_encrypt:
 	movq	%rdx,%rcx
 	xchgq	%rdi,%rsi
 .long	0x9066A4F3
+	lfence
 	movl	$16,%ecx
 	subq	%rdx,%rcx
 	xorl	%eax,%eax
 .long	0x9066AAF3
+	lfence
 	leaq	-16(%rdi),%rdi
 	movl	%r10d,%eax
 	movq	%rdi,%rsi
@@ -4002,6 +4016,7 @@ aesni_cbc_encrypt:
 	subq	%rdx,%rcx
 	leaq	(%rsp),%rsi
 .long	0x9066A4F3
+	lfence
 	movdqa	%xmm2,(%rsp)
 
 .Lcbc_dec_ret:
@@ -4435,6 +4450,8 @@ __aesni_set_encrypt_key:
 .size	aesni_set_encrypt_key,.-aesni_set_encrypt_key
 .size	__aesni_set_encrypt_key,.-__aesni_set_encrypt_key
 .align	64
+
+.title "begin table"
 .Lbswap_mask:
 .byte	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 .Lincrement32:
@@ -4455,4 +4472,6 @@ __aesni_set_encrypt_key:
 .long	0x1b,0x1b,0x1b,0x1b
 
 .byte	65,69,83,32,102,111,114,32,73,110,116,101,108,32,65,69,83,45,78,73,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
+.title "end table"
+
 .align	64

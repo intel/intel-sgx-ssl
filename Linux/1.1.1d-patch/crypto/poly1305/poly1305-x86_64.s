@@ -3429,6 +3429,8 @@ poly1305_emit_base2_44:
 	ret
 .size	poly1305_emit_base2_44,.-poly1305_emit_base2_44
 .align	64
+
+.title "begin table"
 .Lconst:
 .Lmask24:
 .long	0x0ffffff,0,0x0ffffff,0,0x0ffffff,0,0x0ffffff,0
@@ -3451,8 +3453,11 @@ poly1305_emit_base2_44:
 .quad	44,44,42,64
 .L2_44_shift_lft:
 .quad	8,8,10,64
+.title "end table"
 
 .align	64
+
+.title "begin table"
 .Lx_mask44:
 .quad	0xfffffffffff,0xfffffffffff,0xfffffffffff,0xfffffffffff
 .quad	0xfffffffffff,0xfffffffffff,0xfffffffffff,0xfffffffffff
@@ -3460,6 +3465,8 @@ poly1305_emit_base2_44:
 .quad	0x3ffffffffff,0x3ffffffffff,0x3ffffffffff,0x3ffffffffff
 .quad	0x3ffffffffff,0x3ffffffffff,0x3ffffffffff,0x3ffffffffff
 .byte	80,111,108,121,49,51,48,53,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
+.title "end table"
+
 .align	16
 .globl	xor128_encrypt_n_pad
 .type	xor128_encrypt_n_pad,@function
