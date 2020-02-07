@@ -1038,6 +1038,7 @@ $L$mulx4x_body:
 	adcx	r10,rax
 	adox	r11,r12
 DB	0xc4,0x62,0xfb,0xf6,0xa1,0x10,0x00,0x00,0x00
+	lfence
 	mov	rdi,QWORD[48+rsp]
 	mov	QWORD[((-32))+rbx],r10
 	adcx	r11,rax

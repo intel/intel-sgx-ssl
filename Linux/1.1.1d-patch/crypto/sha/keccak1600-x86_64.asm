@@ -476,6 +476,7 @@ $L$tail_squeeze:
 	mov	rdi,r12
 	mov	rcx,r13
 DB	0xf3,0xa4
+	lfence
 
 $L$done_squeeze:
 	pop	r14
