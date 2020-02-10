@@ -39,9 +39,9 @@ echo $SGXSSL_ROOT
 
 OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/../openssl_source/OpenSSL_install_dir_tmp"
 OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1*.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
-if [ "$OPENSSL_VERSION" == "" ] 
+if [ "$OPENSSL_VERSION" != "openssl-1.1.1d" ] 
 then
-	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
+	echo "In order to run this script, OpenSSL 1.1.1d tar.gz package must be located in openssl_source/ directory."
 	exit 1
 fi
 echo $OPENSSL_VERSION
@@ -73,12 +73,20 @@ if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" ]] ; the
     ADDITIONAL_CONF="-g "
 fi
 
-sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
-cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || exit 1
-cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
-cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
-make build_generated libcrypto.a || exit 1
+echo "copy change files to openssl"
+cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION
+cp $SGXSSL_ROOT/1.1.1d-patch/* . -rf
+if  [ -f Makefile  ]; then
+	make clean
+fi
+if  [ -z $MITIGATIONS  ]; then
+	./build_openssl.sh
+elif  [ "$MITIGATIONS" == "FULL" ]; then
+	./build_openssl.sh full 
+elif  [ "$MITIGATIONS" == "INDIRECTS_ONLY" ]; then
+	./build_openssl.sh indirects
+fi
+
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1

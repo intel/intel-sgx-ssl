@@ -51,21 +51,6 @@
 
 #include "e_os.h"
 
-// definitions taken from pthreadtypes.h:
-
-/* Keys for thread-specific data */
-typedef unsigned int pthread_key_t;
-
-/* Once-only execution */
-typedef int pthread_once_t;
-
-/* Thread identifiers.  The structure of the attribute type is not
-   exposed on purpose.  */
-typedef unsigned long int pthread_t;
-
-/* Single execution handling.  */
-#define PTHREAD_ONCE_INIT 0
-
 ////////////////////////////////////////
 
 typedef pthread_once_t CRYPTO_ONCE;
