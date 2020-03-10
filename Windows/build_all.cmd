@@ -1,6 +1,6 @@
 @echo off
 Rem 
-Rem Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+Rem Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
 Rem 
 Rem Redistribution and use in source and binary forms, with or without
 Rem modification, are permitted provided that the following conditions
@@ -69,31 +69,6 @@ set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION:openssl-=%
 echo "Building SGXSSL with: %OPENSSL_VERSION%  %date% %time% to %SGXSSL_VERSION%"
 
 REM *********************************************************
-REM **                     win32_debug                     **
-REM *********************************************************
-
-set pltfrm_conf=win32_debug
-echo "Building %pltfrm_conf%  %date% %time%"
-start /WAIT cmd /C call build_package.cmd %pltfrm_conf% %OPENSSL_VERSION% no-clean
-if %errorlevel% neq 0 (
-	echo "Failed building %pltfrm_conf%  %date% %time%"
-) else (
-	echo "Successfully built %pltfrm_conf%  %date% %time%"
-)
-
-REM *********************************************************
-REM **                    win32_release                    **
-REM *********************************************************
-set pltfrm_conf=win32_release
-echo "Building %pltfrm_conf%  %date% %time%"
-start /WAIT cmd /C call build_package.cmd %pltfrm_conf% %OPENSSL_VERSION% no-clean
-if %errorlevel% neq 0 (
-	echo "Failed building %pltfrm_conf%  %date% %time%"
-) else (
-	echo "Successfully built %pltfrm_conf%  %date% %time%"
-)
-
-REM *********************************************************
 REM **                      x64_debug                      **
 REM *********************************************************
 set pltfrm_conf=x64_debug
@@ -109,6 +84,30 @@ REM *********************************************************
 REM **                     x64_release                     **
 REM *********************************************************
 set pltfrm_conf=x64_release
+echo "Building %pltfrm_conf%  %date% %time%"
+start /WAIT cmd /C call build_package.cmd %pltfrm_conf% %OPENSSL_VERSION% no-clean
+if %errorlevel% neq 0 (
+	echo "Failed building %pltfrm_conf%  %date% %time%"
+) else (
+	echo "Successfully built %pltfrm_conf%  %date% %time%"
+)
+
+REM *********************************************************
+REM **         x64_release_cve-2020-0551-load              **
+REM *********************************************************
+set pltfrm_conf=x64_release_cve-2020-0551-load
+echo "Building %pltfrm_conf%  %date% %time%"
+start /WAIT cmd /C call build_package.cmd %pltfrm_conf% %OPENSSL_VERSION% no-clean
+if %errorlevel% neq 0 (
+	echo "Failed building %pltfrm_conf%  %date% %time%"
+) else (
+	echo "Successfully built %pltfrm_conf%  %date% %time%"
+)
+
+REM *********************************************************
+REM **         x64_release_cve-2020-0551-cf                **
+REM *********************************************************
+set pltfrm_conf=x64_release_cve-2020-0551-cf
 echo "Building %pltfrm_conf%  %date% %time%"
 start /WAIT cmd /C call build_package.cmd %pltfrm_conf% %OPENSSL_VERSION% no-clean
 if %errorlevel% neq 0 (

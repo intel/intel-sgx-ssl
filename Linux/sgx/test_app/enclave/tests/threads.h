@@ -51,37 +51,44 @@
 
 #include "e_os.h"
 
+/* 
+ * The Linux 2.8 release provides Pthreads limited support.
+ * We need to uncomment the definitions below to avoid
+ * conflicts with those in the SGX SDK pthread.h header file
+ * in include/tlibc.
+ */
+
 // definitions taken from pthreadtypes.h:
 
 /* Keys for thread-specific data */
-typedef unsigned int pthread_key_t;
+//typedef unsigned int pthread_key_t;
 
 /* Once-only execution */
-typedef int pthread_once_t;
+//typedef int pthread_once_t;
 
 /* Thread identifiers.  The structure of the attribute type is not
    exposed on purpose.  */
-typedef unsigned long int pthread_t;
+//typedef unsigned long int pthread_t;
 
 /* Single execution handling.  */
-#define PTHREAD_ONCE_INIT 0
+//#define PTHREAD_ONCE_INIT 0
 
 ////////////////////////////////////////
 
-typedef pthread_once_t CRYPTO_ONCE;
-typedef pthread_key_t CRYPTO_THREAD_LOCAL;
-typedef pthread_t CRYPTO_THREAD_ID;
+//typedef pthread_once_t CRYPTO_ONCE;
+//typedef pthread_key_t CRYPTO_THREAD_LOCAL;
+//typedef pthread_t CRYPTO_THREAD_ID;
 
-#define CRYPTO_ONCE_STATIC_INIT PTHREAD_ONCE_INIT
+//#define CRYPTO_ONCE_STATIC_INIT PTHREAD_ONCE_INIT
 
-int CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void));
+//int CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void));
 
-int CRYPTO_THREAD_init_local(CRYPTO_THREAD_LOCAL *key, void (*cleanup)(void *));
-void *CRYPTO_THREAD_get_local(CRYPTO_THREAD_LOCAL *key);
-int CRYPTO_THREAD_set_local(CRYPTO_THREAD_LOCAL *key, void *val);
-int CRYPTO_THREAD_cleanup_local(CRYPTO_THREAD_LOCAL *key);
+//int CRYPTO_THREAD_init_local(CRYPTO_THREAD_LOCAL *key, void (*cleanup)(void *));
+//void *CRYPTO_THREAD_get_local(CRYPTO_THREAD_LOCAL *key);
+//int CRYPTO_THREAD_set_local(CRYPTO_THREAD_LOCAL *key, void *val);
+//int CRYPTO_THREAD_cleanup_local(CRYPTO_THREAD_LOCAL *key);
 
-CRYPTO_THREAD_ID CRYPTO_THREAD_get_current_id(void);
-int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b);
+//CRYPTO_THREAD_ID CRYPTO_THREAD_get_current_id(void);
+//int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b);
 
 #endif
