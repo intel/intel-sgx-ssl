@@ -61,24 +61,91 @@ sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 
 ##Space optimization flags.
 SPACE_OPT=
-if [[ $# -gt 0 ]] && [[ $1 == "space-opt" || $2 == "space-opt" || $3 == "space-opt" ]] ; then
+if [[ $# -gt 0 ]] && [[ $1 == "space-opt" || $2 == "space-opt" || $3 == "space-opt" || $4 == "space-opt" ]] ; then
 SPACE_OPT="-fno-tree-vectorize no-autoalginit -fno-asynchronous-unwind-tables no-cms no-dsa -DOPENSSL_assert=  no-filenames no-rdrand -DOPENSSL_SMALL_FOOTPRINT no-err -fdata-sections -ffunction-sections -Os -Wl,--gc-sections"
 sed -i "/# define OPENSSL_assert/d" $OPENSSL_VERSION/include/openssl/crypto.h
 sed -i '/OPENSSL_die("assertion failed/d' $OPENSSL_VERSION/include/openssl/crypto.h
 fi
 
 OUTPUT_LIB=libsgx_tsgxssl_crypto.a
-if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" ]] ; then
+if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" || $4 == "debug" ]] ; then
 	OUTPUT_LIB=libsgx_tsgxssl_cryptod.a
     ADDITIONAL_CONF="-g "
 fi
 
+# Mitigation flags
+MITIGATION_OPT=""
+MITIGATION_FLAGS=""
+for arg in "$@"
+do
+    case $arg in
+    LOAD)
+        MITIGATION_OPT="$arg"
+        shift
+        ;;
+    CF)
+        MITIGATION_OPT="$arg"
+        shift
+        ;;
+    -mindirect-branch=thunk-extern)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    -mfunction-return=thunk-extern)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    -Wa,-mlfence-before-indirect-branch=register)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    -Wa,-mlfence-before-ret=not)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    -Wa,-mlfence-after-load=yes)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    *)
+        # Unknown option
+        shift
+        ;;
+    esac
+done
+echo $MITIGATION_OPT
+echo $MITIGATION_FLAGS
+echo $SPACE_OPT 
+
 sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
 cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || exit 1
 cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
+cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
+
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
-make build_generated libcrypto.a || exit 1
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
+
+make build_all_generated || exit 1
+
+if [[ "$MITIGATION_OPT" == "LOAD" ]]
+then
+    cp $SGXSSL_ROOT/../openssl_source/Linux/aesni-x86_64.s      ./crypto/aes/aesni-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/keccak1600-x86_64.s ./crypto/sha/keccak1600-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/rsaz-avx2.s         ./crypto/bn/rsaz-avx2.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/rsaz-x86_64.s       ./crypto/bn/rsaz-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64-mont.s       ./crypto/bn/x86_64-mont.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64-mont5.s      ./crypto/bn/x86_64-mont5.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/vpaes-x86_64.s      ./crypto/aes/vpaes-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64cpuid.s       ./crypto/x86_64cpuid.s
+fi
+if [[ "$MITIGATION_OPT" == "CF" ]]
+then
+    cp $SGXSSL_ROOT/../openssl_source/Linux/aesni-x86_64.s      ./crypto/aes/aesni-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/vpaes-x86_64.s      ./crypto/aes/vpaes-x86_64.s
+    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64cpuid.s       ./crypto/x86_64cpuid.s
+fi
+
+make libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1

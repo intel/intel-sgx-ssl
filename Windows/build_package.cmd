@@ -1,5 +1,5 @@
-Rem 
-Rem Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+﻿Rem 
+Rem Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
 Rem 
 Rem Redistribution and use in source and binary forms, with or without
 Rem modification, are permitted provided that the following conditions
@@ -47,19 +47,13 @@ set build_mode=%1
 goto %build_mode%
 
 :win32_debug
-set my_Configuration=Debug
-set my_Platform=Win32
-set VS_CMD_PLFM=x86
-set OPENSSL_CFG_PLFM=sgx-VC-WIN32 --debug
-goto build_start
+@echo 32-bit builds not supported on this branch
+goto error
 
 
 :win32_release
-set my_Configuration=Release
-set my_Platform=Win32
-set VS_CMD_PLFM=x86
-set OPENSSL_CFG_PLFM=sgx-VC-WIN32
-goto build_start
+@echo 32-bit builds not supported on this branch
+goto error
 
 
 :x64_debug
@@ -77,9 +71,19 @@ set VS_CMD_PLFM=amd64
 set OPENSSL_CFG_PLFM=sgx-VC-WIN64A
 goto build_start
 
+:x64_release_cve-2020-0551-load
+set my_Configuration=CVE-2020-0551-Load-Release
+set my_Platform=x64
+set VS_CMD_PLFM=amd64
+set OPENSSL_CFG_PLFM=sgx-VC-WIN64A
+goto build_start
 
-
-
+:x64_release_cve-2020-0551-cf
+set my_Configuration=CVE-2020-0551-CF-Release
+set my_Platform=x64
+set VS_CMD_PLFM=amd64
+set OPENSSL_CFG_PLFM=sgx-VC-WIN64A
+goto build_start
 
 :build_start
 
@@ -96,6 +100,62 @@ call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('B
 copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
 
+if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
+	goto extra_copying
+)
+
+if "%my_Configuration%"=="CVE-2020-0551-Load-Release" (
+	goto extra_copying
+)
+
+goto end_copying
+
+:extra_copying
+
+copy /y  windows\windows-makefile.tmpl %OPENSSL_VERSION%\configurations
+
+copy /y  windows\aesni-mb-x86_64.asm %OPENSSL_VERSION%\crypto\aes
+copy /y  windows\aesni-sha1-x86_64.asm %OPENSSL_VERSION%\crypto\aes
+copy /y  windows\aesni-sha256-x86_64.asm %OPENSSL_VERSION%\crypto\aes
+copy /y  windows\aesni-x86_64.asm %OPENSSL_VERSION%\crypto\aes
+copy /y  windows\aesni-gcm-x86_64.asm %OPENSSL_VERSION%\crypto\modes
+
+copy /y  windows\chacha-x86_64.asm %OPENSSL_VERSION%\crypto\chacha
+
+copy /y  windows\ecp_nistz256-x86_64.asm %OPENSSL_VERSION%\crypto\ec
+
+copy /y  windows\ghash-x86_64.asm %OPENSSL_VERSION%\crypto\modes
+
+copy /y  windows\keccak1600-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+
+copy /y  windows\md5-x86_64.asm %OPENSSL_VERSION%\crypto\md5
+
+copy /y  windows\poly1305-x86_64.asm %OPENSSL_VERSION%\crypto\poly1305
+
+copy /y  windows\rsaz-avx2.asm %OPENSSL_VERSION%\crypto\bn
+
+copy /y  windows\rsaz-x86_64.asm %OPENSSL_VERSION%\crypto\bn
+
+copy /y  windows\sha1-mb-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+copy /y  windows\sha1-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+copy /y  windows\sha256-mb-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+copy /y  windows\sha256-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+copy /y  windows\sha512-x86_64.asm %OPENSSL_VERSION%\crypto\sha
+
+copy /y  windows\vpaes-x86_64.asm %OPENSSL_VERSION%\crypto\aes
+
+copy /y  windows\wp-x86_64.asm %OPENSSL_VERSION%\crypto\whrlpool
+
+copy /y  windows\x86_64cpuid.asm %OPENSSL_VERSION%\crypto
+copy /y  windows\x86_64-gf2m.asm %OPENSSL_VERSION%\crypto\bn
+copy /y  windows\x86_64-mont.asm %OPENSSL_VERSION%\crypto\bn
+copy /y  windows\x86_64-mont5.asm %OPENSSL_VERSION%\crypto\bn
+
+copy /y  windows\x25519-x86_64.asm %OPENSSL_VERSION%\crypto\ec
+
+:end_copying
+
+
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
 REM Visual Studio 2017
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
@@ -106,9 +166,28 @@ if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
 	)
 echo "PROCESSOR_ARCHITECTURE: %PROCESSOR_ARCHITECTURE%"
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
 
-nmake build_generated libcrypto.lib
+set CVE_2020_0551_MITIGATIONS=
+if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
+	set CVE_2020_0551_MITIGATIONS=-Qspectre-load-cf
+) else (
+	if "%my_Configuration%"=="CVE-2020-0551-Load-Release" (
+		set CVE_2020_0551_MITIGATIONS=-Qspectre-load
+	)
+)
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
+
+copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .
+if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
+	nmake AS="python sgx-asm-pp.py" ASFLAGS="-g --assembler=nasm --MITIGATION-CVE-2020-0551=CF" build_generated libcrypto.lib
+) else (
+	if "%my_Configuration%"=="CVE-2020-0551-Load-Release" (
+		nmake AS="python sgx-asm-pp.py" ASFLAGS="-g --assembler=nasm --MITIGATION-CVE-2020-0551=LOAD" build_generated libcrypto.lib
+	) else (
+		nmake build_generated libcrypto.lib
+	)
+)
+
 if %errorlevel% neq 0 (
 	echo Failed command: [nmake build_generated libcrypto.lib]   %date% %time%
 	goto error
@@ -136,7 +215,7 @@ if "%my_Configuration%"=="Debug" (
 	xcopy /y %my_Platform%\%my_Configuration%\libsgx_usgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 )
 
-if "%my_Configuration%" neq "Release" (
+if "%my_Configuration%" equ "Debug" (
 	if "%TEST_MODE%" neq "SIM" (
 		cd %my_Platform%\%my_Configuration%\
 		call TestApp.exe
