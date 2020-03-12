@@ -61,7 +61,7 @@ To build Intel® SGX SSL package in Linux OS:
 ```
 make all test
 ```
-This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/. And the Intel® SGX SSL trusted libraries (libsgx_tsgxssl.lib,  libsgx_tsgxssl_crypto.lib) with CVE-2020-0551 Mitigation enabled can be found in package/lib64/{cve-2020-0551-cf|cve-2020-0551-load}/.
+This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/. And the Intel® SGX SSL trusted libraries (libsgx_tsgxssl.lib,  libsgx_tsgxssl_crypto.lib) with CVE-2020-0551 Mitigation enabled can be found in package/lib64/{cve_2020_0551_cf|cve_2020_0551_load}/.
 
 ### Available `make` flags:
 - DEBUG={1,0}: Libraries build mode, with debug symbols or without.
