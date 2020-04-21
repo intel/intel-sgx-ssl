@@ -48,7 +48,7 @@ Linux
 ----------------------------
 ### Prerequisites
 - Perl
-- Toolchain with mitigation (refer to [SGX Linux README](https://github.com/intel/linux-sgx/blob/sgx_2.9.1/README.md))
+- Toolchain with mitigation (refer to [SGX Linux README](https://github.com/intel/linux-sgx/blob/master/README.md))
 - Intel(R) SGX Linux latest release, including SDK, PSW, and driver
 
 To build Intel® SGX SSL package in Linux OS:
