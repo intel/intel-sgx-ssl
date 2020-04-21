@@ -40,20 +40,23 @@ echo "Validating Prerequisites (7z, perl, nasm)"
 7z > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find 7z."
+	exit /b 1
 )
 perl -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find perl."
+	exit /b 1
 )
 nasm -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find nasm."
+	exit /b 1
 )
 
 
 REM This variable must be set to the openssl file name (version) located in the openssl_source folder
 if "%1"=="" (
-	set OPENSSL_VERSION=openssl-1.1.1
+	set OPENSSL_VERSION=openssl-1.1.1d
 ) else (
 	set OPENSSL_VERSION=%1
 )

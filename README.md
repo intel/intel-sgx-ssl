@@ -27,13 +27,11 @@ Build Intel® SGX SSL package
 Windows
 ----------------------------
 ### Prerequisites
-- Microsoft Visual Studio 2015 or 2017.
+- Microsoft Visual Studio 2019
 - 7-Zip
 - Perl
 - NASM (Netwide Assembler)
-- Intel(R) SGX SDK.
-- Intel(R) SGX PSW.
-- Intel(R) SGX driver.
+- Intel(R) SGX Windows latest release, including SDK, PSW, and driver
 (Note: 7-Zip, Perl, NASM need to be included in machine's PATH variable)
 
 To build Intel® SGX SSL package in Windows OS:
@@ -41,7 +39,7 @@ To build Intel® SGX SSL package in Windows OS:
 2. Download and install latest SGX SDK from [Intel Developer Zone](https://software.intel.com/en-us/sgx-sdk/download). You can find installation guide from the same website.
 3. Change the directory to the SGXSSL path and enter the following command:
 ```
-build_all.cmd <OPENSSL_VERSION> [default == openssl-1.1.1]
+build_all.cmd <OPENSSL_VERSION> [default == openssl-1.1.1d]
 ```
 This will build the Intel® SGX SSL libraries (libsgx_tsgxssl.lib, libsgx_usgxssl.lib, libsgx_tsgxssl_crypto.lib), which can be found in package/lib/{Win32|X64}/{debug|release}/. And the version with CVE-2020-0551 Mitigation enabled can be found in package/lib/X64/{CVE-2020-0551-CF-Release|CVE-2020-0551-Load-Release}/.
 
@@ -49,9 +47,8 @@ Linux
 ----------------------------
 ### Prerequisites
 - Perl
-- Intel(R) SGX SDK.
-- Intel(R) SGX PSW.
-- Intel(R) SGX driver.
+- Toolchain with mitigation (refer to [SGX Linux README](https://github.com/intel/linux-sgx/blob/master/README.md))
+- Intel(R) SGX Linux latest release, including SDK, PSW, and driver
 
 To build Intel® SGX SSL package in Linux OS:
 1. Download OpenSSL 1.1.1d package into openssl_source/ directory. (tar.gz package, e.g. openssl-1.1.1d.tar.gz)
