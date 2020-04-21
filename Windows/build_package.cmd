@@ -157,11 +157,9 @@ copy /y  windows\x25519-x86_64.asm %OPENSSL_VERSION%\crypto\ec
 
 
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
-REM Visual Studio 2017
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
+REM Visual Studio 2019
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
 
-REM Visual Studio 2015
-REM call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %VS_CMD_PLFM% %WIN_SDK_VER%
 if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
 	)

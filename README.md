@@ -27,7 +27,7 @@ Build Intel® SGX SSL package
 Windows
 ----------------------------
 ### Prerequisites
-- Microsoft Visual Studio 2015 or 2017.
+- Microsoft Visual Studio 2019.
 - 7-Zip
 - Perl
 - NASM (Netwide Assembler)
