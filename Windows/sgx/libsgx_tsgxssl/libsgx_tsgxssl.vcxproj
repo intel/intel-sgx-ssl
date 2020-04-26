@@ -232,7 +232,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\package\include;$(SolutionDir)..\..\..\..\common\inc\;$(SolutionDir)..\..\..\..\common\inc\tlibc;$(SolutionDir)..\..\..\..\sdk\tlibstdcxx\stlport;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\libc++;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\stlport;%(AdditionalIncludeDirectories);$(VCInstallDir)include;$(IncludePath)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <OmitDefaultLibName>true</OmitDefaultLibName>
-      <AdditionalOptions>/d2FH4- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/d2FH4-  /Zc:tlsGuards- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
@@ -264,6 +264,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\package\include;$(SolutionDir)..\..\..\..\common\inc\;$(SolutionDir)..\..\..\..\common\inc\tlibc;$(SolutionDir)..\..\..\..\sdk\tlibstdcxx\stlport;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\libc++;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\stlport;%(AdditionalIncludeDirectories);$(VCInstallDir)include;$(IncludePath)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <OmitDefaultLibName>true</OmitDefaultLibName>
+      <AdditionalOptions>/d2FH4-  /Zc:tlsGuards- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
@@ -339,7 +340,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <OmitDefaultLibName>true</OmitDefaultLibName>
-      <AdditionalOptions>/d2FH4- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/d2FH4-  /Zc:tlsGuards- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
@@ -355,7 +356,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <OmitDefaultLibName>true</OmitDefaultLibName>
-      <AdditionalOptions>/d2FH4- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/d2FH4-  /Zc:tlsGuards- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
@@ -371,7 +372,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <OmitDefaultLibName>true</OmitDefaultLibName>
-      <AdditionalOptions>/d2FH4- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/d2FH4-  /Zc:tlsGuards- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
