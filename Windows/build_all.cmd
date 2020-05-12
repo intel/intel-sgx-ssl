@@ -40,14 +40,17 @@ echo "Validating Prerequisites (7z, perl, nasm)"
 7z > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find 7z."
+	exit /b 1
 )
 perl -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find perl."
+	exit /b 1
 )
 nasm -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find nasm."
+	exit /b 1
 )
 
 

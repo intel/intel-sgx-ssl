@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -91,6 +91,7 @@ typedef void pthread_rwlockattr_t;
 #define _UNISTD_H
 #define Ubuntu 1
 #define CentOS 2
+#define NixPKG 3
 
 #ifndef OS_ID
 	#error No OS ID defined.	
@@ -99,6 +100,8 @@ typedef void pthread_rwlockattr_t;
 	#include "/usr/include/x86_64-linux-gnu/bits/confname.h"
 #elif OS_ID == CentOS
 	#include "/usr/include/bits/confname.h"
+#elif OS_ID == NixPKG
+	#include "bits/confname.h"
 #else
 	#error Invalid OS ID
 #endif

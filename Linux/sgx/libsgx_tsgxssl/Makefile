@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -80,9 +80,9 @@ endif
 
 SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
-Sgx_tssl_Cpp_Files := $(wildcard *.cpp)
-Sgx_tssl_C_Files := $(wildcard *.c)
-Sgx_tssl_S_Files := $(wildcard *.S)
+Sgx_tssl_Cpp_Files := $(sort $(wildcard *.cpp))
+Sgx_tssl_C_Files := $(sort $(wildcard *.c))
+Sgx_tssl_S_Files := $(sort $(wildcard *.S))
 
 Sgx_tssl_Cpp_Objects := $(addprefix $(OBJDIR)/, $(Sgx_tssl_Cpp_Files:.cpp=.o))
 Sgx_tssl_C_Objects := $(addprefix $(OBJDIR)/, $(Sgx_tssl_C_Files:.c=.o))
