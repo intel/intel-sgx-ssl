@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@ SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
 OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/../openssl_source/OpenSSL_install_dir_tmp"
-OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1*.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1g.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
@@ -76,6 +76,7 @@ fi
 # Mitigation flags
 MITIGATION_OPT=""
 MITIGATION_FLAGS=""
+CC_VERSION=`gcc -dumpversion`
 for arg in "$@"
 do
     case $arg in
@@ -93,6 +94,9 @@ do
         ;;
     -mfunction-return=thunk-extern)
         MITIGATION_FLAGS+=" $arg"
+        if [[ $CC_VERSION -ge 8 ]] ; then
+            MITIGATION_FLAGS+=" -fcf-protection=none"
+        fi
         shift
         ;;
     -Wa,-mlfence-before-indirect-branch=register)

@@ -36,7 +36,7 @@ Rem
 set SGXSSL_VERSION=1.9.100.%errorlevel%
 
 REM Check if Prerequisites apps available
-echo "Validating Prerequisites (7z, perl, nasm)"
+echo "Validating Prerequisites (7z, perl, nasm, openssl source code)"
 7z > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find 7z."
@@ -55,10 +55,13 @@ if %errorlevel% neq 0 (
 
 
 REM This variable must be set to the openssl file name (version) located in the openssl_source folder
-if "%1"=="" (
-	set OPENSSL_VERSION=openssl-1.1.1
+set OPENSSL_VERSION=openssl-1.1.1g
+
+if exist ..\\openssl_source\\%OPENSSL_VERSION%.tar.gz (
+	echo "Found openssl source code of %OPENSSL_VERSION% "
 ) else (
-	set OPENSSL_VERSION=%1
+	echo "Build failed, can't find openssl source code of %OPENSSL_VERSION% "
+	exit /b 1
 )
 
 for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version') DO (
@@ -68,7 +71,7 @@ for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version')
   )
 )
 :break
-set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION:openssl-=%
+set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION%
 echo "Building SGXSSL with: %OPENSSL_VERSION%  %date% %time% to %SGXSSL_VERSION%"
 
 REM *********************************************************
@@ -93,6 +96,11 @@ if %errorlevel% neq 0 (
 	echo "Failed building %pltfrm_conf%  %date% %time%"
 ) else (
 	echo "Successfully built %pltfrm_conf%  %date% %time%"
+)
+
+if "%1"=="nolvi" (
+       echo "No LVI Mitigation configs will be built"
+       goto lvi_skipped
 )
 
 REM *********************************************************
@@ -120,6 +128,7 @@ if %errorlevel% neq 0 (
 )
 
 
+:lvi_skipped
 
 REM # generate list of tools used for creating this release
 set BUILD_TOOLS_FILENAME=sgxssl.%SGXSSL_VERSION%.build-tools.txt

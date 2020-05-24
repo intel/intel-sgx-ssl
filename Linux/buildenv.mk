@@ -28,6 +28,11 @@ ifeq ($(MITIGATION_INDIRECT), 1)
     MITIGATION_CFLAGS += -mindirect-branch-register
 endif
 ifeq ($(MITIGATION_RET), 1)
+    CC_VERSION := $(shell $(CC) -dumpversion)
+    CC_NO_LESS_THAN_8 := $(shell expr $(CC_VERSION) \>\= "8")
+ifeq ($(CC_NO_LESS_THAN_8), 1)
+    MITIGATION_CFLAGS += -fcf-protection=none
+endif
     MITIGATION_CFLAGS += -mfunction-return=thunk-extern
 endif
 endif
