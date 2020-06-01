@@ -24,6 +24,7 @@ DB	0xf0
 	jne	NEAR $L$spin
 	mov	eax,r8d
 DB	0x48,0x98
+	nop
 	ret
 
 

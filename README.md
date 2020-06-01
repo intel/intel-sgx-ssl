@@ -40,7 +40,7 @@ To build Intel® SGX SSL package in Windows OS:
 2. Download and install latest SGX SDK from [Intel Developer Zone](https://software.intel.com/en-us/sgx-sdk/download). You can find installation guide from the same website.
 3. Change the directory to the SGXSSL path and enter the following command:
 ```
-build_all.cmd
+build_all.cmd <OPENSSL_VERSION> [default == openssl-1.1.1]
 ```
 This will build the Intel® SGX SSL libraries (libsgx_tsgxssl.lib, libsgx_usgxssl.lib, libsgx_tsgxssl_crypto.lib), which can be found in package/lib/{Win32|X64}/{debug|release}/. And the version with CVE-2020-0551 Mitigation enabled can be found in package/lib/X64/{CVE-2020-0551-CF-Release|CVE-2020-0551-Load-Release}/.
 

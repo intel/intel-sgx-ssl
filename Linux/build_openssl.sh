@@ -38,7 +38,7 @@ SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
 OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/../openssl_source/OpenSSL_install_dir_tmp"
-OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1g.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1*.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
@@ -99,11 +99,15 @@ do
         fi
         shift
         ;;
-    -Wa,-mlfence-before-indirect-branch=register)
+    -Wa,-mlfence-before-indirect-branch=all)
         MITIGATION_FLAGS+=" $arg"
         shift
         ;;
-    -Wa,-mlfence-before-ret=not)
+    -Wa,-mlfence-before-indirect-branch=memory)
+        MITIGATION_FLAGS+=" $arg"
+        shift
+        ;;
+    -Wa,-mlfence-before-ret=shl)
         MITIGATION_FLAGS+=" $arg"
         shift
         ;;

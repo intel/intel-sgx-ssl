@@ -41,11 +41,12 @@ ifeq ($(MITIGATION_ASM), 1)
     MITIGATION_ASFLAGS += -fno-plt
 ifeq ($(MITIGATION_AFTERLOAD), 1)
     MITIGATION_ASFLAGS += -Wa,-mlfence-after-load=yes
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=memory
 else
-    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=register
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=all
 endif
 ifeq ($(MITIGATION_RET), 1)
-    MITIGATION_ASFLAGS += -Wa,-mlfence-before-ret=not
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-ret=shl
 endif
 endif
 
