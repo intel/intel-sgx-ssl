@@ -3,6 +3,7 @@
 .type	__KeccakF1600,@function
 .align	32
 __KeccakF1600:
+.cfi_startproc	
 	movq	60(%rdi),%rax
 	movq	68(%rdi),%rbx
 	movq	76(%rdi),%rcx
@@ -255,6 +256,7 @@ __KeccakF1600:
 
 	leaq	-192(%r15),%r15
 	ret
+.cfi_endproc	
 .size	__KeccakF1600,.-__KeccakF1600
 
 .type	KeccakF1600,@function
@@ -476,7 +478,7 @@ SHA3_squeeze:
 	movq	%r12,%rdi
 	movq	%r13,%rcx
 .byte	0xf3,0xa4
-	lfence
+    lfence
 
 .Ldone_squeeze:
 	popq	%r14

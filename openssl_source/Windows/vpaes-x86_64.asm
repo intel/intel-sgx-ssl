@@ -103,6 +103,7 @@ DB	102,15,56,0,195
 	movdqa	xmm1,XMMWORD[64+r10*1+r11]
 	pxor	xmm0,xmm4
 DB	102,15,56,0,193
+	nop
 	ret
 
 
@@ -211,6 +212,7 @@ DB	102,15,56,0,226
 DB	102,15,56,0,195
 	pxor	xmm0,xmm4
 DB	102,15,56,0,194
+	nop
 	ret
 
 

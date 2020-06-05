@@ -871,6 +871,7 @@ aesni_ecb_encrypt:
 .type	aesni_ccm64_encrypt_blocks,@function
 .align	16
 aesni_ccm64_encrypt_blocks:
+.cfi_startproc	
 	movl	240(%rcx),%eax
 	movdqu	(%r8),%xmm6
 	movdqa	.Lincrement64(%rip),%xmm9
@@ -929,11 +930,13 @@ aesni_ccm64_encrypt_blocks:
 	pxor	%xmm8,%xmm8
 	pxor	%xmm6,%xmm6
 	ret
+.cfi_endproc	
 .size	aesni_ccm64_encrypt_blocks,.-aesni_ccm64_encrypt_blocks
 .globl	aesni_ccm64_decrypt_blocks
 .type	aesni_ccm64_decrypt_blocks,@function
 .align	16
 aesni_ccm64_decrypt_blocks:
+.cfi_startproc	
 	movl	240(%rcx),%eax
 	movups	(%r8),%xmm6
 	movdqu	(%r9),%xmm3
@@ -1026,6 +1029,7 @@ aesni_ccm64_decrypt_blocks:
 	pxor	%xmm8,%xmm8
 	pxor	%xmm6,%xmm6
 	ret
+.cfi_endproc	
 .size	aesni_ccm64_decrypt_blocks,.-aesni_ccm64_decrypt_blocks
 .globl	aesni_ctr32_encrypt_blocks
 .type	aesni_ctr32_encrypt_blocks,@function
@@ -1845,19 +1849,19 @@ aesni_xts_encrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,221,84,36,0
-	lfence
+    lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,221,92,36,16
-	lfence
+    lfence
 .byte	102,15,56,221,100,36,32
 	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,221,108,36,48
-	lfence
+    lfence
 .byte	102,15,56,221,116,36,64
-	lfence
+    lfence
 .byte	102,15,56,221,124,36,80
 	lfence
 	pxor	%xmm9,%xmm15
@@ -2327,19 +2331,19 @@ aesni_xts_decrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,223,84,36,0
-	lfence
+    lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,223,92,36,16
-	lfence
+    lfence
 .byte	102,15,56,223,100,36,32
 	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,223,108,36,48
-	lfence
+    lfence
 .byte	102,15,56,223,116,36,64
-	lfence
+    lfence
 .byte	102,15,56,223,124,36,80
 	lfence
 	pxor	%xmm9,%xmm15
@@ -2812,6 +2816,7 @@ aesni_ocb_encrypt:
 .type	__ocb_encrypt6,@function
 .align	32
 __ocb_encrypt6:
+.cfi_startproc	
 	pxor	%xmm9,%xmm15
 	movdqu	(%rbx,%r12,1),%xmm11
 	movdqa	%xmm10,%xmm12
@@ -2910,11 +2915,13 @@ __ocb_encrypt6:
 .byte	102,65,15,56,221,255
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_encrypt6,.-__ocb_encrypt6
 
 .type	__ocb_encrypt4,@function
 .align	32
 __ocb_encrypt4:
+.cfi_startproc	
 	pxor	%xmm9,%xmm15
 	movdqu	(%rbx,%r12,1),%xmm11
 	movdqa	%xmm10,%xmm12
@@ -2980,11 +2987,13 @@ __ocb_encrypt4:
 .byte	102,65,15,56,221,237
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_encrypt4,.-__ocb_encrypt4
 
 .type	__ocb_encrypt1,@function
 .align	32
 __ocb_encrypt1:
+.cfi_startproc	
 	pxor	%xmm15,%xmm7
 	pxor	%xmm9,%xmm7
 	pxor	%xmm2,%xmm8
@@ -3016,6 +3025,7 @@ __ocb_encrypt1:
 .byte	102,15,56,221,215
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_encrypt1,.-__ocb_encrypt1
 
 .globl	aesni_ocb_decrypt
@@ -3258,6 +3268,7 @@ aesni_ocb_decrypt:
 .type	__ocb_decrypt6,@function
 .align	32
 __ocb_decrypt6:
+.cfi_startproc	
 	pxor	%xmm9,%xmm15
 	movdqu	(%rbx,%r12,1),%xmm11
 	movdqa	%xmm10,%xmm12
@@ -3350,11 +3361,13 @@ __ocb_decrypt6:
 .byte	102,65,15,56,223,255
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_decrypt6,.-__ocb_decrypt6
 
 .type	__ocb_decrypt4,@function
 .align	32
 __ocb_decrypt4:
+.cfi_startproc	
 	pxor	%xmm9,%xmm15
 	movdqu	(%rbx,%r12,1),%xmm11
 	movdqa	%xmm10,%xmm12
@@ -3416,11 +3429,13 @@ __ocb_decrypt4:
 .byte	102,65,15,56,223,237
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_decrypt4,.-__ocb_decrypt4
 
 .type	__ocb_decrypt1,@function
 .align	32
 __ocb_decrypt1:
+.cfi_startproc	
 	pxor	%xmm15,%xmm7
 	pxor	%xmm9,%xmm7
 	pxor	%xmm7,%xmm2
@@ -3451,6 +3466,7 @@ __ocb_decrypt1:
 .byte	102,15,56,223,215
 	nop
 	ret
+.cfi_endproc	
 .size	__ocb_decrypt1,.-__ocb_decrypt1
 .globl	aesni_cbc_encrypt
 .type	aesni_cbc_encrypt,@function
@@ -3512,7 +3528,6 @@ aesni_cbc_encrypt:
 	subq	%rdx,%rcx
 	xorl	%eax,%eax
 .long	0x9066AAF3
-	lfence
 	leaq	-16(%rdi),%rdi
 	movl	%r10d,%eax
 	movq	%rdi,%rsi
@@ -4392,7 +4407,6 @@ __aesni_set_encrypt_key:
 	addq	$8,%rsp
 .cfi_adjust_cfa_offset	-8
 	ret
-.cfi_endproc	
 .LSEH_end_set_encrypt_key:
 
 .align	16
@@ -4463,6 +4477,7 @@ __aesni_set_encrypt_key:
 	shufps	$170,%xmm1,%xmm1
 	xorps	%xmm1,%xmm2
 	ret
+.cfi_endproc	
 .size	aesni_set_encrypt_key,.-aesni_set_encrypt_key
 .size	__aesni_set_encrypt_key,.-__aesni_set_encrypt_key
 .align	64

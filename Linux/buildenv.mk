@@ -28,6 +28,11 @@ ifeq ($(MITIGATION_INDIRECT), 1)
     MITIGATION_CFLAGS += -mindirect-branch-register
 endif
 ifeq ($(MITIGATION_RET), 1)
+    CC_VERSION := $(shell $(CC) -dumpversion)
+    CC_NO_LESS_THAN_8 := $(shell expr $(CC_VERSION) \>\= "8")
+ifeq ($(CC_NO_LESS_THAN_8), 1)
+    MITIGATION_CFLAGS += -fcf-protection=none
+endif
     MITIGATION_CFLAGS += -mfunction-return=thunk-extern
 endif
 endif
@@ -36,11 +41,12 @@ ifeq ($(MITIGATION_ASM), 1)
     MITIGATION_ASFLAGS += -fno-plt
 ifeq ($(MITIGATION_AFTERLOAD), 1)
     MITIGATION_ASFLAGS += -Wa,-mlfence-after-load=yes
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=memory
 else
-    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=register
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-indirect-branch=all
 endif
 ifeq ($(MITIGATION_RET), 1)
-    MITIGATION_ASFLAGS += -Wa,-mlfence-before-ret=not
+    MITIGATION_ASFLAGS += -Wa,-mlfence-before-ret=shl
 endif
 endif
 
