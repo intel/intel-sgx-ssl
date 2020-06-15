@@ -1,0 +1,142 @@
+diff --git a/Configure b/Configure
+index 5a699836f3..92ce661d68 100755
+--- a/Configure
++++ b/Configure
+@@ -1382,7 +1382,6 @@ unless ($disabled{asm}) {
+         push @{$config{lib_defines}}, "AES_XTS_ASM" if ($target{aes_asm_src} =~ s/\s*aes-xts\.fake//);
+         $target{aes_asm_src} =~ s/\s*(vpaes|aesni)-x86\.s//g if ($disabled{sse2});
+         push @{$config{lib_defines}}, "VPAES_ASM" if ($target{aes_asm_src} =~ m/vpaes/);
+-        push @{$config{lib_defines}}, "BSAES_ASM" if ($target{aes_asm_src} =~ m/bsaes/);
+     }
+     if ($target{wp_asm_src} =~ /mmx/) {
+         if ($config{processor} eq "386") {
+diff --git a/crypto/perlasm/x86_64-xlate.pl b/crypto/perlasm/x86_64-xlate.pl
+index 29a0eacfd5..66ea0e599d 100755
+--- a/crypto/perlasm/x86_64-xlate.pl
++++ b/crypto/perlasm/x86_64-xlate.pl
+@@ -154,7 +154,9 @@ my %globals;
+ 		    $epilogue = "movq	8(%rsp),%rdi\n\t" .
+ 				"movq	16(%rsp),%rsi\n\t";
+ 		}
+-	    	$epilogue . ".byte	0xf3,0xc3";
++            # Emit mnemonic instead of .byte directive to mitigate the ret instruction.
++            $epilogue .= "ret";
++            #$epilogue .= ".byte    0xf3,0xc3";
+ 	    } elsif ($self->{op} eq "call" && !$elf && $current_segment eq ".init") {
+ 		".p2align\t3\n\t.quad";
+ 	    } else {
+diff --git a/crypto/rand/rand_lib.c b/crypto/rand/rand_lib.c
+index 91b2652311..3f0bdbe0fe 100644
+--- a/crypto/rand/rand_lib.c
++++ b/crypto/rand/rand_lib.c
+@@ -835,35 +835,27 @@ int RAND_set_rand_method(const RAND_METHOD *meth)
+     CRYPTO_THREAD_unlock(rand_meth_lock);
+     return 1;
+ }
++int sgx_rand_status(void);
++int get_sgx_rand_bytes(unsigned char *buf, int num);
++
++RAND_METHOD sgxssl_rand_meth = {
++    NULL,                       /* seed */
++    get_sgx_rand_bytes,
++    NULL,                       /* cleanup */
++    NULL,                       /* add */
++    get_sgx_rand_bytes,
++    sgx_rand_status,
++};
+ 
+ const RAND_METHOD *RAND_get_rand_method(void)
+ {
+-    const RAND_METHOD *tmp_meth = NULL;
+-
+-    if (!RUN_ONCE(&rand_init, do_rand_init))
+-        return NULL;
+-
+-    CRYPTO_THREAD_write_lock(rand_meth_lock);
+-    if (default_RAND_meth == NULL) {
+-#ifndef OPENSSL_NO_ENGINE
+-        ENGINE *e;
+-
+-        /* If we have an engine that can do RAND, use it. */
+-        if ((e = ENGINE_get_default_RAND()) != NULL
+-                && (tmp_meth = ENGINE_get_RAND(e)) != NULL) {
+-            funct_ref = e;
+-            default_RAND_meth = tmp_meth;
+-        } else {
+-            ENGINE_finish(e);
+-            default_RAND_meth = &rand_meth;
+-        }
+-#else
+-        default_RAND_meth = &rand_meth;
+-#endif
++    //Default SGXSSL will always use RDRAND engine (sgx_get_rand()).
++    //Thread lock removed due to performance drop it cause. (Lock mechanism result many enclave EENTER/EEXIT)
++    //
++    if (!default_RAND_meth) {
++        default_RAND_meth = &sgxssl_rand_meth;
+     }
+-    tmp_meth = default_RAND_meth;
+-    CRYPTO_THREAD_unlock(rand_meth_lock);
+-    return tmp_meth;
++    return default_RAND_meth;
+ }
+ 
+ #ifndef OPENSSL_NO_ENGINE
+diff --git a/crypto/uid.c b/crypto/uid.c
+index 65b1171039..89720a74ff 100644
+--- a/crypto/uid.c
++++ b/crypto/uid.c
+@@ -12,7 +12,7 @@
+ 
+ #if defined(OPENSSL_SYS_WIN32) || defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_UEFI)
+ 
+-int OPENSSL_issetugid(void)
++int OPENSSLd_issetugid(void)
+ {
+     return 0;
+ }
+@@ -21,7 +21,7 @@ int OPENSSL_issetugid(void)
+ 
+ # include OPENSSL_UNISTD
+ 
+-int OPENSSL_issetugid(void)
++int OPENSSLd_issetugid(void)
+ {
+     return issetugid();
+ }
+@@ -38,7 +38,7 @@ int OPENSSL_issetugid(void)
+ #  endif
+ # endif
+ 
+-int OPENSSL_issetugid(void)
++int OPENSSLd_issetugid(void)
+ {
+ # ifdef OSSL_IMPLEMENT_GETAUXVAL
+     return getauxval(AT_SECURE) != 0;
+diff --git a/sgx_config.conf b/sgx_config.conf
+new file mode 100644
+index 0000000000..abab7b8f60
+--- /dev/null
++++ b/sgx_config.conf
+@@ -0,0 +1,21 @@
++## SgxSSL configuration targets. This is required inorder to disable dso build.
++
++
++(
++    'sgx-linux-x86_64' => {
++        inherit_from    => [ 'linux-x86_64' ],
++        dso_scheme     => undef,
++    },
++
++    'sgx-VC-WIN32' => {
++        inherit_from    => [ 'VC-WIN32' ],
++        dso_scheme     => undef,
++    },
++
++    'sgx-VC-WIN64A' => {
++        inherit_from    => [ 'VC-WIN64A' ],
++        dso_scheme     => undef,
++    }
++);
++
++
