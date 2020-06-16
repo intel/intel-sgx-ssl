@@ -1,0 +1,464 @@
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/aes/aesni-sha1-x86_64.s openssl/crypto/aes/aesni-sha1-x86_64.s
+--- openssl1.1.1d/crypto/aes/aesni-sha1-x86_64.s	2020-05-19 12:58:39.801339742 -0400
++++ openssl/crypto/aes/aesni-sha1-x86_64.s	2020-05-18 08:42:15.901917925 -0400
+@@ -2717,6 +2717,8 @@
+ .cfi_endproc	
+ .size	aesni_cbc_sha1_enc_avx,.-aesni_cbc_sha1_enc_avx
+ .align	64
++
++.title "begin table"
+ K_XX_XX:
+ .long	0x5a827999,0x5a827999,0x5a827999,0x5a827999
+ .long	0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1
+@@ -2726,6 +2728,8 @@
+ .byte	0xf,0xe,0xd,0xc,0xb,0xa,0x9,0x8,0x7,0x6,0x5,0x4,0x3,0x2,0x1,0x0
+ 
+ .byte	65,69,83,78,73,45,67,66,67,43,83,72,65,49,32,115,116,105,116,99,104,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+ .type	aesni_cbc_sha1_enc_shaext,@function
+ .align	32
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/aes/aesni-sha256-x86_64.s openssl/crypto/aes/aesni-sha256-x86_64.s
+--- openssl1.1.1d/crypto/aes/aesni-sha256-x86_64.s	2020-05-19 12:58:40.157342132 -0400
++++ openssl/crypto/aes/aesni-sha256-x86_64.s	2020-05-18 08:43:25.166692136 -0400
+@@ -33,6 +33,8 @@
+ .size	aesni_cbc_sha256_enc,.-aesni_cbc_sha256_enc
+ 
+ .align	64
++
++.title "begin table"
+ .type	K256,@object
+ K256:
+ .long	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5
+@@ -73,6 +75,8 @@
+ .long	0,0,0,0,   0,0,0,0,   -1,-1,-1,-1
+ .long	0,0,0,0,   0,0,0,0
+ .byte	65,69,83,78,73,45,67,66,67,43,83,72,65,50,53,54,32,115,116,105,116,99,104,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+ .type	aesni_cbc_sha256_enc_xop,@function
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/aes/aesni-x86_64.s openssl/crypto/aes/aesni-x86_64.s
+--- openssl1.1.1d/crypto/aes/aesni-x86_64.s	2020-05-19 12:58:40.397343743 -0400
++++ openssl/crypto/aes/aesni-x86_64.s	2020-05-18 08:44:20.671246436 -0400
+@@ -4435,6 +4435,8 @@
+ .size	aesni_set_encrypt_key,.-aesni_set_encrypt_key
+ .size	__aesni_set_encrypt_key,.-__aesni_set_encrypt_key
+ .align	64
++
++.title "begin table"
+ .Lbswap_mask:
+ .byte	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
+ .Lincrement32:
+@@ -4455,4 +4457,6 @@
+ .long	0x1b,0x1b,0x1b,0x1b
+ 
+ .byte	65,69,83,32,102,111,114,32,73,110,116,101,108,32,65,69,83,45,78,73,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/aes/vpaes-x86_64.s openssl/crypto/aes/vpaes-x86_64.s
+--- openssl1.1.1d/crypto/aes/vpaes-x86_64.s	2020-05-19 12:58:40.453344119 -0400
++++ openssl/crypto/aes/vpaes-x86_64.s	2020-05-18 08:44:52.487542611 -0400
+@@ -754,6 +754,8 @@
+ 
+ .type	_vpaes_consts,@object
+ .align	64
++
++.title "begin table"
+ _vpaes_consts:
+ .Lk_inv:
+ .quad	0x0E05060F0D080180, 0x040703090A0B0C02
+@@ -849,5 +851,7 @@
+ .quad	0x1387EA537EF94000, 0xC7AA6DB9D4943E2D
+ .quad	0x12D7560F93441D00, 0xCA4B8159D8C58E9C
+ .byte	86,101,99,116,111,114,32,80,101,114,109,117,116,97,116,105,111,110,32,65,69,83,32,102,111,114,32,120,56,54,95,54,52,47,83,83,83,69,51,44,32,77,105,107,101,32,72,97,109,98,117,114,103,32,40,83,116,97,110,102,111,114,100,32,85,110,105,118,101,114,115,105,116,121,41,0
++.title "end table"
++
+ .align	64
+ .size	_vpaes_consts,.-_vpaes_consts
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/bn/rsaz-avx2.s openssl/crypto/bn/rsaz-avx2.s
+--- openssl1.1.1d/crypto/bn/rsaz-avx2.s	2020-05-19 12:58:40.589345031 -0400
++++ openssl/crypto/bn/rsaz-avx2.s	2020-05-18 08:46:13.732241551 -0400
+@@ -1731,6 +1731,8 @@
+ .size	rsaz_avx2_eligible,.-rsaz_avx2_eligible
+ 
+ .align	64
++
++.title "begin table"
+ .Land_mask:
+ .quad	0x1fffffff,0x1fffffff,0x1fffffff,0x1fffffff
+ .Lscatter_permd:
+@@ -1741,4 +1743,6 @@
+ .long	0,0,0,0, 1,1,1,1
+ .long	2,2,2,2, 3,3,3,3
+ .long	4,4,4,4, 4,4,4,4
++.title "end table"
++
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/bn/rsaz-x86_64.s openssl/crypto/bn/rsaz-x86_64.s
+--- openssl1.1.1d/crypto/bn/rsaz-x86_64.s	2020-05-19 12:58:40.705345810 -0400
++++ openssl/crypto/bn/rsaz-x86_64.s	2020-05-18 08:47:22.636783236 -0400
+@@ -1983,6 +1983,9 @@
+ .size	rsaz_512_gather4,.-rsaz_512_gather4
+ 
+ .align	64
++
++.title "begin table"
+ .Linc:
+ .long	0,0, 1,1
+ .long	2,2, 2,2
++.title "end table"
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/bn/x86_64-gf2m.s openssl/crypto/bn/x86_64-gf2m.s
+--- openssl1.1.1d/crypto/bn/x86_64-gf2m.s	2020-05-19 12:58:40.753346132 -0400
++++ openssl/crypto/bn/x86_64-gf2m.s	2020-05-18 08:48:06.521109319 -0400
+@@ -307,5 +307,9 @@
+ .Lend_mul_2x2:
+ .cfi_endproc	
+ .size	bn_GF2m_mul_2x2,.-bn_GF2m_mul_2x2
++
++.title "begin table"
+ .byte	71,70,40,50,94,109,41,32,77,117,108,116,105,112,108,105,99,97,116,105,111,110,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	16
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/bn/x86_64-mont5.s openssl/crypto/bn/x86_64-mont5.s
+--- openssl1.1.1d/crypto/bn/x86_64-mont5.s	2020-05-19 12:58:41.029347985 -0400
++++ openssl/crypto/bn/x86_64-mont5.s	2020-05-18 08:49:53.053854719 -0400
+@@ -3758,7 +3758,11 @@
+ .LSEH_end_bn_gather5:
+ .size	bn_gather5,.-bn_gather5
+ .align	64
++
++.title "begin table"
+ .Linc:
+ .long	0,0, 1,1
+ .long	2,2, 2,2
+ .byte	77,111,110,116,103,111,109,101,114,121,32,77,117,108,116,105,112,108,105,99,97,116,105,111,110,32,119,105,116,104,32,115,99,97,116,116,101,114,47,103,97,116,104,101,114,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/bn/x86_64-mont.s openssl/crypto/bn/x86_64-mont.s
+--- openssl1.1.1d/crypto/bn/x86_64-mont.s	2020-05-19 12:58:40.841346723 -0400
++++ openssl/crypto/bn/x86_64-mont.s	2020-05-18 08:49:01.453500820 -0400
+@@ -1235,5 +1235,9 @@
+ 	ret
+ .cfi_endproc	
+ .size	bn_mulx4x_mont,.-bn_mulx4x_mont
++
++.title "begin table"
+ .byte	77,111,110,116,103,111,109,101,114,121,32,77,117,108,116,105,112,108,105,99,97,116,105,111,110,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	16
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/buildinf.h openssl/crypto/buildinf.h
+--- openssl1.1.1d/crypto/buildinf.h	2020-05-19 12:58:41.037348038 -0400
++++ openssl/crypto/buildinf.h	2020-05-11 21:47:24.821265114 -0400
+@@ -11,7 +11,7 @@
+  */
+ 
+ #define PLATFORM "platform: sgx-linux-x86_64"
+-#define DATE "built on: Tue May 19 16:58:41 2020 UTC"
++#define DATE "built on: Tue May 12 01:47:24 2020 UTC"
+ 
+ /*
+  * Generate compiler_flags as an array of individual characters. This is a
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/chacha/chacha-x86_64.s openssl/crypto/chacha/chacha-x86_64.s
+--- openssl1.1.1d/crypto/chacha/chacha-x86_64.s	2020-05-19 12:58:41.269349595 -0400
++++ openssl/crypto/chacha/chacha-x86_64.s	2020-05-18 08:50:49.218227576 -0400
+@@ -3,6 +3,8 @@
+ 
+ 
+ .align	64
++
++.title "begin table"
+ .Lzero:
+ .long	0,0,0,0
+ .Lone:
+@@ -21,7 +23,11 @@
+ .byte	0x3,0x0,0x1,0x2, 0x7,0x4,0x5,0x6, 0xb,0x8,0x9,0xa, 0xf,0xc,0xd,0xe
+ .Ltwoy:
+ .long	2,0,0,0, 2,0,0,0
++.title "end table"
++
+ .align	64
++
++.title "begin table"
+ .Lzeroz:
+ .long	0,0,0,0, 1,0,0,0, 2,0,0,0, 3,0,0,0
+ .Lfourz:
+@@ -33,6 +39,8 @@
+ .Lsigma:
+ .byte	101,120,112,97,110,100,32,51,50,45,98,121,116,101,32,107,0
+ .byte	67,104,97,67,104,97,50,48,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .globl	ChaCha20_ctr32
+ .type	ChaCha20_ctr32,@function
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/ec/ecp_nistz256-x86_64.s openssl/crypto/ec/ecp_nistz256-x86_64.s
+--- openssl1.1.1d/crypto/ec/ecp_nistz256-x86_64.s	2020-05-19 12:58:41.601351822 -0400
++++ openssl/crypto/ec/ecp_nistz256-x86_64.s	2020-05-18 08:52:09.586743551 -0400
+@@ -2,6 +2,8 @@
+ .globl	ecp_nistz256_precomputed
+ .type	ecp_nistz256_precomputed,@object
+ .align	4096
++
++.title "begin table"
+ ecp_nistz256_precomputed:
+ .long	0x18a9143c,0x79e730d4,0x5fedb601,0x75ba95fc,0x77622510,0x79fb732b,0xa53755c6,0x18905f76,0xce95560a,0xddf25357,0xba19e45c,0x8b4ab8e4,0xdd21f325,0xd2e88688,0x25885d85,0x8571ff18
+ .long	0x10ddd64d,0x850046d4,0xa433827d,0xaa6ae3c1,0x8d1490d9,0x73220503,0x3dcf3a3b,0xf6bb32e4,0x61bee1a5,0x2f3648d3,0xeb236ff8,0x152cd7cb,0x92042dbe,0x19a8fb0e,0x0a5b8a3b,0x78c57751
+@@ -2371,12 +2373,16 @@
+ .long	0xc716cc0a,0xd85218c0,0x85691c49,0xf4b5ff90,0xce356ac6,0xa4fd666b,0x4b327a7a,0x17c72895,0xda6be7de,0xf93d5085,0x3301d34e,0xff71530e,0xd8f448e8,0x4cd96442,0x2ed18ffa,0x9283d331
+ .long	0x2a849870,0x4d33dd99,0x41576335,0xa716964b,0x179be0e5,0xff5e3a9b,0x83b13632,0x5b9d6b1b,0xa52f313b,0x3b8bd7d4,0x637a4660,0xc9dd95a0,0x0b3e218f,0x30035962,0xc7b28a3c,0xce1481a3
+ .long	0x43228d83,0xab41b43a,0x4ad63f99,0x24ae1c30,0x46a51229,0x8e525f1a,0xcd26d2b4,0x14af860f,0x3f714aa1,0xd6baef61,0xeb78795e,0xf51865ad,0xe6a9d694,0xd3e21fce,0x8a37b527,0x82ceb1dd
++.title "end table"
++
+ .size	ecp_nistz256_precomputed,.-ecp_nistz256_precomputed
+ .text	
+ 
+ 
+ 
+ .align	64
++
++.title "begin table"
+ .Lpoly:
+ .quad	0xffffffffffffffff, 0x00000000ffffffff, 0x0000000000000000, 0xffffffff00000001
+ 
+@@ -2398,6 +2404,7 @@
+ .quad	0xf3b9cac2fc632551, 0xbce6faada7179e84, 0xffffffffffffffff, 0xffffffff00000000
+ .LordK:
+ .quad	0xccd1c8aaee00bc4f
++.title "end table"
+ 
+ .globl	ecp_nistz256_mul_by_2
+ .type	ecp_nistz256_mul_by_2,@function
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/ec/x25519-x86_64.s openssl/crypto/ec/x25519-x86_64.s
+--- openssl1.1.1d/crypto/ec/x25519-x86_64.s	2020-05-19 12:58:41.669352278 -0400
++++ openssl/crypto/ec/x25519-x86_64.s	2020-05-18 08:52:36.498912608 -0400
+@@ -789,4 +789,8 @@
+ .Lfe64_to_epilogue:
+ 	ret
+ .size	x25519_fe64_tobytes,.-x25519_fe64_tobytes
++
++.title "begin table"
+ .byte	88,50,53,53,49,57,32,112,114,105,109,105,116,105,118,101,115,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/modes/aesni-gcm-x86_64.s openssl/crypto/modes/aesni-gcm-x86_64.s
+--- openssl1.1.1d/crypto/modes/aesni-gcm-x86_64.s	2020-05-19 12:58:41.849353486 -0400
++++ openssl/crypto/modes/aesni-gcm-x86_64.s	2020-05-18 09:15:46.007812583 -0400
+@@ -771,6 +771,8 @@
+ .cfi_endproc	
+ .size	aesni_gcm_encrypt,.-aesni_gcm_encrypt
+ .align	64
++
++.title "begin table"
+ .Lbswap_mask:
+ .byte	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
+ .Lpoly:
+@@ -782,4 +784,6 @@
+ .Lone_lsb:
+ .byte	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ .byte	65,69,83,45,78,73,32,71,67,77,32,109,111,100,117,108,101,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/modes/ghash-x86_64.s openssl/crypto/modes/ghash-x86_64.s
+--- openssl1.1.1d/crypto/modes/ghash-x86_64.s	2020-05-19 12:58:41.985354399 -0400
++++ openssl/crypto/modes/ghash-x86_64.s	2020-05-18 09:16:24.015681186 -0400
+@@ -1793,6 +1793,8 @@
+ .cfi_endproc	
+ .size	gcm_ghash_avx,.-gcm_ghash_avx
+ .align	64
++
++.title "begin table"
+ .Lbswap_mask:
+ .byte	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
+ .L0x1c2_polynomial:
+@@ -1801,7 +1803,11 @@
+ .long	7,0,7,0
+ .L7_mask_poly:
+ .long	7,0,450,0
++.title "end table"
++
+ .align	64
++
++.title "begin table"
+ .type	.Lrem_4bit,@object
+ .Lrem_4bit:
+ .long	0,0,0,471859200,0,943718400,0,610271232
+@@ -1844,4 +1850,6 @@
+ .value	0xBBF0,0xBA32,0xB874,0xB9B6,0xBCF8,0xBD3A,0xBF7C,0xBEBE
+ 
+ .byte	71,72,65,83,72,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/poly1305/poly1305-x86_64.s openssl/crypto/poly1305/poly1305-x86_64.s
+--- openssl1.1.1d/crypto/poly1305/poly1305-x86_64.s	2020-05-19 12:58:42.189355767 -0400
++++ openssl/crypto/poly1305/poly1305-x86_64.s	2020-05-18 09:17:11.927529871 -0400
+@@ -3429,6 +3429,8 @@
+ 	ret
+ .size	poly1305_emit_base2_44,.-poly1305_emit_base2_44
+ .align	64
++
++.title "begin table"
+ .Lconst:
+ .Lmask24:
+ .long	0x0ffffff,0,0x0ffffff,0,0x0ffffff,0,0x0ffffff,0
+@@ -3451,8 +3453,11 @@
+ .quad	44,44,42,64
+ .L2_44_shift_lft:
+ .quad	8,8,10,64
++.title "end table"
+ 
+ .align	64
++
++.title "begin table"
+ .Lx_mask44:
+ .quad	0xfffffffffff,0xfffffffffff,0xfffffffffff,0xfffffffffff
+ .quad	0xfffffffffff,0xfffffffffff,0xfffffffffff,0xfffffffffff
+@@ -3460,6 +3465,8 @@
+ .quad	0x3ffffffffff,0x3ffffffffff,0x3ffffffffff,0x3ffffffffff
+ .quad	0x3ffffffffff,0x3ffffffffff,0x3ffffffffff,0x3ffffffffff
+ .byte	80,111,108,121,49,51,48,53,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	16
+ .globl	xor128_encrypt_n_pad
+ .type	xor128_encrypt_n_pad,@function
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/keccak1600-x86_64.s openssl/crypto/sha/keccak1600-x86_64.s
+--- openssl1.1.1d/crypto/sha/keccak1600-x86_64.s	2020-05-19 12:58:42.245356142 -0400
++++ openssl/crypto/sha/keccak1600-x86_64.s	2020-05-18 09:19:37.823153835 -0400
+@@ -491,6 +491,8 @@
+ .cfi_endproc	
+ .size	SHA3_squeeze,.-SHA3_squeeze
+ .align	256
++
++.title "begin table"
+ .quad	0,0,0,0,0,0,0,0
+ .type	iotas,@object
+ iotas:
+@@ -520,3 +522,5 @@
+ .quad	0x8000000080008008
+ .size	iotas,.-iotas
+ .byte	75,101,99,99,97,107,45,49,54,48,48,32,97,98,115,111,114,98,32,97,110,100,32,115,113,117,101,101,122,101,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/sha1-mb-x86_64.s openssl/crypto/sha/sha1-mb-x86_64.s
+--- openssl1.1.1d/crypto/sha/sha1-mb-x86_64.s	2020-05-19 12:58:42.629358717 -0400
++++ openssl/crypto/sha/sha1-mb-x86_64.s	2020-05-18 09:20:57.682993236 -0400
+@@ -7252,6 +7252,8 @@
+ .size	sha1_multi_block_avx2,.-sha1_multi_block_avx2
+ 
+ .align	256
++
++.title "begin table"
+ .long	0x5a827999,0x5a827999,0x5a827999,0x5a827999
+ .long	0x5a827999,0x5a827999,0x5a827999,0x5a827999
+ K_XX_XX:
+@@ -7265,3 +7267,5 @@
+ .long	0x00010203,0x04050607,0x08090a0b,0x0c0d0e0f
+ .byte	0xf,0xe,0xd,0xc,0xb,0xa,0x9,0x8,0x7,0x6,0x5,0x4,0x3,0x2,0x1,0x0
+ .byte	83,72,65,49,32,109,117,108,116,105,45,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/sha1-x86_64.s openssl/crypto/sha/sha1-x86_64.s
+--- openssl1.1.1d/crypto/sha/sha1-x86_64.s	2020-05-19 12:58:43.021361346 -0400
++++ openssl/crypto/sha/sha1-x86_64.s	2020-05-18 09:21:22.254949273 -0400
+@@ -5434,6 +5434,8 @@
+ .cfi_endproc	
+ .size	sha1_block_data_order_avx2,.-sha1_block_data_order_avx2
+ .align	64
++
++.title "begin table"
+ K_XX_XX:
+ .long	0x5a827999,0x5a827999,0x5a827999,0x5a827999
+ .long	0x5a827999,0x5a827999,0x5a827999,0x5a827999
+@@ -5447,4 +5449,6 @@
+ .long	0x00010203,0x04050607,0x08090a0b,0x0c0d0e0f
+ .byte	0xf,0xe,0xd,0xc,0xb,0xa,0x9,0x8,0x7,0x6,0x5,0x4,0x3,0x2,0x1,0x0
+ .byte	83,72,65,49,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .align	64
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/sha256-mb-x86_64.s openssl/crypto/sha/sha256-mb-x86_64.s
+--- openssl1.1.1d/crypto/sha/sha256-mb-x86_64.s	2020-05-19 12:58:43.417364001 -0400
++++ openssl/crypto/sha/sha256-mb-x86_64.s	2020-05-18 09:21:45.534909801 -0400
+@@ -7796,6 +7796,8 @@
+ .cfi_endproc	
+ .size	sha256_multi_block_avx2,.-sha256_multi_block_avx2
+ .align	256
++
++.title "begin table"
+ K256:
+ .long	1116352408,1116352408,1116352408,1116352408
+ .long	1116352408,1116352408,1116352408,1116352408
+@@ -7946,3 +7948,5 @@
+ .long	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208
+ .long	0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+ .byte	83,72,65,50,53,54,32,109,117,108,116,105,45,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/sha256-x86_64.s openssl/crypto/sha/sha256-x86_64.s
+--- openssl1.1.1d/crypto/sha/sha256-x86_64.s	2020-05-19 12:58:43.821366709 -0400
++++ openssl/crypto/sha/sha256-x86_64.s	2020-05-18 09:22:18.126857918 -0400
+@@ -1729,6 +1729,8 @@
+ .cfi_endproc	
+ .size	sha256_block_data_order,.-sha256_block_data_order
+ .align	64
++
++.title "begin table"
+ .type	K256,@object
+ K256:
+ .long	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5
+@@ -1771,6 +1773,8 @@
+ .long	0xffffffff,0xffffffff,0x03020100,0x0b0a0908
+ .long	0xffffffff,0xffffffff,0x03020100,0x0b0a0908
+ .byte	83,72,65,50,53,54,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .type	sha256_block_data_order_shaext,@function
+ .align	64
+ sha256_block_data_order_shaext:
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/sha/sha512-x86_64.s openssl/crypto/sha/sha512-x86_64.s
+--- openssl1.1.1d/crypto/sha/sha512-x86_64.s	2020-05-19 12:58:44.217369363 -0400
++++ openssl/crypto/sha/sha512-x86_64.s	2020-05-18 09:22:39.578825813 -0400
+@@ -1727,6 +1727,8 @@
+ .cfi_endproc	
+ .size	sha512_block_data_order,.-sha512_block_data_order
+ .align	64
++
++.title "begin table"
+ .type	K512,@object
+ K512:
+ .quad	0x428a2f98d728ae22,0x7137449123ef65cd
+@@ -1813,6 +1815,8 @@
+ .quad	0x0001020304050607,0x08090a0b0c0d0e0f
+ .quad	0x0001020304050607,0x08090a0b0c0d0e0f
+ .byte	83,72,65,53,49,50,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
++.title "end table"
++
+ .type	sha512_block_data_order_xop,@function
+ .align	64
+ sha512_block_data_order_xop:
+diff -ruN -X diff-exclude-file openssl1.1.1d/crypto/whrlpool/wp-x86_64.s openssl/crypto/whrlpool/wp-x86_64.s
+--- openssl1.1.1d/crypto/whrlpool/wp-x86_64.s	2020-05-19 12:58:44.293369872 -0400
++++ openssl/crypto/whrlpool/wp-x86_64.s	2020-05-18 09:33:24.416956721 -0400
+@@ -609,6 +609,8 @@
+ .size	whirlpool_block,.-whirlpool_block
+ 
+ .align	64
++
++.title "begin table"
+ .type	.Ltable,@object
+ .Ltable:
+ .byte	24,24,96,24,192,120,48,216,24,24,96,24,192,120,48,216
+@@ -877,3 +879,5 @@
+ .byte	228,39,65,139,167,125,149,216
+ .byte	251,238,124,102,221,23,71,158
+ .byte	202,45,191,7,173,90,131,51
++.title "end table"
++
