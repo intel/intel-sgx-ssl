@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -105,7 +105,6 @@ endif
 endif
 endif
 
-								
 TestEnclave_Cpp_Files := $(wildcard $(ENCLAVE_DIR)/*.cpp) $(wildcard $(ENCLAVE_DIR)/tests/*.cpp)
 TestEnclave_C_Files := $(wildcard $(ENCLAVE_DIR)/*.c) $(wildcard $(ENCLAVE_DIR)/tests/*.c)
 
@@ -152,15 +151,15 @@ $(ENCLAVE_DIR)/TestEnclave_t.o: $(ENCLAVE_DIR)/TestEnclave_t.c
 	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-$(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.cpp
+$(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.cpp $(ENCLAVE_DIR)/TestEnclave_t.c
 	$(VCXX) $(TestEnclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.c
+$(ENCLAVE_DIR)/%.o: $(ENCLAVE_DIR)/%.c $(ENCLAVE_DIR)/TestEnclave_t.c
 	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
-$(ENCLAVE_DIR)/tests/%.o: $(ENCLAVE_DIR)/tests/%.c
+$(ENCLAVE_DIR)/tests/%.o: $(ENCLAVE_DIR)/tests/%.c $(ENCLAVE_DIR)/TestEnclave_t.c
 	$(VCC) $(TestEnclave_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
