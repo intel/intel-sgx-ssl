@@ -108,11 +108,11 @@ sgx_tsgxssl_t.o: sgx_tsgxssl_t.c
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-$(OBJDIR)/%.o : %.cpp
+$(OBJDIR)/%.o : %.cpp sgx_tsgxssl_t.c
 	$(VCXX) $(Sgx_tssl_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(OBJDIR)/%.o : %.c
+$(OBJDIR)/%.o : %.c sgx_tsgxssl_t.c
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
@@ -127,4 +127,3 @@ $(TRUSTED_LIB): sgx_tsgxssl_t.c $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(
 
 clean:
 	@rm -f libsgx_tsgxssl.* libsgx_tsgxssld.* sgx_tsgxssl_t.* $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects)
-	
