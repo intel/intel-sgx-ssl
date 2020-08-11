@@ -250,11 +250,6 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define clock_gettime sgxssl_clock_gettime
 
 
-#define pthread_rwlock_init sgxssl_pthread_rwlock_init
-#define pthread_rwlock_rdlock sgxssl_pthread_rwlock_rdlock
-#define pthread_rwlock_wrlock sgxssl_pthread_rwlock_wrlock
-#define pthread_rwlock_unlock sgxssl_pthread_rwlock_unlock
-#define pthread_rwlock_destroy sgxssl_pthread_rwlock_destroy
 #define pthread_once sgxssl_pthread_once
 #define pthread_key_create sgxssl_pthread_key_create
 #define pthread_setspecific sgxssl_pthread_setspecific
