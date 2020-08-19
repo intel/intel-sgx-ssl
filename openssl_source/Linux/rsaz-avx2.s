@@ -1734,7 +1734,6 @@ rsaz_avx2_eligible:
 
 .align	64
 
-.title "begin table"
 .Land_mask:
 .quad	0x1fffffff,0x1fffffff,0x1fffffff,0x1fffffff
 .Lscatter_permd:
@@ -1745,6 +1744,5 @@ rsaz_avx2_eligible:
 .long	0,0,0,0, 1,1,1,1
 .long	2,2,2,2, 3,3,3,3
 .long	4,4,4,4, 4,4,4,4
-.title "end table"
 
 .align	64
