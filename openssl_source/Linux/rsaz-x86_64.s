@@ -2032,8 +2032,6 @@ rsaz_512_gather4:
 
 .align	64
 
-.title "begin table"
 .Linc:
 .long	0,0, 1,1
 .long	2,2, 2,2
-.title "end table"
