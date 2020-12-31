@@ -48,6 +48,7 @@ echo $OPENSSL_VERSION
 
 #Create required directories
 mkdir -p $SGXSSL_ROOT/package/include/openssl/
+mkdir -p $SGXSSL_ROOT/package/include/crypto/
 mkdir -p $SGXSSL_ROOT/package/lib64/
 
 
@@ -157,4 +158,5 @@ make libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
+cp include/crypto/* $SGXSSL_ROOT/package/include/crypto/ || exit 1
 exit 0
