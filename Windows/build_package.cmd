@@ -168,6 +168,7 @@ if %errorlevel% neq 0 (
 xcopy /y  libcrypto.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\libsgx_tsgxssl_crypto.lib*
 xcopy /y  ossl_static.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 xcopy /y include\openssl\* %SGXSSL_ROOT%\package\include\openssl\
+xcopy /y include\crypto\* %SGXSSL_ROOT%\package\include\crypto\
 
 echo "Done building OpenSSL for %my_Platform% | %my_Configuration%. Building Intel® Software Guard Extensions SSL libraries  %date% %time%"
 cd %SGXSSL_SOLUTION%\
@@ -201,6 +202,7 @@ pause
 :cleanup
 
 del /f /q %SGXSSL_ROOT%\package\include\openssl\*
+del /f /q %SGXSSL_ROOT%\package\include\crypto\*
 
 del /f /q %SGXSSL_ROOT%\package\lib\x64\Debug\*
 del /f /q %SGXSSL_ROOT%\package\lib\x64\Release\*
