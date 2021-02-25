@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,12 @@
 #ifndef _TSGXSSL_IO_H_
 #define _TSGXSSL_IO_H_
 
-typedef void FILE;
+#include <stdio.h>
+
+#undef stdout
+#define stdout ((void*)1)
+#undef stderr
+#define stderr ((void*)2)
+typedef struct _IO_FILE FILE;
 
 #endif // _TSGXSSL_IO_H_

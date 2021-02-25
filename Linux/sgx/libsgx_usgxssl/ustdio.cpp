@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+ * Copyright (C) 2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,60 +29,68 @@
  *
  */
 
+#include <stdio.h>
+#include <stdint.h>
 #include <string.h>
-
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
-
-
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
-
 extern "C" {
 
-#define MAX_ENV_BUF_LEN 4096
-static __thread char t_env_buf[MAX_ENV_BUF_LEN];
-
-char *sgxssl_getenv(const char *name)
+uint64_t ocall_cc_fopen(const char *filename, size_t filename_len, const char *mode, size_t mode_len)
 {
-    int ret = 0;
-    int res;
-    int buf_len = 0;
-    
-    if (t_env_buf == NULL || MAX_ENV_BUF_LEN <= 0) {
-        return NULL;
-    }
-   
-    memset(t_env_buf, 0, MAX_ENV_BUF_LEN);
-    res = ocall_cc_getenv(&ret, name, strlen(name), t_env_buf, MAX_ENV_BUF_LEN, &buf_len);
-    if (res != CC_SSL_SUCCESS || ret <= 0 || ret != buf_len) {
-        return NULL;
-    }
-    return t_env_buf;
+    FILE *file_host = fopen(filename, mode);
+    return (uint64_t)file_host;
 }
 
-int sgxssl_atexit(void (*function)(void))
+int ocall_cc_fclose(uint64_t fp)
 {
-	// Do nothing, assuming that registered function does allocations cleanup.
-	// This should be fine, as sgx_destroy_enclave cleans everything inside of enclave.
-	return 0;
+    return fclose((FILE *)fp);
 }
 
+int ocall_cc_ferror(uint64_t fp)
+{
+    return ferror((FILE *)fp);
+}
+
+int ocall_cc_feof(uint64_t fp)
+{
+    return feof((FILE *)fp);
+}
+
+int ocall_cc_fflush(uint64_t fp)
+{
+    return fflush((FILE *)fp);
+}
+
+int ocall_cc_ftell(uint64_t fp)
+{
+    return ftell((FILE *)fp);
+}
+
+int ocall_cc_fseek(uint64_t fp, long offset, int origin)
+{
+    return fseek((FILE *)fp, offset, origin);
+}
+
+size_t ocall_cc_fread(void *buf, size_t total_size, size_t element_size, size_t cnt, uint64_t fp)
+{
+    return fread(buf, element_size, cnt, (FILE *)fp);
+}
+
+size_t ocall_cc_fwrite(const void *buf, size_t total_size, size_t element_size, size_t cnt, uint64_t fp)
+{
+    return fwrite(buf, element_size, cnt, (FILE *)fp);
+}
+
+int ocall_cc_fgets(char *str, int max_cnt, uint64_t fp)
+{
+    if (fgets(str, max_cnt, (FILE *)fp) != NULL) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+int ocall_cc_fputs(const char *str, size_t total_size, uint64_t fp)
+{
+    return fputs(str, (FILE *)fp);
+}
 }

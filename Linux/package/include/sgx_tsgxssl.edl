@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,6 +37,20 @@ enclave {
     
     untrusted {
     	 void u_sgxssl_ftime([out, size=timeb_len] void * timeptr, uint32_t timeb_len);
+         int ocall_cc_read(int fd, [out, size = buf_len] void *buf, size_t buf_len);
+         int ocall_cc_write(int fd, [in, size = buf_len] const void *buf, size_t buf_len);
+         int ocall_cc_getenv([in, size = name_len] const char *name, size_t name_len, [out, size = buf_len] void *buf, int buf_len, [out] int *need_len);
+         uint64_t ocall_cc_fopen([in, size = filename_len] const char *filename, size_t filename_len, [in, size = mode_len] const char *mode, size_t mode_len);
+         int ocall_cc_fclose(uint64_t fp);
+         int ocall_cc_ferror(uint64_t fp);
+         int ocall_cc_feof(uint64_t fp);
+         int ocall_cc_fflush(uint64_t fp);
+         long ocall_cc_ftell(uint64_t fp);
+         int ocall_cc_fseek(uint64_t fp, long offset, int origin);
+         size_t ocall_cc_fread([out, size = total_size] void *buf, size_t total_size, size_t element_size, size_t cnt, uint64_t fp);
+         size_t ocall_cc_fwrite([in, size = total_size] const void *buf, size_t total_size, size_t element_size, size_t cnt, uint64_t fp);
+         int ocall_cc_fgets([out, size = max_cnt] char *str, int max_cnt, uint64_t fp);
+         int ocall_cc_fputs([in, size = total_size] const char *str, size_t total_size, uint64_t fp);
     };
 
     trusted {

@@ -4,7 +4,7 @@ Intel® Software Guard Extensions SSL
 Introduction
 ------------
 The Intel® Software Guard Extensions SSL (Intel® SGX SSL) cryptographic library is intended to provide cryptographic services for Intel® Software Guard Extensions (SGX) enclave applications.
-The Intel® SGX SSL cryptographic library is based on the underlying OpenSSL* Open Source project, providing a full-strength general purpose cryptography library.
+The Intel® SGX SSL cryptographic library is based on the underlying OpenSSL* Open Source project, providing a full-strength general purpose cryptography library and providing a SSL protocol library for the Linux environment.
 Supported OpenSSL version is 1.1.1i. To work with 1.1.0 version please use "openssl_1.1.0" branch.
 
 In order to build Intel® SGX SSL libraries based on old OpenSSL version, checkout the tag with the corresponding versioning, e.g. lin_2.5_1.1.1c. Tag naming convention ``[lin/win]_<Intel(R) SGX SDK VERSION>_<OpenSSL VERSION>``.
@@ -59,7 +59,7 @@ To build Intel® SGX SSL package in Linux OS:
 ```
 make all test
 ```
-This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/. And the Intel® SGX SSL trusted libraries (libsgx_tsgxssl.lib,  libsgx_tsgxssl_crypto.lib) with CVE-2020-0551 Mitigation enabled can be found in package/lib64/{cve_2020_0551_cf|cve_2020_0551_load}/.
+This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a, libsgx_tsgxssl_ssl.a), which can be found in package/lib64/. And the Intel® SGX SSL trusted libraries (libsgx_tsgxssl.a,  libsgx_tsgxssl_crypto.a, libsgx_tsgxssl_ssl.a) with CVE-2020-0551 Mitigation enabled can be found in package/lib64/{cve_2020_0551_cf|cve_2020_0551_load}/.
 
 ### Available `make` flags:
 - DEBUG={1,0}: Libraries build mode, with debug symbols or without.

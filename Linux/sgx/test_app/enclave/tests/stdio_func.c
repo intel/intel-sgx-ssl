@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,19 +42,3 @@ static int print_fp(const char *str, size_t len, void *fp)
     printf("%s", str);
     return 1;
 }
-
-void ERR_print_errors_fp(FILE *fp)
-{
-    ERR_print_errors_cb(print_fp, fp);
-}
-
-int BN_print_fp(FILE *fp, const BIGNUM *a)
-{
-    char* str = BN_bn2hex(a);
-    if (str == NULL)
-		return 0;
-	printf("%s", str);
-	OPENSSL_free(str);
-    return 1;
-}
-

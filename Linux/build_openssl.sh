@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -69,8 +69,10 @@ sed -i '/OPENSSL_die("assertion failed/d' $OPENSSL_VERSION/include/openssl/crypt
 fi
 
 OUTPUT_LIB=libsgx_tsgxssl_crypto.a
+OUTPUT_SSLLIB=libsgx_tsgxssl_ssl.a
 if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" || $4 == "debug" ]] ; then
 	OUTPUT_LIB=libsgx_tsgxssl_cryptod.a
+        OUTPUT_SSLLIB=libsgx_tsgxssl_ssld.a
     ADDITIONAL_CONF="-g "
 fi
 
@@ -132,7 +134,7 @@ cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h -include$SGXSSL_ROOT/../Linux/package/include/tsgxsslio.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
 
 make build_all_generated || exit 1
 
@@ -154,8 +156,9 @@ then
     cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64cpuid.s       ./crypto/x86_64cpuid.s
 fi
 
-make libcrypto.a || exit 1
+make libcrypto.a libssl.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
+cp libssl.a $SGXSSL_ROOT/package/lib64/$OUTPUT_SSLLIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 cp include/crypto/* $SGXSSL_ROOT/package/include/crypto/ || exit 1

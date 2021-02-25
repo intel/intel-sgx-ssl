@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -54,9 +54,11 @@ endif
 
 ifneq ($(MITIGATION-CVE-2020-0551),)
 	$(RM) -r $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/$(TRUSTED_LIB)
+	$(RM) -r $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/$(OPENSSL_SSL_LIB)
 	$(RM) -r $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/$(OPENSSL_LIB)
 	mkdir -p $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)
 	mv $(PACKAGE_LIB)/$(OPENSSL_LIB) $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/
+	mv $(PACKAGE_LIB)/$(OPENSSL_SSL_LIB) $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/
 	mv $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)$(MITIGATION_LIB_PATH)/
 endif
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,47 +56,34 @@ int sgxssl_pipe (int pipefd[2])
 
 size_t sgxssl_write (int fd, const void *buf, size_t n)
 {
-	FSTART;
+    int ret = 0;
+    int res;
 
-	if (fd == FAKE_PIPE_WRITE_FD) {
-		// With pipes the function is used only by the engines/e_dasync.c (dummy async engine).
-		SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
-
-		FEND;
-		// On error, -1 is returned, and errno is set appropriately
-		return -1;
-	}
-
-	// In addition, the function is used by bss_sock.c as writesocket function.
-	// It is unreachable under the assumption that TLS support is not required.
-	// Otherwise should be implemented as OCALL.
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-	FEND;
-
-	return -1;
-
+    if (fd == FAKE_PIPE_WRITE_FD) {
+        return -1;
+    }
+    
+    res = ocall_cc_write(&ret, fd, buf, n);
+    if (res != CC_SSL_SUCCESS) {
+        return -1;
+    }
+    return ret;
 }
 
 size_t sgxssl_read(int fd, void *buf, size_t count)
 {
-	FSTART;
+    int ret = 0;
+    int res;
+    
+    if (fd == FAKE_PIPE_READ_FD) {
+        return -1;
+    }
 
-	if (fd == FAKE_PIPE_READ_FD) {
-		// With pipes the function is used only by the engines/e_dasync.c (dummy async engine).
-		SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
-
-		FEND;
-		// On error, -1 is returned, and errno is set appropriately
-		return -1;
-	}
-
-	// In addition, the function is used by bss_sock.c as readsocket function.
-	// It is unreachable under the assumption that TLS support is not required.
-	// Otherwise should be implemented as OCALL.
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-	FEND;
-
-	return -1;
+    res = ocall_cc_read(&ret, fd, buf, count);
+    if (res != CC_SSL_SUCCESS) {
+        return -1;
+    }
+    return ret;
 }
 
 // TODO

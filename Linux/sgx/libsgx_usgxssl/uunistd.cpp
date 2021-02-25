@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+ * Copyright (C) 2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,60 +29,18 @@
  *
  */
 
-#include <string.h>
-
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
-
-
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
+#include <unistd.h>
 
 extern "C" {
 
-#define MAX_ENV_BUF_LEN 4096
-static __thread char t_env_buf[MAX_ENV_BUF_LEN];
-
-char *sgxssl_getenv(const char *name)
+int ocall_cc_read(int fd, void *buf, size_t buf_len)
 {
-    int ret = 0;
-    int res;
-    int buf_len = 0;
-    
-    if (t_env_buf == NULL || MAX_ENV_BUF_LEN <= 0) {
-        return NULL;
-    }
-   
-    memset(t_env_buf, 0, MAX_ENV_BUF_LEN);
-    res = ocall_cc_getenv(&ret, name, strlen(name), t_env_buf, MAX_ENV_BUF_LEN, &buf_len);
-    if (res != CC_SSL_SUCCESS || ret <= 0 || ret != buf_len) {
-        return NULL;
-    }
-    return t_env_buf;
+    return read(fd, buf, buf_len);
 }
 
-int sgxssl_atexit(void (*function)(void))
+int ocall_cc_write(int fd, const void *buf, size_t buf_len)
 {
-	// Do nothing, assuming that registered function does allocations cleanup.
-	// This should be fine, as sgx_destroy_enclave cleans everything inside of enclave.
-	return 0;
+    return write(fd, buf, buf_len);
 }
 
 }

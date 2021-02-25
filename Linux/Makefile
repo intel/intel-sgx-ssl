@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -51,6 +51,7 @@ sgxssl_no_mitigation:
 clean:
 	$(MAKE) -C sgx/ clean
 	rm -rf $(PACKAGE_LIB)/$(OPENSSL_LIB) $(PACKAGE_INC)/openssl/
+	rm -rf $(PACKAGE_LIB)/$(OPENSSL_SSL_LIB)
 	rm -rf $(PACKAGE_LIB)/cve_2020_0551_load
 	rm -rf $(PACKAGE_LIB)/cve_2020_0551_cf
 

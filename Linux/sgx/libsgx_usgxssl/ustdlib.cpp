@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+ * Copyright (C) 2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,60 +29,33 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
-
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
-
-
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
 
 extern "C" {
 
-#define MAX_ENV_BUF_LEN 4096
-static __thread char t_env_buf[MAX_ENV_BUF_LEN];
-
-char *sgxssl_getenv(const char *name)
+int ocall_cc_getenv(const char *name, int name_len, void *buf, int buf_len, int *need_len)
 {
-    int ret = 0;
-    int res;
-    int buf_len = 0;
+    char *get_buf = NULL;
     
-    if (t_env_buf == NULL || MAX_ENV_BUF_LEN <= 0) {
-        return NULL;
+    if (name == NULL || need_len == NULL || buf_len <= 0) {
+        return -1;
     }
-   
-    memset(t_env_buf, 0, MAX_ENV_BUF_LEN);
-    res = ocall_cc_getenv(&ret, name, strlen(name), t_env_buf, MAX_ENV_BUF_LEN, &buf_len);
-    if (res != CC_SSL_SUCCESS || ret <= 0 || ret != buf_len) {
-        return NULL;
-    }
-    return t_env_buf;
-}
 
-int sgxssl_atexit(void (*function)(void))
-{
-	// Do nothing, assuming that registered function does allocations cleanup.
-	// This should be fine, as sgx_destroy_enclave cleans everything inside of enclave.
-	return 0;
+    get_buf = getenv(name);
+    if (get_buf == NULL) {
+        *need_len = 0;
+        return 0;
+    }
+    *need_len = strlen(get_buf) + 1;
+    if (*need_len > buf_len) {
+        return 0;
+    }
+    if (buf == NULL) {
+        return -1;
+    }
+    memcpy(buf, get_buf, *need_len);
+    return (*need_len);
 }
 
 }
