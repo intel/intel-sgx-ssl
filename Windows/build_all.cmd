@@ -36,12 +36,7 @@ Rem
 set SGXSSL_VERSION=1.9.100.%errorlevel%
 
 REM Check if Prerequisites apps available
-echo "Validating Prerequisites (7z, perl, nasm)"
-7z > nul 2>&1
-if %errorlevel% neq 0 (
-	echo "Build failed, can't find 7z."
-	exit /b 1
-)
+echo "Validating Prerequisites (perl, nasm)"
 perl -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find perl."
@@ -135,10 +130,10 @@ echo "Build completed\nZipping package  %date% %time%"
 
 cd package
 
-7z.exe a ..\sgxssl.%SGXSSL_VERSION%.zip .
+call powershell -Command "Compress-Archive -Path docs, include, lib  -DestinationPath ..\sgxssl.%SGXSSL_VERSION%.zip"
 
 if %errorlevel% neq 0 (
-	echo "Failed command: [7z.exe a ..\sgxssl.%SGXSSL_VERSION%.zip package] %errorlevel%"
+	echo "Failed command: [Compress-Archive ...] %errorlevel%"
 	cd ..
 	exit /b 1
 )
