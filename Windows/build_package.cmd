@@ -180,8 +180,8 @@ if %errorlevel% neq 0 (
 xcopy /y %my_Platform%\%my_Configuration%\libsgx_tsgxssl.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 xcopy /y %my_Platform%\%my_Configuration%\libsgx_usgxssl.lib %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 if "%my_Configuration%"=="Debug" (
-	xcopy /y %my_Platform%\%my_Configuration%\libsgx_tsgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
-	xcopy /y %my_Platform%\%my_Configuration%\libsgx_usgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
+	rem xcopy /y libsgx_tsgxssl\%my_Platform%\%my_Configuration%\libsgx_tsgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
+	rem xcopy /y libsgx_usgxssl\%my_Platform%\%my_Configuration%\libsgx_usgxssl.pdb %SGXSSL_ROOT%\package\lib\%my_Platform%\%my_Configuration%\
 )
 
 if "%my_Configuration%" equ "Debug" (

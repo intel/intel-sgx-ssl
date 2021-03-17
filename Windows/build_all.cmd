@@ -130,7 +130,7 @@ echo "Build completed\nZipping package  %date% %time%"
 
 cd package
 
-call powershell -Command "Compress-Archive -Path docs, include, lib  -DestinationPath ..\sgxssl.%SGXSSL_VERSION%.zip"
+call powershell -Command "Compress-Archive -Path docs, include, lib  -DestinationPath ..\sgxssl.%SGXSSL_VERSION%.zip -Update"
 
 if %errorlevel% neq 0 (
 	echo "Failed command: [Compress-Archive ...] %errorlevel%"
