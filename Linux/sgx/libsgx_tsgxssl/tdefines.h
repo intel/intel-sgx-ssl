@@ -31,6 +31,7 @@
  
 #ifndef __TDEFINES_H__
 #define __TDEFINES_H__
+#include "time.h"
 
 #define TRUE	1
 #define FALSE	0
@@ -38,22 +39,6 @@
 typedef unsigned int socklen_t;
 
 typedef long int time_t;
-
-struct tm
-{
-  int tm_sec;
-  int tm_min;
-  int tm_hour;
-  int tm_mday;
-  int tm_mon;
-  int tm_year;
-  int tm_wday;
-  int tm_yday;
-  int tm_isdst;
-
-  long int tm_gmtoff;
-  const char *tm_zone;
-};
 
 typedef long int suseconds_t;
 
