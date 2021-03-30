@@ -31,14 +31,14 @@
  
 #ifndef __TDEFINES_H__
 #define __TDEFINES_H__
+
 #include "time.h"
+#include "pthread.h"
 
 #define TRUE	1
 #define FALSE	0
 
 typedef unsigned int socklen_t;
-
-typedef long int time_t;
 
 typedef long int suseconds_t;
 
@@ -67,9 +67,6 @@ struct timezone
   int tz_dsttime;         /* type of DST correction */
 };
 
-typedef void pthread_rwlock_t;
-
-typedef void pthread_rwlockattr_t;
 #define CLOCK_REALTIME 0
 
 // Values for the argument to `sysconf'. Only _SC_PAGESIZE is actually used.
@@ -91,12 +88,6 @@ typedef void pthread_rwlockattr_t;
 	#error Invalid OS ID
 #endif
 #undef _UNISTD_H
-
-
-typedef int pthread_once_t;
-typedef unsigned int pthread_key_t;
-typedef unsigned long int pthread_t;
-
 
 #define ONCE_CONTROL_INIT	 	0
 #define ONCE_CONTROL_COMPLETE	1
