@@ -31,13 +31,16 @@
 include buildenv.mk
 include sgx/buildenv.mk
 LINUX_SGX_BUILD ?= 0
-
+EMPTY_SRC = check_lvi_toolset.cpp
 .PHONY: sgxssl sgxssl_no_mitigation clean install uninstall
 
 
 all: sgxssl
 
 sgxssl:
+	@rm -rf $(EMPTY_SRC) && touch $(EMPTY_SRC)
+	@gcc -Wa,-mlfence-after-load=yes -c $(EMPTY_SRC) 2> /dev/null \
+		|| (echo "Please follow the instruction at https://github.com/intel/linux-sgx/blob/master/README.md#build-the-intelr-sgx-sdk-and-intelr-sgx-psw-package to install \"mitigation tools\" first."  &&  exit 1)
 	$(MAKE) -C sgx/ clean
 	$(MAKE) -C sgx/ MITIGATION-CVE-2020-0551=LOAD
 	$(MAKE) -C sgx/ clean
