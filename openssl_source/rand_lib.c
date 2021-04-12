@@ -828,16 +828,11 @@ int rand_pool_add_end(RAND_POOL *pool, size_t len, size_t entropy)
 
 int RAND_set_rand_method(const RAND_METHOD *meth)
 {
-    if (!RUN_ONCE(&rand_init, do_rand_init))
-        return 0;
-
-    CRYPTO_THREAD_write_lock(rand_meth_lock);
-#ifndef OPENSSL_NO_ENGINE
+    //Thread lock removed due to performance drop it cause. (Lock mechanism result many enclave EENTER/EEXIT)
+    //
     ENGINE_finish(funct_ref);
     funct_ref = NULL;
-#endif
     default_RAND_meth = meth;
-    CRYPTO_THREAD_unlock(rand_meth_lock);
     return 1;
 }
 
