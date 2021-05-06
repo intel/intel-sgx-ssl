@@ -255,8 +255,6 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define pthread_setspecific sgxssl_pthread_setspecific
 #define pthread_getspecific sgxssl_pthread_getspecific
 #define pthread_key_delete sgxssl_pthread_key_delete
-#define pthread_self sgxssl_pthread_self
-#define pthread_equal sgxssl_pthread_equal
 
 #define __ctype_b_loc sgxssl___ctype_b_loc
 #define __ctype_tolower_loc sgxssl___ctype_tolower_loc
