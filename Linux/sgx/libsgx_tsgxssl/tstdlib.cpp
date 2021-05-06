@@ -92,11 +92,4 @@ char *sgxssl_getenv(const char *name)
 	return NULL;
 }
 
-int sgxssl_atexit(void (*function)(void))
-{
-	// Do nothing, assuming that registered function does allocations cleanup.
-	// This should be fine, as sgx_destroy_enclave cleans everything inside of enclave.
-	return 0;
-}
-
 }
