@@ -28,12 +28,11 @@ Windows
 ----------------------------
 ### Prerequisites
 - Microsoft Visual Studio 2019
-- 7-Zip
 - Perl
 - NASM (Netwide Assembler)
 - Intel(R) SGX Windows latest release, including SDK, PSW, and driver
 
- (Note: 7-Zip, Perl, NASM need to be included in machine's PATH variable)
+ (Note: Perl, NASM need to be included in machine's PATH variable)
 
 To build Intel® SGX SSL package in Windows OS:
 1. Download OpenSSL package into openssl_source/ directory. (tar.gz package, e.g. openssl-1.1.1k.tar.gz)
