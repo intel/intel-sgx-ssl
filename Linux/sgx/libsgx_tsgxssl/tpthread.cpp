@@ -278,17 +278,6 @@ int sgxssl_pthread_setspecific (pthread_key_t key, const void *data)
 	return 0;
 }
 
-pthread_t sgxssl_pthread_self (void)
-{
-	FSTART;
-
-	sgx_thread_t thread_self = sgx_thread_self();
-
-	FEND;
-
-	return thread_self;
-}
-
 //Thread forking isn't supported inside enclave.
 int sgxssl_pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void))
 {
@@ -298,21 +287,6 @@ int sgxssl_pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*ch
     FEND;
     //Operation not permitted
     return EPERM;
-}
-
-// Return 0 if the threads are not equal
-int sgxssl_pthread_equal (pthread_t thread1, pthread_t thread2)
-{
-	FSTART;
-	
-	int retval = FALSE;
-
-	if (thread1 == thread2)
-		retval = TRUE;
-
-	FEND;
-
-	return retval;
 }
 
 }
