@@ -41,12 +41,6 @@ static sgx_spinlock_t pthread_once_lock = SGX_SPINLOCK_INITIALIZER;
 
 typedef void (*destr_function) (void *);
 
-static sgx_spinlock_t pthread_key_lock = SGX_SPINLOCK_INITIALIZER;
-static std::map<pthread_key_t, destr_function> pthread_key_destr_func_map;
-static pthread_key_t	pthread_next_key = 1;
-
-static std::map<pthread_key_t, std::map<sgx_thread_t, const void*> *> thread_specific_data_map;
-
 extern "C" {
 
 int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (void))
@@ -63,9 +57,9 @@ int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (voi
 
 	sgx_spin_lock(&pthread_once_lock);
 
-	if (*once_control != ONCE_CONTROL_INIT &&
-		*once_control != ONCE_CONTROL_COMPLETE &&
-		*once_control != ONCE_CONTROL_BUSY) {
+	if (once_control->state != ONCE_CONTROL_INIT &&
+		once_control->state != ONCE_CONTROL_COMPLETE &&
+		once_control->state != ONCE_CONTROL_BUSY) {
 
 		sgx_spin_unlock(&pthread_once_lock);
 
@@ -75,7 +69,7 @@ int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (voi
 
 	}
 
-	while (*once_control == ONCE_CONTROL_BUSY) {
+	while (once_control->state == ONCE_CONTROL_BUSY) {
 		sgx_spin_unlock(&pthread_once_lock);
 
 		sgx_spin_lock(&pthread_once_lock);
@@ -83,9 +77,9 @@ int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (voi
 
 	// First call by any thread in a process with a given once_control causes init_routne to be executed and completed.
 	// Subsequent calls with the given once_control shall not call the inti_routin.
-	if (*once_control == ONCE_CONTROL_INIT) {
+	if (once_control->state == ONCE_CONTROL_INIT) {
 
-		*once_control_p = ONCE_CONTROL_BUSY;
+		once_control_p->state = ONCE_CONTROL_BUSY;
 		sgx_spin_unlock(&pthread_once_lock);
 
 		// init function is called outside the lock to support recursive sgxssl_pthread_once
@@ -94,7 +88,7 @@ int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (voi
 			init_routine();
 
 		sgx_spin_lock(&pthread_once_lock);
-		*once_control_p = ONCE_CONTROL_COMPLETE;
+		once_control_p->state = ONCE_CONTROL_COMPLETE;
 	}
 	sgx_spin_unlock(&pthread_once_lock);
 
