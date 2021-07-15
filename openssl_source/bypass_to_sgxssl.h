@@ -235,6 +235,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 
 #define time sgxssl_time
 #define gmtime_r sgxssl_gmtime_r
+#define gmtime sgxssl_gmtime
 #define gettimeofday sgxssl_gettimeofday
 
 //openssl 1.1.1 new APIs

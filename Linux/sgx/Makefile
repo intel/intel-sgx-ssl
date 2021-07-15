@@ -44,6 +44,10 @@ ifeq ($(DEBUG), 1)
 	OPENSSL_CONFIG += debug
 endif
 
+ifeq ($(NO_THREADS), 1)
+        OPENSSL_CONFIG += no-threads
+endif
+
 all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
 	$(MAKE) -C $(TRUSTED_LIB_DIR) all
 	$(MAKE) -C $(UNTRUSTED_LIB_DIR) all
