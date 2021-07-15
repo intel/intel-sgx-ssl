@@ -41,15 +41,11 @@ static sgx_spinlock_t pthread_once_lock = SGX_SPINLOCK_INITIALIZER;
 
 typedef void (*destr_function) (void *);
 
-static sgx_spinlock_t pthread_key_lock = SGX_SPINLOCK_INITIALIZER;
-static std::map<pthread_key_t, destr_function> pthread_key_destr_func_map;
-static pthread_key_t	pthread_next_key = 1;
-
-static std::map<pthread_key_t, std::map<sgx_thread_t, const void*> *> thread_specific_data_map;
+typedef int sgxssl_pthread_once_t;
 
 extern "C" {
 
-int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (void))
+int sgxssl_pthread_once (sgxssl_pthread_once_t *once_control, void (*init_routine) (void))
 {
 	FSTART;
 
@@ -59,7 +55,7 @@ int sgxssl_pthread_once (pthread_once_t *once_control, void (*init_routine) (voi
 		return EINVAL;
 	}
 
-	volatile pthread_once_t * once_control_p = once_control;
+	volatile sgxssl_pthread_once_t * once_control_p = once_control;
 
 	sgx_spin_lock(&pthread_once_lock);
 
