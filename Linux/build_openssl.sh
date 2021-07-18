@@ -76,6 +76,7 @@ fi
 
 if [[ $# -gt 0 ]] && [[ $1 == "no-threads" || $2 == "no-threads" || $3 == "no-threads" || $4 == "no-threads" ]] ; then
 	ADDITIONAL_CONF+="no-threads"
+	sed -i 's/static __thread/static/' $SGXSSL_ROOT/sgx/libsgx_tsgxssl/bionic_localtime.c
 fi
 
 # Mitigation flags
