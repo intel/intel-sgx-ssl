@@ -214,8 +214,11 @@ timesub(const time_t *const timep, const int_fast32_t offset,
 	return tmp;
 }
 
-
+#if defined(NO_THREADS)
+static struct tm g_tm;
+#else
 static __thread struct tm g_tm;
+#endif
 
 struct tm* sgxssl_gmtime_r(const time_t* timep, struct tm *result)
 {

@@ -46,6 +46,7 @@ endif
 
 ifeq ($(NO_THREADS), 1)
         OPENSSL_CONFIG += no-threads
+	export NO_THREADS_CFLAG = -DNO_THREADS
 endif
 
 all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
