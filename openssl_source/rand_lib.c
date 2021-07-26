@@ -892,6 +892,7 @@ int RAND_set_rand_engine(ENGINE *engine)
 
 void RAND_seed(const void *buf, int num)
 {
+    #pragma message("Warning: calling RAND_seed is not necessary, since SGXSSL will always use RDRAND engine")
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth != NULL && meth->seed != NULL)
@@ -900,6 +901,7 @@ void RAND_seed(const void *buf, int num)
 
 void RAND_add(const void *buf, int num, double randomness)
 {
+    #pragma message("Warning: calling RAND_add is not necessary, since SGXSSL will always use RDRAND engine")
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth != NULL && meth->add != NULL)
@@ -955,4 +957,10 @@ int RAND_status(void)
     if (meth != NULL && meth->status != NULL)
         return meth->status();
     return 0;
+}
+
+int ENGINE_set_default_RAND(ENGINE *e)
+{
+    #pragma message("Warning: ENGINE_set_default_RAND is not necessary, since SGXSSL will always use RDRAND engine")
+    return 1;
 }
