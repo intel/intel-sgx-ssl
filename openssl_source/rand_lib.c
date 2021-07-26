@@ -961,6 +961,6 @@ int RAND_status(void)
 
 int ENGINE_set_default_RAND(ENGINE *e)
 {
-    #pragma message("Warning: ENGINE_set_default_RAND is not necessary, since SGXSSL will always use RDRAND engine")
-    return 1;
+    #pragma message("Warning: ENGINE_set_default_RAND is not valid, since SGXSSL will always use RDRAND engine")
+    return 0;
 }
