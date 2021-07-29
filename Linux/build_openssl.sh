@@ -62,19 +62,19 @@ sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
 
 ##Space optimization flags.
 SPACE_OPT=
-if [[ $# -gt 0 ]] && [[ $1 == "space-opt" || $2 == "space-opt" || $3 == "space-opt" || $4 == "space-opt" ]] ; then
+if [[ "$*" == *"space-opt"* ]] ; then
 SPACE_OPT="-fno-tree-vectorize no-autoalginit -fno-asynchronous-unwind-tables no-cms no-dsa -DOPENSSL_assert=  no-filenames no-rdrand -DOPENSSL_SMALL_FOOTPRINT no-err -fdata-sections -ffunction-sections -Os -Wl,--gc-sections"
 sed -i "/# define OPENSSL_assert/d" $OPENSSL_VERSION/include/openssl/crypto.h
 sed -i '/OPENSSL_die("assertion failed/d' $OPENSSL_VERSION/include/openssl/crypto.h
 fi
 
 OUTPUT_LIB=libsgx_tsgxssl_crypto.a
-if [[ $# -gt 0 ]] && [[ $1 == "debug" || $2 == "debug" || $3 == "debug" || $4 == "debug" ]] ; then
+if [[ "$*" == *"debug"* ]] ; then
 	OUTPUT_LIB=libsgx_tsgxssl_cryptod.a
     ADDITIONAL_CONF="-g "
 fi
 
-if [[ $# -gt 0 ]] && [[ $1 == "no-threads" || $2 == "no-threads" || $3 == "no-threads" || $4 == "no-threads" ]] ; then
+if [[ "$*" == *"no-threads"* ]] ; then
 	ADDITIONAL_CONF+="no-threads"
 fi
 
