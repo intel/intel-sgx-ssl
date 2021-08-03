@@ -65,6 +65,7 @@ This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx
 - SGX_MODE={HW,SIM}: SGX feature mode. Hardware/Simulation
 - DESTDIR=\<PATH\>: Directory realpath to install Intel® SGX SSL libraries in. Default /opt/intel/sgxssl/
 - VERBOSE={1,0}: Makefile verbose mode. Print compilation commands before executing it.
+- NO_THREADS={1,0}: Enable "no-threads" in the OpenSSL's build configuration options
 
 To install Intel® SGX SSL libraries in Linux OS, run:
 ```

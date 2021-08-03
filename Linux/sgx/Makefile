@@ -44,12 +44,19 @@ ifeq ($(DEBUG), 1)
 	OPENSSL_CONFIG += debug
 endif
 
+ifeq ($(NO_THREADS), 1)
+        OPENSSL_CONFIG += no-threads
+	export NO_THREADS_CFLAG = -DNO_THREADS
+endif
+
 all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
 	$(MAKE) -C $(TRUSTED_LIB_DIR) all
 	$(MAKE) -C $(UNTRUSTED_LIB_DIR) all
 
 ifeq ($(LINUX_SGX_BUILD), 0)
+ifneq ($(NO_THREADS), 1)
 	$(MAKE) -C $(TEST_DIR) all
+endif
 endif
 
 ifneq ($(MITIGATION-CVE-2020-0551),)
