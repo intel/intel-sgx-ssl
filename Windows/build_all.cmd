@@ -126,7 +126,7 @@ echo "perl --version:" >> %BUILD_TOOLS_FILENAME%
 perl --version >> %BUILD_TOOLS_FILENAME%
 
 
-echo "Build completed\nZipping package  %date% %time%"
+echo "Build completed: Zipping package  %date% %time%"
 
 cd package
 
