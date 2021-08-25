@@ -44,6 +44,7 @@ from "sgx_pthread.edl" import *;
         void uprint([in, string] const char *str);
         void usgx_exit(int reason);
         int ucreate_thread();
+		void write_file([in, string] const char *filename, [in, size=len] uint8_t *buf, size_t len);
     };
 
 

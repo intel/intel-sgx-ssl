@@ -63,6 +63,10 @@ int dh_test();
 int sha256_test();
 int sha1_test();
 int threads_test();
+int ecall_sm2();
+int ecall_sm3();
+int ecall_sm4_cbc();
+int ecall_sm4_ctr();
 
 #if defined(__cplusplus)
 }
