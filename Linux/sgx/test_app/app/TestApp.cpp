@@ -263,12 +263,12 @@ int ucreate_thread()
 
 void write_file(const char *filename, uint8_t *buf, size_t len)
 {
-	FILE *fp;
-	printf("File: %s\n", filename);
-	printf("Buf: %p, Len: %ld\n", buf, len);
-	fp = fopen(filename, "w");
-	fwrite(buf, len, 1, fp);
-	fclose(fp);
+    FILE *fp;
+    printf("File: %s\n", filename);
+    printf("Buf: %p, Len: %ld\n", buf, len);
+    fp = fopen(filename, "w");
+    fwrite(buf, len, 1, fp);
+    fclose(fp);
 }
 
 /* Application entry */
