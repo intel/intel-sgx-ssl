@@ -98,12 +98,11 @@ int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_ke
         *private_key = (char*)malloc(pri_len);
         if (BIO_read(pri_bio, *private_key, pri_len) <= 0) {
             printf("Error: fail to read private key from the BIO\n");
+            SAFE_FREE(*private_key, sizeof(*private_key));
             ret = -7;
             break;			
         }
         (*private_key)[pri_len-1] = '\0';
-
-        write_file("sm2pri.pem", *private_key, pri_len);
 
         // 5. Generate SM2 public key based on the curve
         pub_bio = BIO_new(BIO_s_mem());
@@ -126,12 +125,11 @@ int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_ke
         *public_key = (char*)malloc(pub_len);
         if (BIO_read(pub_bio, *public_key, pub_len) <= 0) {
             printf("Error: fail to read public key from the BIO\n");
+            SAFE_FREE(*public_key, sizeof(*public_key));
             ret = -11;
             break;			
         }
         (*public_key)[pub_len-1] = '\0';
-
-        write_file("sm2pub.pem", *public_key, pub_len);
 
     } while(0);
 
@@ -227,9 +225,6 @@ int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned cha
             ret = -12;
             break;			
         }
-
-        write_file("sm2sign.data", data, data_size);
-        write_file("sm2sign.sig", *signature, *sign_len);
 
     } while(0);
 
@@ -382,6 +377,9 @@ int ecall_sm2(void)
 
     // 5. Finalize
     EC_GROUP_free(ec_group);
+    SAFE_FREE(private_key, sizeof(private_key));
+    SAFE_FREE(public_key, sizeof(public_key));
+    SAFE_FREE(signature, sizeof(signature));
 
     return ret;
 }
@@ -437,13 +435,11 @@ int ecall_sm3(void)
             break;
         }
 
-        write_file("sm3.data", msg, strlen((char*)msg));
-        write_file("sm3.hash", hash, hash_len);
-
     } while(0);
 
     // 4. Clean up and return
     EVP_MD_CTX_free(evp_ctx);
+    //this function is not realized in openssl 1.1.1k, but realized in openssl 3.0.0
     //EVP_MD_free(sm3_md);
 
     return ret;
@@ -495,8 +491,6 @@ int ecall_sm4_cbc(void)
             break;
         }
 
-        write_file("sm4_cbc.enc", encryptedText, sizeof(encryptedText));
-
         // 5. Initialize decrypt, key and IV
         if (!EVP_DecryptInit_ex(evp_ctx, EVP_sm4_cbc(), NULL, (unsigned char*)key, iv)) {
             printf("Error: fail to initialize decrypt, key and IV\n");
@@ -522,8 +516,6 @@ int ecall_sm4_cbc(void)
                 break;
             }
         }
-
-        write_file("sm4_cbc.dec", decryptedText, sizeof(decryptedText));
 
         // 8. Compare original and decrypted text
         if (memcmp(plainText, decryptedText, sizeof(plainText)) != 0) {
@@ -586,8 +578,6 @@ int ecall_sm4_ctr(void)
             break;
         }
 
-        write_file("sm4_ctr.enc", encryptedText, sizeof(encryptedText));
-
         // 5. Initialize decrypt, key and ctr
         if (!EVP_DecryptInit_ex(evp_ctx, EVP_sm4_ctr(), NULL, (unsigned char*)key, ctr)) {
             printf("Error: fail to initialize decrypt, key and ctr\n");
@@ -610,8 +600,6 @@ int ecall_sm4_ctr(void)
             ret = -7;
             break;
         }
-
-        write_file("sm4_ctr.dec", decryptedText, sizeof(decryptedText));
 
         // 8. Compare original and decrypted text
         if (memcmp(msg, decryptedText, sizeof(msg)) != 0) {
