@@ -47,7 +47,7 @@ unsigned char sm2_user_id[] = "1234567812345678";
 unsigned int sm2_user_id_len = sizeof(sm2_user_id)-1;
 
 // create key pair including private key and public key
-int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_key)
+static int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_key)
 {
     int ret = 0;
     EC_KEY *ec_key = NULL;
@@ -93,14 +93,13 @@ int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_ke
         if (pri_len == 0) {
             printf("Error: fail to get size of the BIO for private key\n");
             ret = -6;
-            break;				
+            break;
         }
         *private_key = (char*)malloc(pri_len);
         if (BIO_read(pri_bio, *private_key, pri_len) <= 0) {
             printf("Error: fail to read private key from the BIO\n");
-            SAFE_FREE(*private_key, sizeof(*private_key));
             ret = -7;
-            break;			
+            break;
         }
         (*private_key)[pri_len-1] = '\0';
 
@@ -109,40 +108,44 @@ int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** public_ke
         if (pub_bio == NULL) {
             printf("Error: fail to create a BIO for public key\n");
             ret = -8;
-            break;			
+            break;
         }
         if (!PEM_write_bio_EC_PUBKEY(pub_bio, ec_key)) {
             printf("Error: fail to write public key from ec_key to the BIO\n");
             ret = -9;
-            break;			
+            break;
         }
         pub_len = BIO_pending(pub_bio);
         if (pub_len == 0) {
             printf("Error: fail to get size of the BIO for public key\n");
             ret = -10;
-            break;				
+            break;
         }
         *public_key = (char*)malloc(pub_len);
         if (BIO_read(pub_bio, *public_key, pub_len) <= 0) {
             printf("Error: fail to read public key from the BIO\n");
-            SAFE_FREE(*public_key, sizeof(*public_key));
             ret = -11;
-            break;			
+            break;
         }
         (*public_key)[pub_len-1] = '\0';
 
     } while(0);
 
     // 6. Finalize
-    EC_KEY_free(ec_key);
-    BIO_free_all(pri_bio);
-    BIO_free_all(pub_bio);
+    if (ret != 0)
+    {
+        SAFE_FREE(*private_key, pri_len);
+        SAFE_FREE(*public_key, pub_len);
+    }	
+	EC_KEY_free(ec_key);
+	BIO_free_all(pri_bio);
+	BIO_free_all(pub_bio);
 
     return ret;
 }
 
 // sign the message
-int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char** signature, size_t* sign_len)
+static int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char** signature, size_t* sign_len)
 { 
     int ret = 0;
     BIO *pri_bio = NULL;
@@ -239,7 +242,7 @@ int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned cha
 }
 
 // verify the signature
-int verify_sm2(const char* public_key, char* data, size_t data_size, unsigned char* signature, size_t sign_len)
+static int verify_sm2(const char* public_key, char* data, size_t data_size, unsigned char* signature, size_t sign_len)
 {
     int ret = 0;
     BIO *pub_bio = NULL;
