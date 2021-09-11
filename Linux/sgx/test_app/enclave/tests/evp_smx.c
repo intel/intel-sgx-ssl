@@ -95,13 +95,13 @@ static int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** pu
             ret = -6;
             break;
         }
-        *private_key = (char*)malloc(pri_len);
+        *private_key = (char*)malloc(pri_len+1);
         if (BIO_read(pri_bio, *private_key, pri_len) <= 0) {
             printf("Error: fail to read private key from the BIO\n");
             ret = -7;
             break;
         }
-        (*private_key)[pri_len-1] = '\0';
+        (*private_key)[pri_len] = '\0';
 
         // 5. Generate SM2 public key based on the curve
         pub_bio = BIO_new(BIO_s_mem());
@@ -121,21 +121,21 @@ static int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** pu
             ret = -10;
             break;
         }
-        *public_key = (char*)malloc(pub_len);
+        *public_key = (char*)malloc(pub_len+1);
         if (BIO_read(pub_bio, *public_key, pub_len) <= 0) {
             printf("Error: fail to read public key from the BIO\n");
             ret = -11;
             break;
         }
-        (*public_key)[pub_len-1] = '\0';
+        (*public_key)[pub_len] = '\0';
 
     } while(0);
 
     // 6. Finalize
     if (ret != 0)
     {
-        SAFE_FREE(*private_key, pri_len);
-        SAFE_FREE(*public_key, pub_len);
+        SAFE_FREE(*private_key, pri_len+1);
+        SAFE_FREE(*public_key, pub_len+1);
     }	
 	EC_KEY_free(ec_key);
 	BIO_free_all(pri_bio);
