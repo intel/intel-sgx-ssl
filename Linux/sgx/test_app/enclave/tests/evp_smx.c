@@ -380,9 +380,9 @@ int ecall_sm2(void)
 
     // 5. Finalize
     EC_GROUP_free(ec_group);
-    SAFE_FREE(private_key, sizeof(private_key));
-    SAFE_FREE(public_key, sizeof(public_key));
-    SAFE_FREE(signature, sizeof(signature));
+    SAFE_FREE(private_key, strlen(private_key)+1);
+    SAFE_FREE(public_key, strlen(public_key)+1);
+    SAFE_FREE(signature, strlen(signature)+1);
 
     return ret;
 }
