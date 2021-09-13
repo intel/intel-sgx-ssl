@@ -503,7 +503,7 @@ int ecall_sm4_cbc(void)
 
         // 6. Decrypt the ciphertext and obtain the decrypted output
         if (!EVP_DecryptUpdate(evp_ctx, decryptedText, &len, encryptedText, sizeof(encryptedText))) {
-            printf("fail to decrypt the ciphertext\n");
+            printf("Error: fail to decrypt the ciphertext\n");
             ret = -6;
             break;
         }
