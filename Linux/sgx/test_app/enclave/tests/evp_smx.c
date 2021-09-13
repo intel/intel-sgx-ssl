@@ -145,7 +145,7 @@ static int create_key_pair_sm2(EC_GROUP* ec_group, char** private_key, char** pu
 }
 
 // sign the message
-static int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char** signature, size_t* sign_len)
+static int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char* signature, size_t* sign_len)
 { 
     int ret = 0;
     BIO *pri_bio = NULL;
@@ -223,7 +223,7 @@ static int sign_sm2(const char* private_key, char* data, size_t data_size, unsig
             ret = -11;
             break;			
         }
-        if (EVP_DigestSignFinal(evp_md_ctx, *signature, sign_len) != 1) {
+        if (EVP_DigestSignFinal(evp_md_ctx, signature, sign_len) != 1) {
             printf("Error: fail to finalize digest sign\n");
             ret = -12;
             break;			
@@ -363,7 +363,7 @@ int ecall_sm2(void)
         }
 
         // 3. Sign
-        if (sign_sm2(private_key, data, data_size, &signature, &sign_len) != 0) {
+        if (sign_sm2(private_key, data, data_size, signature, &sign_len) != 0) {
             printf("Error: fail to sign\n");
             ret = -3;
             break;
@@ -382,7 +382,7 @@ int ecall_sm2(void)
     EC_GROUP_free(ec_group);
     SAFE_FREE(private_key, strlen(private_key)+1);
     SAFE_FREE(public_key, strlen(public_key)+1);
-    SAFE_FREE(signature, strlen(signature)+1);
+    SAFE_FREE(signature, 1024);
 
     return ret;
 }
