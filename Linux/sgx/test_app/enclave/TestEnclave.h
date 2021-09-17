@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,6 +63,10 @@ int dh_test();
 int sha256_test();
 int sha1_test();
 int threads_test();
+int ecall_sm2();
+int ecall_sm3();
+int ecall_sm4_cbc();
+int ecall_sm4_ctr();
 
 #if defined(__cplusplus)
 }

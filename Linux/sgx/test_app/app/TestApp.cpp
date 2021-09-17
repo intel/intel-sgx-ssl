@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -260,7 +260,6 @@ int ucreate_thread()
 	int res = pthread_create(&thread, NULL, thread_test_func, NULL);
 	return res;
 }
-
 
 /* Application entry */
 int main(int argc, char *argv[])

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -361,5 +361,39 @@ void t_sgxssl_call_apis()
     }
 	printf("test threads_test completed\n");
 	
-}
+    //GM SM2 - sign and verify
+    ret = ecall_sm2();
+    if (ret != 0)
+    {
+        printf("test evp_sm2 returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test evp_sm2 completed\n");
 
+    //GM SM3 - compute digest of message
+    ret = ecall_sm3();
+    if (ret != 0)
+    {
+        printf("test evp_sm3 returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test evp_sm3 completed\n");
+
+    //GM SM4 - cbc encrypt and decrypt
+    ret = ecall_sm4_cbc();
+    if (ret != 0)
+    {
+        printf("test evp_sm4_cbc returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test evp_sm4_cbc completed\n");
+
+    //GM SM4 - ctr encrypt and decrypt
+    ret = ecall_sm4_ctr();
+    if (ret != 0)
+    {
+        printf("test evp_sm4_ctr returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test evp_sm4_ctr completed\n");
+}
