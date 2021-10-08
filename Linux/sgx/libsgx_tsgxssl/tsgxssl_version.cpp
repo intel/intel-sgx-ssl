@@ -29,8 +29,8 @@
  *
  */
 
-// This srting should be updated before every release!!
-#define STRFILEVER "1.1.0"
+// This string should be updated before every release!!
+#define STRFILEVER "1.1.1"
 
 #define __CONCAT(x, y) x/**/y
 
