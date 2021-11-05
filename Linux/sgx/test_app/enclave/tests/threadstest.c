@@ -56,31 +56,70 @@
 
 #define fprintf(stream, msg...) printf(msg)
 
-typedef pthread_t thread_t;
-
 sgx_status_t ucreate_thread();
 
-/*
-static void *thread_run(void *arg)
+void (*func)(void) = NULL;
+volatile int busy_wait = 0;
+
+#if !defined(OPENSSL_THREADS) || defined(CRYPTO_TDEBUG)
+
+typedef unsigned int thread_t;
+
+static int run_thread(thread_t *t, void (*f)(void))
+{
+       int res = 0;
+       func = f;
+       busy_wait = 1;
+       sgx_status_t status = ucreate_thread(&res);
+       if (status != SGX_SUCCESS || res != 0)
+               return 0;
+       return 1;
+}
+
+static int wait_for_thread(thread_t thread)
+{
+	while (busy_wait == 1);
+	return 1;
+}
+
+#elif defined(OPENSSL_SYS_WINDOWS)
+
+typedef HANDLE thread_t;
+
+static DWORD WINAPI thread_run(LPVOID arg)
 {
     void (*f)(void);
 
     *(void **) (&f) = arg;
 
     f();
+    return 0;
+}
+
+static int run_thread(thread_t *t, void (*f)(void))
+{
+    *t = CreateThread(NULL, 0, thread_run, *(void **) &f, 0, NULL);
+    return *t != NULL;
+}
+
+static int wait_for_thread(thread_t thread)
+{
+    return WaitForSingleObject(thread, INFINITE) == 0;
+}
+
+#else
+
+typedef pthread_t thread_t;
+
+/*
+static void *thread_run(void *arg)
+{
+    void (*f)(void);
+    *(void **) (&f) = arg;
+    f();
     return NULL;
 }
 */
-
-void (*func)(void) = NULL;
-volatile int busy_wait = 0;
-
-void new_thread_func()
-{
-   	printf("in new thread, id: %llu\n",sgx_thread_self());
-	func();
-	busy_wait = 0;
-}
 
 static int run_thread(thread_t *t, void (*f)(void))
 {
@@ -99,6 +138,15 @@ static int wait_for_thread(thread_t thread)
 	while (busy_wait == 1);
 	return 1;
 	//return pthread_join(thread, NULL) == 0;
+}
+
+#endif
+
+void new_thread_func()
+{
+	printf("in new thread, id: %llu\n",sgx_thread_self());
+	func();
+	busy_wait = 0;
 }
 
 static int test_lock(void)
@@ -224,6 +272,8 @@ static int test_thread_local(void)
         return 0;
     }
 
+#if defined(OPENSSL_THREADS) && !defined(CRYPTO_TDEBUG)
+
     ptr = CRYPTO_THREAD_get_local(&thread_local_key);
     if (ptr != NULL) {
         fprintf(stderr, "ptr not NULL\n");
@@ -237,6 +287,7 @@ static int test_thread_local(void)
     //    return 0;
     //}
 
+#endif
     if (!CRYPTO_THREAD_cleanup_local(&thread_local_key)) {
         fprintf(stderr, "CRYPTO_THREAD_cleanup_local() failed\n");
         return 0;
