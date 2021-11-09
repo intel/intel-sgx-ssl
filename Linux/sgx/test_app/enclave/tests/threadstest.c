@@ -82,31 +82,6 @@ static int wait_for_thread(thread_t thread)
 	return 1;
 }
 
-#elif defined(OPENSSL_SYS_WINDOWS)
-
-typedef HANDLE thread_t;
-
-static DWORD WINAPI thread_run(LPVOID arg)
-{
-    void (*f)(void);
-
-    *(void **) (&f) = arg;
-
-    f();
-    return 0;
-}
-
-static int run_thread(thread_t *t, void (*f)(void))
-{
-    *t = CreateThread(NULL, 0, thread_run, *(void **) &f, 0, NULL);
-    return *t != NULL;
-}
-
-static int wait_for_thread(thread_t thread)
-{
-    return WaitForSingleObject(thread, INFINITE) == 0;
-}
-
 #else
 
 typedef pthread_t thread_t;
