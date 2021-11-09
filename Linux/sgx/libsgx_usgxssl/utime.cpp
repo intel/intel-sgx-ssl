@@ -51,14 +51,3 @@ SGX_ACCESS_VERSION(ussl, 1);
 
 #endif
 
-extern "C" {
-
-void u_sgxssl_ftime(void * timeptr, uint32_t timeb_len)
-{
-	SGX_ASSERT_STRUCT_SIZE(struct timeb, timeb_len);
-
-	ftime((struct timeb *) timeptr);
-
-}
-
-}

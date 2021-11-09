@@ -36,10 +36,8 @@ enclave {
     from "sgx_tstdc.edl" import *;
     
     untrusted {
-    	 void u_sgxssl_ftime([out, size=timeb_len] void * timeptr, uint32_t timeb_len);
     };
 
     trusted {
-
     };
 };
