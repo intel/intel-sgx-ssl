@@ -37,8 +37,10 @@
 #include "openssl/evp.h"
 #include "openssl/ec.h"
 #include "openssl/pem.h"
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
 #include "openssl/decoder.h"
-#include "openssl/core_names.h" /* openssl library */
+#include "openssl/core_names.h"
+#endif /* openssl library */
 
 #ifndef SAFE_FREE
 #define SAFE_FREE(ptr, size) do {if (NULL != (ptr)) {memset_s(ptr, size, 0, size); free(ptr); (ptr)=NULL;}} while(0);
@@ -52,6 +54,8 @@ unsigned int sm2_user_id_len = sizeof(sm2_user_id)-1;
 static int create_key_pair_sm2(char** private_key, char** public_key)
 {
 	int ret = 0;
+	EC_GROUP *ec_group = NULL;
+	EC_KEY *ec_key = NULL;
 	BIO *pri_bio = NULL, *pub_bio = NULL;
 	size_t pri_len = 0, pub_len = 0;
 	EVP_PKEY *evp_pkey = NULL;
@@ -61,8 +65,6 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 #if OPENSSL_VERSION_NUMBER < 0x30000000
 		printf("OpenSSL version: 1.1.1 or lower\n");
 		// 1. Create an EC_GROUP object with a curve specified by SM2 NID
-		EC_GROUP *ec_group = NULL;
-		EC_KEY *ec_key = NULL;
 		ec_group = EC_GROUP_new_by_curve_name(NID_sm2);
 		if (ec_group == NULL) {
 			printf("Error: fail to create an EC_GROUP object for SM2\n");
@@ -88,7 +90,7 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 			ret = -4;
 			break;
 		}
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000
+#else
 		printf("OpenSSL version: 3.0.0 or higher\n");
 		// 1. Create a EVP_PKEY_CTX for SM2
 		evp_pkey_ctx = EVP_PKEY_CTX_new_from_name(NULL, "SM2", NULL);
@@ -133,7 +135,7 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 			ret = -10;
 			break;
 		}
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000
+#else
 		if (!PEM_write_bio_PrivateKey(pri_bio, evp_pkey, NULL, NULL, 0, NULL, NULL)) {
 			printf("Error: fail to write SM2 private key from evp_pkey to the BIO\n");
 			ret = -11;
@@ -167,7 +169,7 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 			ret = -15;
 			break;
 		}
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000
+#else
 		if (!PEM_write_bio_PUBKEY(pub_bio, evp_pkey)) {
 			printf("Error: fail to write SM2 public key from evp_pkey to the BIO\n");
 			ret = -16;
@@ -211,6 +213,7 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 static int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char* signature, size_t* sign_len)
 { 
 	int ret = 0;
+	EC_KEY *ec_key = NULL;
 	BIO *pri_bio = NULL;
 	EVP_PKEY* evp_pkey = NULL;
 	EVP_MD_CTX *evp_md_ctx = NULL;
@@ -219,7 +222,6 @@ static int sign_sm2(const char* private_key, char* data, size_t data_size, unsig
 	do {
 #if OPENSSL_VERSION_NUMBER < 0x30000000
 		// 1.1 Read SM2 private key using EC_KEY
-		EC_KEY *ec_key = NULL;
 		pri_bio = BIO_new_mem_buf(private_key, -1);
 		ec_key = PEM_read_bio_ECPrivateKey(pri_bio, NULL, NULL, NULL);
 		if (ec_key == NULL) {
@@ -244,7 +246,7 @@ static int sign_sm2(const char* private_key, char* data, size_t data_size, unsig
 			ret = -4;
 			break;
 		}
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000
+#else
 		// 1. Read SM2 private key using SM2 EVP_PKEY directly
 		pri_bio = BIO_new_mem_buf(private_key, -1);
 		evp_pkey = PEM_read_bio_PrivateKey(pri_bio, &evp_pkey, NULL, NULL);
@@ -319,6 +321,7 @@ static int sign_sm2(const char* private_key, char* data, size_t data_size, unsig
 static int verify_sm2(const char* public_key, char* data, size_t data_size, unsigned char* signature, size_t sign_len)
 {
 	int ret = 0;
+	EC_KEY *ec_key = NULL;
 	BIO *pub_bio = NULL;
 	EVP_PKEY* evp_pkey = NULL;
 	EVP_MD_CTX *evp_md_ctx = NULL;
@@ -327,7 +330,6 @@ static int verify_sm2(const char* public_key, char* data, size_t data_size, unsi
 	do {
 #if OPENSSL_VERSION_NUMBER < 0x30000000
 		// 1.1 Read SM2 public key using EC_KEY
-		EC_KEY *ec_key = NULL;
 		pub_bio = BIO_new_mem_buf(public_key, -1);
 		ec_key = PEM_read_bio_EC_PUBKEY(pub_bio, NULL, NULL, NULL);
 		if (ec_key == NULL) {
@@ -352,7 +354,7 @@ static int verify_sm2(const char* public_key, char* data, size_t data_size, unsi
 			ret = -4;
 			break;
 		}
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000	
+#else	
 		// 1. Read SM2 public key using SM2 EVP_PKEY directly
 		pub_bio = BIO_new_mem_buf(public_key, -1);
 		evp_pkey = PEM_read_bio_PUBKEY(pub_bio, &evp_pkey, NULL, NULL);
