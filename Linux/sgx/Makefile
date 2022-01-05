@@ -55,7 +55,9 @@ all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
 
 ifeq ($(LINUX_SGX_BUILD), 0)
 ifneq ($(NO_THREADS), 1)
+ifneq ($(NO_BUILDTEST), 1)
 	$(MAKE) -C $(TEST_DIR) all
+endif
 endif
 endif
 
