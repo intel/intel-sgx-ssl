@@ -170,6 +170,11 @@ xcopy /y include\openssl\* %SGXSSL_ROOT%\package\include\openssl\
 xcopy /y include\crypto\* %SGXSSL_ROOT%\package\include\crypto\
 
 echo "Done building OpenSSL for %my_Platform% | %my_Configuration%. Building Intel® Software Guard Extensions SSL libraries  %date% %time%"
+
+if "%TEST_MODE%" equ "NOTEST" (
+goto end
+)
+
 cd %SGXSSL_SOLUTION%\
 
  
