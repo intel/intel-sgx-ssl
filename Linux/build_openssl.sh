@@ -82,6 +82,7 @@ fi
 MITIGATION_OPT=""
 MITIGATION_FLAGS=""
 CC_VERSION=`gcc -dumpversion`
+CC_VERSION_MAJOR=`echo "$CC_VERSION" | cut -f1 -d.`
 for arg in "$@"
 do
     case $arg in
@@ -99,7 +100,7 @@ do
         ;;
     -mfunction-return=thunk-extern)
         MITIGATION_FLAGS+=" $arg"
-        if [[ $CC_VERSION -ge 8 ]] ; then
+        if [[ "$CC_VERSION_MAJOR" -ge 8 ]] ; then
             MITIGATION_FLAGS+=" -fcf-protection=none"
         fi
         shift
