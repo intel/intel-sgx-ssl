@@ -94,9 +94,7 @@ Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fdata-sec
 Sgx_tssl_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11 $(MITIGATION_CFLAGS) $(NO_THREADS_CFLAG)
 Sgx_tssl_Cpp_Flags := $(Common_C_Cpp_Flags) -std=c++11 -nostdinc++ $(MITIGATION_CFLAGS)
 ifeq ($(SGX_MODE), SIM)
-ifeq ($(NONE_INTEL),TRUE)
 Sgx_tssl_C_Flags += -DSKIP_INTELCPU_CHECK
-endif
 endif
 
 $(shell mkdir -p $(OBJDIR))
