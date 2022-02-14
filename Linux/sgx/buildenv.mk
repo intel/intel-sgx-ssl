@@ -65,7 +65,7 @@ $(shell mkdir -p $(PACKAGE_LIB))
 UBUNTU_CONFNAME:=/usr/include/x86_64-linux-gnu/bits/confname.h
 ifneq ("$(wildcard $(UBUNTU_CONFNAME))","")
 	OS_ID=1
-else ifeq ($(origin NIX_PATH),environment)
+else ifeq ($(origin NIX_STORE),environment)
 	OS_ID=3
 else
 	OS_ID=2
