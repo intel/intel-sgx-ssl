@@ -37,8 +37,10 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
+BUILD_SSL_LIB=1
+
 OPENSSL_INSTALL_DIR="$SGXSSL_ROOT/../openssl_source/OpenSSL_install_dir_tmp"
-OPENSSL_VERSION=`/bin/ls $SGXSSL_ROOT/../openssl_source/*1.1.1*.tar.gz | /usr/bin/head -1 | /bin/grep -o '[^/]*$' | /bin/sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*1.1.1*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
@@ -69,8 +71,14 @@ sed -i '/OPENSSL_die("assertion failed/d' $OPENSSL_VERSION/include/openssl/crypt
 fi
 
 OUTPUT_LIB=libsgx_tsgxssl_crypto.a
+if [[ $BUILD_SSL_LIB == 1 ]]; then
+	OUTPUT_SSL_LIB=libsgx_tsgxssl_ssl.a
+fi
 if [[ "$*" == *"debug"* ]] ; then
 	OUTPUT_LIB=libsgx_tsgxssl_cryptod.a
+	if [[ $BUILD_SSL_LIB == 1 ]]; then
+		OUTPUT_SSL_LIB=libsgx_tsgxssl_ssld.a
+	fi
     ADDITIONAL_CONF="-g "
 fi
 
@@ -82,6 +90,7 @@ fi
 MITIGATION_OPT=""
 MITIGATION_FLAGS=""
 CC_VERSION=`gcc -dumpversion`
+CC_VERSION_MAJOR=`echo "$CC_VERSION" | cut -f1 -d.`
 for arg in "$@"
 do
     case $arg in
@@ -99,7 +108,7 @@ do
         ;;
     -mfunction-return=thunk-extern)
         MITIGATION_FLAGS+=" $arg"
-        if [[ $CC_VERSION -ge 8 ]] ; then
+        if [[ "$CC_VERSION_MAJOR" -ge 8 ]] ; then
             MITIGATION_FLAGS+=" -fcf-protection=none"
         fi
         shift
@@ -162,6 +171,12 @@ fi
 make libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
+if [[ $BUILD_SSL_LIB == 1 ]]; then
+	make libssl.a || exit 1
+	cp libssl.a $SGXSSL_ROOT/package/lib64/$OUTPUT_SSL_LIB || exit 1
+	objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_SSL_LIB || exit 1
+fi
+
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 cp include/crypto/* $SGXSSL_ROOT/package/include/crypto/ || exit 1
 exit 0

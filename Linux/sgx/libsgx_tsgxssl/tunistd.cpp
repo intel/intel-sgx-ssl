@@ -70,10 +70,18 @@ size_t sgxssl_write (int fd, const void *buf, size_t n)
 	// In addition, the function is used by bss_sock.c as writesocket function.
 	// It is unreachable under the assumption that TLS support is not required.
 	// Otherwise should be implemented as OCALL.
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
+	// SGX_UNREACHABLE_CODE(SET_ERRNO);
+
+	size_t retval = 0;
+	sgx_status_t ret = u_sgxssl_write(&retval, fd, buf, n);
+	if (ret != SGX_SUCCESS)
+	{
+		FEND;
+		return 0;
+	}
 	FEND;
 
-	return -1;
+	return retval;
 
 }
 
@@ -93,10 +101,18 @@ size_t sgxssl_read(int fd, void *buf, size_t count)
 	// In addition, the function is used by bss_sock.c as readsocket function.
 	// It is unreachable under the assumption that TLS support is not required.
 	// Otherwise should be implemented as OCALL.
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
+	// SGX_UNREACHABLE_CODE(SET_ERRNO);
+
+	size_t retval = 0;
+	sgx_status_t ret = u_sgxssl_read(&retval, fd, buf, count);
+	if (ret != SGX_SUCCESS)
+	{
+		FEND;
+		return 0;
+	}
 	FEND;
 
-	return -1;
+	return retval;
 }
 
 // TODO
@@ -117,10 +133,19 @@ int sgxssl_close(int fd)
 	// In addition, the function is used by b_sock2.c as closesocket function.
 	// It is unreachable under the assumption that TLS support is not required.
 	// Otherwise should be implemented as OCALL.
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
+	// SGX_UNREACHABLE_CODE(SET_ERRNO);
+
+	int retval = 0;
+	sgx_status_t ret = u_sgxssl_close(&retval, fd);
+	if (ret != SGX_SUCCESS)
+	{
+		FEND;
+		return 0;
+	}
+
 	FEND;
 
-	return -1;
+	return retval;
 }
 
 long sgxssl_sysconf(int name)

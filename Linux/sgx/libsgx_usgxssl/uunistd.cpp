@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,20 +29,27 @@
  *
  */
 
-/* sgx_tssl.edl - Top EDL file. */
+#include <unistd.h>
+#include "ucommon.h"
 
-enclave {
-    
-    from "sgx_tstdc.edl" import *;
-    
-    untrusted {
-		void u_sgxssl_ftime([out, size=timeb_len] void * timeptr, uint32_t timeb_len);
-		size_t u_sgxssl_write (int fd, [in,size=n]const void *buf, size_t n);
-	    size_t u_sgxssl_read(int fd, [out, size=count]void *buf, size_t count);
-        int u_sgxssl_close(int fd);
-	};
+extern "C" {
 
-    trusted {
+	size_t u_sgxssl_write(int fd, const void* buf, size_t n)
+	{
+		size_t ret = write(fd, buf, n);
+		return ret;
+	}
+	
+	size_t u_sgxssl_read(int fd, void* buf, size_t count)
+	{
+		size_t ret = read(fd, buf, count);
+		return ret;
+	}
+	
+	int u_sgxssl_close(int fd)
+	{
+		int ret = close(fd) ;
+		return ret;
+	}
 
-    };
-};
+}
