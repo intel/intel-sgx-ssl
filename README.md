@@ -62,8 +62,8 @@ This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx
 
 ### Available `make` flags:
 - DEBUG={1,0}: Libraries build mode, with debug symbols or without. Default ``0``.
-- NO_THREADS={1,0}: Enable "no-threads" in the OpenSSL's build configuration options. Default ``0``.
-- SGX_MODE={HW,SIM}: Use can take "SIM" to run the unit test on non-SGX platform if necessary. Default ``HW``. 
+- NO_THREADS={1,0}: Enable ``no-threads`` in the OpenSSL's build configuration options. Default ``0``.
+- SGX_MODE={HW,SIM}: User can take ``SIM`` to run the unit test on non-SGX platform if necessary. Default ``HW``. 
 - DESTDIR=\<PATH\>: Directory realpath to install Intel® SGX SSL libraries in. Default ``/opt/intel/sgxssl/``. 
 - VERBOSE={1,0}: Makefile verbose mode. Print compilation commands before executing it. Default ``0``.
 
