@@ -61,11 +61,12 @@ make all test
 This will build and test the Intel® SGX SSL libraries (libsgx_tsgxssl.a, libsgx_usgxssl.a, libsgx_tsgxssl_crypto.a), which can be found in package/lib64/. And the Intel® SGX SSL trusted libraries (libsgx_tsgxssl.lib,  libsgx_tsgxssl_crypto.lib) with CVE-2020-0551 Mitigation enabled can be found in package/lib64/{cve_2020_0551_cf|cve_2020_0551_load}/.
 
 ### Available `make` flags:
-- DEBUG={1,0}: Libraries build mode, with debug symbols or without.
-- SGX_MODE={HW,SIM}: SGX feature mode. Hardware/Simulation
-- DESTDIR=\<PATH\>: Directory realpath to install Intel® SGX SSL libraries in. Default /opt/intel/sgxssl/
-- VERBOSE={1,0}: Makefile verbose mode. Print compilation commands before executing it.
-- NO_THREADS={1,0}: Enable "no-threads" in the OpenSSL's build configuration options
+- DEBUG={1,0}: Libraries build mode, with debug symbols or without. Default "0".
+- NO_THREADS={1,0}: Enable "no-threads" in the OpenSSL's build configuration options. Default "0".
+- SGX_MODE={HW,SIM}: Use can take "SIM" to run the unit test on non-SGX platform if necessary. Default "HW".
+- DESTDIR=\<PATH\>: Directory realpath to install Intel® SGX SSL libraries in. Default /opt/intel/sgxssl/.
+- VERBOSE={1,0}: Makefile verbose mode. Print compilation commands before executing it. Default "0".
+
 
 To install Intel® SGX SSL libraries in Linux OS, run:
 ```
