@@ -1,6 +1,6 @@
 @echo off
 Rem 
-Rem Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+Rem Copyright (C) 2011-2022 Intel Corporation. All rights reserved.
 Rem 
 Rem Redistribution and use in source and binary forms, with or without
 Rem modification, are permitted provided that the following conditions
@@ -118,12 +118,13 @@ if %errorlevel% neq 0 (
 
 REM # generate list of tools used for creating this release
 set BUILD_TOOLS_FILENAME=sgxssl.%SGXSSL_VERSION%.build-tools.txt
-echo "OpenSSL package version:" >> %BUILD_TOOLS_FILENAME%
+echo "OpenSSL package version:" > %BUILD_TOOLS_FILENAME%
 echo "%OPENSSL_VERSION%" >> %BUILD_TOOLS_FILENAME%
-echo "SVN revision:" >> %BUILD_TOOLS_FILENAME%
-echo "%SVN_REVISION%" >> %BUILD_TOOLS_FILENAME%
+echo "GIT commit:" >> %BUILD_TOOLS_FILENAME%
+git log -1 --pretty=format:%%h >> %BUILD_TOOLS_FILENAME%
+echo; >> %BUILD_TOOLS_FILENAME%
 echo "perl --version:" >> %BUILD_TOOLS_FILENAME%
-perl --version >> %BUILD_TOOLS_FILENAME%
+perl --version | findstr ver >> %BUILD_TOOLS_FILENAME%
 
 
 echo "Build completed: Zipping package  %date% %time%"
