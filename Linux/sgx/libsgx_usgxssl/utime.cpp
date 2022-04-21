@@ -30,6 +30,7 @@
  */
 
 #include <sys/timeb.h>
+#include <unistd.h>
 
 #include "ucommon.h"
 
@@ -61,4 +62,8 @@ void u_sgxssl_ftime(void * timeptr, uint32_t timeb_len)
 
 }
 
+void u_sgxssl_usleep(int micro_seconds)
+{
+	usleep(micro_seconds);
+}
 }

@@ -219,12 +219,15 @@
 #define bind sgxssl_bind
 #define listen sgxssl_listen
 #define connect sgxssl_connect
+#define shutdown sgxssl_shutdown
 #define accept sgxssl_accept
+#define select sgxssl_select
 #define getaddrinfo sgxssl_getaddrinfo
 #define freeaddrinfo sgxssl_freeaddrinfo
 #define gethostbyname sgxssl_gethostbyname
 #define getnameinfo sgxssl_getnameinfo
 #define ioctl sgxssl_ioctl
+#define __fdelt_chk sgxssl__fdelt_chk
 
 char * sgxssl___builtin___strcat_chk(char *dest, const char *src, unsigned int dest_size);
 char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int dest_size);
@@ -237,6 +240,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define gmtime_r sgxssl_gmtime_r
 #define gmtime sgxssl_gmtime
 #define gettimeofday sgxssl_gettimeofday
+#define usleep sgxssl_usleep
 
 //openssl 1.1.1 new APIs
 //

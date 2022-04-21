@@ -1676,8 +1676,9 @@ char* getenv(char* name);
 
 int ec_test()
 {
-    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-
+#ifndef OPENSSL_NO_CRYPTO_MDEBUG
+	    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+#endif
     RAND_seed(rnd_seed, sizeof rnd_seed); /* or BN_generate_prime may fail */
 
     prime_field_tests();

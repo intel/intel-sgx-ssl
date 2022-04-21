@@ -128,6 +128,19 @@ int sgxssl_connect(int sockfd, const void* addr, socklen_t addrlen)
 
 }
 
+int sgxssl_shutdown(int sockfd,int how)
+{
+        FSTART;
+
+        // It is unreachable under the assumption that TLS support is not required.
+        // Otherwise should be implemented as OCALL.
+        SGX_UNREACHABLE_CODE(SET_ERRNO);
+        FEND;
+
+        return -1;
+
+}
+
 int sgxssl_accept(int fd, void* addr, socklen_t* addr_len)
 {
 	FSTART;
@@ -138,6 +151,19 @@ int sgxssl_accept(int fd, void* addr, socklen_t* addr_len)
 	FEND;
 
 	return -1;
+
+}
+
+int sgxssl_select(int nfds, void* readfds, void* writefds, void* exceptfds, struct timeval *timeout)
+{
+        FSTART;
+
+        // It is unreachable under the assumption that TLS support is not required.
+        // Otherwise should be implemented as OCALL.
+        SGX_UNREACHABLE_CODE(SET_ERRNO);
+        FEND;
+
+        return -1;
 
 }
 
@@ -222,4 +248,15 @@ char * sgxssl_gai_strerror(int err)
 	return str;
 }
 
+long int sgxssl__fdelt_chk (long int d)
+{
+        FSTART;
+
+        // It is unreachable under the assumption that TLS support is not required.
+        // Otherwise should be implemented as OCALL.
+        SGX_UNREACHABLE_CODE(SET_ERRNO);
+        FEND;
+
+        return NULL;
+}
 }
