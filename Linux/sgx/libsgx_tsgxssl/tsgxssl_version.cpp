@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2022 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,8 +29,8 @@
  *
  */
 
-// This string should be updated before every release!!
-#define STRFILEVER "1.1.1n"
+// This srting should be updated before every release!!
+#define STRFILEVER "3.0.2"
 
 #define __CONCAT(x, y) x/**/y
 
