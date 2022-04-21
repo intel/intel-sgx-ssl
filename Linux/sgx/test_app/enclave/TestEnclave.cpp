@@ -282,10 +282,10 @@ void t_sgxssl_call_apis()
 
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
-    
+#if 0
     rsa_key_gen();
     printf("test rsa_key_gen completed\n");
-           
+#endif
     ec_key_gen();
 	printf("test ec_key_gen completed\n");
 	
@@ -304,7 +304,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ec_test completed\n");
-	
+#if 0
 	ret = ecdh_test();
 	if (ret != 0)
     {
@@ -312,7 +312,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdh_test completed\n");
-	
+#endif
 	ret = ecdsa_test();
 	if (ret != 0)
     {
@@ -328,7 +328,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test bn_test completed\n");
-
+#if 0
 	ret = dh_test();
 	if (ret != 0)
     {
@@ -336,7 +336,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test dh_test completed\n");
-
+#endif
 	ret = sha256_test();
 	if (ret != 0)
     {
