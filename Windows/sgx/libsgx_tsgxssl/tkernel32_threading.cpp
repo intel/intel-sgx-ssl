@@ -38,8 +38,6 @@
 
 #include "tcommon.h"
 
-#include "libsgx_tsgxssl_t.h"
-
 #define NTAPI __stdcall
 
 //////////////////// LAST ERROR ////////////////////

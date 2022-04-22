@@ -34,7 +34,7 @@
 
 #include <stdlib.h>
 #include <sgx_trts.h>
-#include "libsgx_tsgxssl_t.h"
+#include "sgx_tsgxssl_t.h"
 #include "errno.h"
 
 #include "defines.h"

@@ -29,7 +29,6 @@
  *
  */
 
-#include "libsgx_tsgxssl_t.h"
 #include "tCommon.h"
 #include <sgx_thread.h>
 #include <sgx_spinlock.h>

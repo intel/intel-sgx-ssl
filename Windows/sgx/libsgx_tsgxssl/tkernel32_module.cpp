@@ -33,7 +33,6 @@
 #include <string>
 #include <sgx_trts.h>
 #include "tcommon.h"
-#include "libsgx_tsgxssl_t.h"
 
 extern "C" {
 
