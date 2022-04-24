@@ -29,7 +29,7 @@
  *
  */
 
-#include "tCommon.h"
+#include "tcommon.h"
 #include "time.h"
 #include "string.h"
 
