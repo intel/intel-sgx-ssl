@@ -32,7 +32,6 @@
 #pragma warning(disable:4197)
 #include <map>
 #include <vector>
-#include <sgx_trts.h>
 #include <sgx_thread.h>
 #include <sgx_spinlock.h>
 

@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <map>
 
-#include <sgx_trts.h>
 #include <sgx_spinlock.h>
 
 #include "tcommon.h"

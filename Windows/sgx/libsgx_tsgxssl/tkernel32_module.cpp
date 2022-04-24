@@ -31,7 +31,6 @@
 
 #include <stdio.h>
 #include <string>
-#include <sgx_trts.h>
 #include "tcommon.h"
 
 extern "C" {

@@ -31,7 +31,6 @@
 
 #include "tCommon.h"
 #include "time.h"
-#include <sgx_trts.h>
 #include "string.h"
 
 
