@@ -29,10 +29,8 @@
  *
  */
 
-#include "tCommon.h"
+#include "tcommon.h"
 #include "time.h"
-#include <sgx_trts.h>
-#include "libsgx_tsgxssl_t.h"
 #include "string.h"
 
 

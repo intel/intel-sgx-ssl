@@ -32,10 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libsgx_tsgxssl_t.h"
-
-#include "tCommon.h"
-#include <sgx_trts.h>
+#include "tcommon.h"
 
 __declspec(thread)	int s_error = 0;
 

@@ -31,9 +31,7 @@
 
 #define printf	sgxssl_printf
 
-#include <sgx_trts.h>
 #include "tcommon.h"
-#include "libsgx_tsgxssl_t.h"
 
 extern "C" {
 
