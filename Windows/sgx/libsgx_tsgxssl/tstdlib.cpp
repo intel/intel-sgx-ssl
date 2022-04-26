@@ -33,7 +33,7 @@
 #include <string.h>
 #include "tcommon.h"
 #include "errno.h"
-#include "libsgx_tsgxssl_t.h"
+#include "sgx_tsgxssl_t.h"
 #include "tSgxSSL_api.h"
 
 
@@ -41,6 +41,7 @@
 #define ENV_X509_CERT_DIR_EVP	"X509_CERT_DIR_EVP"
 #define ENV_OPENSSL_ALLOW_PROXY_CERTS	"OPENSSL_ALLOW_PROXY_CERTS"
 #define ENV_OPENSSL_ENGINES		"OPENSSL_ENGINES"
+#define OPENSSL_CONF			"OPENSSL_CONF"
 #define DUMMY_PATH	"C:\\dev\\null"
 #define STR_OPENSSL_FIPS			"1"
 #define STR_PROXY_CERTS_ALLOWED		"1"
@@ -55,7 +56,8 @@ char* sgxssl_getenv(const char* name)
 	FSTART;
 
 	if (! strcmp(name, ENV_X509_CERT_DIR_EVP) ||
-		! strcmp(name, ENV_OPENSSL_ENGINES)) {
+		! strcmp(name, ENV_OPENSSL_ENGINES) ||
+                ! strcmp(name, OPENSSL_CONF)) {
 	    FEND;
 		return DUMMY_PATH;
 	}

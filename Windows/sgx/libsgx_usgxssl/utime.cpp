@@ -33,9 +33,15 @@
 
 #include <time.h>
 #include <sys/timeb.h>
+#include <windows.h>
 
 void u_sgxssl_ftime64(void * timeptr, uint32_t timeb64Len)
 {
 	SGX_ASSERT_STRUCT_SIZE(struct __timeb64 , timeb64Len)
 	_ftime64_s((struct __timeb64 *) timeptr);
+}
+
+void u_sgxssl_sleep(int seconds)
+{
+	Sleep(seconds);
 }

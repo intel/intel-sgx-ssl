@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 void u_sgxssl_ftime64(void * timeptr, uint32_t timeb64Len);
-
+void u_sgxssl_sleep(int seconds);
 
 #ifdef __cplusplus
 }

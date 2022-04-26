@@ -33,11 +33,9 @@
 #include <stdlib.h>
 #include <map>
 
-#include <sgx_trts.h>
 #include <sgx_spinlock.h>
 
 #include "tcommon.h"
-#include "libsgx_tsgxssl_t.h"
 
 extern "C" {
 

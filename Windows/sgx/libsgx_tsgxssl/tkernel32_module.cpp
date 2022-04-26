@@ -33,7 +33,7 @@
 #include <string>
 #include <sgx_trts.h>
 #include "tcommon.h"
-#include "libsgx_tsgxssl_t.h"
+#include "sgx_tsgxssl_t.h"
 
 extern "C" {
 
@@ -140,6 +140,82 @@ and in ui_openssl.c (in unreachable place - read from console)
 
 	FEND;
 	return INVALID_HANDLE_VALUE;
+}
+
+void WINAPI sgxssl_GetSystemInfo(
+	_Out_ void* lpSystemInfo
+)
+{
+	FSTART;
+
+	// If the function fails, the return value is INVALID_HANDLE_VALUE. To get extended error information, call GetLastError.
+	SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+	FEND;
+	// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+}
+
+
+LPVOID sgxssl_VirtualAlloc(LPVOID lpAddress, DWORD dwSize, DWORD flAllocationType, DWORD flProtect)
+{
+	FSTART;
+
+	// If the function fails, the return value is INVALID_HANDLE_VALUE. To get extended error information, call GetLastError.
+	SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+	FEND;
+	// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+	return NULL;
+}
+
+BOOL WINAPI sgxssl_VirtualProtect(
+	_In_ LPVOID lpAddress,
+	_In_ SIZE_T dwSize,
+	_In_ DWORD flNewProtect,
+	_Out_ PDWORD lpflOldProtect
+)
+{
+	FSTART;
+
+	// If the function fails, the return value is INVALID_HANDLE_VALUE. To get extended error information, call GetLastError.
+	SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+	FEND;
+	// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+	return false;
+}
+
+BOOL WINAPI sgxssl_VirtualFree(
+LPVOID lpAddress,  SIZE_T dwSize,  DWORD dwFreeType)
+{
+	FSTART;
+
+	// If the function fails, the return value is INVALID_HANDLE_VALUE. To get extended error information, call GetLastError.
+	SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+	FEND;
+	// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+	return false;
+}
+
+BOOL sgxssl_VirtualLock(
+ LPVOID lpAddress,
+ SIZE_T dwSize
+)
+{
+	FSTART;
+
+	// If the function fails, the return value is INVALID_HANDLE_VALUE. To get extended error information, call GetLastError.
+	SGX_UNREACHABLE_CODE(SET_LAST_ERROR);
+
+	FEND;
+	// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+	return false;
+}
+
+unsigned int sgxssl_GetACP()
+{
+	return 42;
 }
 
 }

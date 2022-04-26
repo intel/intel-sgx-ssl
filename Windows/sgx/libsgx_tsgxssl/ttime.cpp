@@ -32,7 +32,7 @@
 #include "tCommon.h"
 #include "time.h"
 #include <sgx_trts.h>
-#include "libsgx_tsgxssl_t.h"
+#include "sgx_tsgxssl_t.h"
 #include "string.h"
 
 
@@ -179,5 +179,9 @@ BOOL WINBASEAPI sgxssl_SystemTimeToFileTime(const _SYSTEMTIME *lpSystemTime, FIL
 	return 1;
 }
 
+void sgxssl_sleep(int seconds)
+{
+	u_sgxssl_sleep(seconds);
+}
 
 }

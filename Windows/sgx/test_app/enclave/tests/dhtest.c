@@ -96,10 +96,10 @@ int dh_test()
     int i, alen, blen, aout, bout;
     int ret = 1;
     BIO *out = NULL;
-
+#ifndef OPENSSL_NO_CRYPTO_MDEBUG
     CRYPTO_set_mem_debug(1);
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-
+#endif
     RAND_seed(rnd_seed, sizeof rnd_seed);
 
     out = BIO_new(BIO_s_mem());

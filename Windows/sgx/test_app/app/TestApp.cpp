@@ -184,11 +184,11 @@ int run_all_tests()
 	if (run_test("ec_test", ec_test) != 0 && stop_on_failure) {
 		return 1;
 	}
-
+#if 0
 	if (run_test("ecdh_test", ecdh_test) != 0 && stop_on_failure) {
 		return 1;
 	}
-
+#endif
 	if (run_test("ecdsa_test", ecdsa_test) != 0 && stop_on_failure) {
 		return 1;
 	}

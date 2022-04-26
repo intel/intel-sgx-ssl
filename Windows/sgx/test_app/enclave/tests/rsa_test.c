@@ -225,8 +225,10 @@ int rsa_test()
     int num;
     int n;
 
+#ifndef OPENSSL_NO_CRYPTO_MDEBUG
     CRYPTO_set_mem_debug(1);
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+#endif
 	unsigned int sizeofbuffer = sizeof(rnd_seed);
     RAND_seed(&(rnd_seed[0]), sizeofbuffer); /* or OAEP may fail */
 

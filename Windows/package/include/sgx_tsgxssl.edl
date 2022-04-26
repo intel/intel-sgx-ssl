@@ -43,6 +43,7 @@ enclave {
 
 	// time - aggregate to 1 ocall
 		void u_sgxssl_ftime64([out, size=timeb64Len] void * timeptr, uint32_t timeb64Len);
+		void u_sgxssl_sleep(int seconds);
 
 	};
 };
