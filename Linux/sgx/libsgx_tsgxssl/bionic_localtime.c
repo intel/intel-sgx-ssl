@@ -237,3 +237,40 @@ struct tm* sgxssl_gmtime(const time_t* timep)
 {
 	return sgxssl_gmtime_r(timep, NULL);
 }
+
+struct __locale_struct
+{
+
+  const unsigned short int *__ctype_b;
+  const int *__ctype_tolower;
+  const int *__ctype_toupper;
+
+  const char *__names[13];
+};
+
+typedef struct __locale_struct *__locale_t;
+typedef __locale_t locale_t;
+
+locale_t sgxssl_newlocale(int category_mask, const char *locale,
+                          locale_t base)
+{
+	SGX_UNREACHABLE_CODE(SET_ERRNO);
+	return NULL;
+}
+
+void sgxssl_freelocale(locale_t locobj)
+{
+	SGX_UNREACHABLE_CODE(SET_ERRNO);
+}
+
+int sgxssl_strcasecmp_l(const char *string1, const char *string2, locale_t locale)
+{
+        (void)locale;
+        return  strcasecmp(string1, string2);
+}
+
+int sgxssl_strncasecmp_l(const char *string1, const char *string2, size_t number, locale_t locale)
+{
+	(void)locale;
+	return  strncasecmp(string1, string2, number);
+}

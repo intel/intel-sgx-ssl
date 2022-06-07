@@ -278,6 +278,13 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define secure_getenv	sgxssl_getenv
 #define sscanf sgxssl_sscanf
 
+//openssl 3.0.3  new APIs
+
+#define newlocale sgxssl_newlocale
+#define freelocale sgxssl_freelocale
+#define strcasecmp_l sgxssl_strcasecmp_l
+#define strncasecmp_l sgxssl_strncasecmp_l
+
 #include <sys/cdefs.h>
 
 #undef __REDIRECT
