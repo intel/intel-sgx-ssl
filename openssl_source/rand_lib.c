@@ -336,6 +336,8 @@ int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
+    //use RDRAND for SGX Enclave insteadly
+    return get_sgx_rand_bytes(buf, num);
 
     rand = RAND_get0_private(ctx);
     if (rand != NULL)
@@ -365,6 +367,8 @@ int RAND_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
+    //use RDRAND for SGX Enclave insteadly
+    return get_sgx_rand_bytes(buf, num);
 
     rand = RAND_get0_public(ctx);
     if (rand != NULL)
