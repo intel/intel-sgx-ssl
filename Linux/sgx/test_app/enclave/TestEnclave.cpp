@@ -87,7 +87,7 @@ struct evp_pkey_st {
     STACK_OF(X509_ATTRIBUTE) *attributes; /* [ 0 ] */
     CRYPTO_RWLOCK *lock;
 } /* EVP_PKEY */ ;
-
+#if 0
 void rsa_key_gen()
 {
 	BIGNUM *bn = BN_new();
@@ -226,7 +226,7 @@ void ec_key_gen()
 	  EC_KEY_free(ec);
 	}
 }
-
+#endif
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 {
@@ -285,7 +285,7 @@ void t_sgxssl_call_apis()
 #if 0
     rsa_key_gen();
     printf("test rsa_key_gen completed\n");
-#endif
+    
     ec_key_gen();
 	printf("test ec_key_gen completed\n");
 	
@@ -304,7 +304,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ec_test completed\n");
-#if 0
+
 	ret = ecdh_test();
 	if (ret != 0)
     {
@@ -312,7 +312,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdh_test completed\n");
-#endif
+
 	ret = ecdsa_test();
 	if (ret != 0)
     {
@@ -320,7 +320,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdsa_test completed\n");
-
+#endif
 	ret = bn_test();
 	if (ret != 0)
     {
@@ -360,7 +360,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test threads_test completed\n");
-	
+
     //GM SM2 - sign and verify
     ret = ecall_sm2();
     if (ret != 0)
@@ -396,4 +396,5 @@ void t_sgxssl_call_apis()
         exit(ret);
     }
     printf("test evp_sm4_ctr completed\n");
+
 }
