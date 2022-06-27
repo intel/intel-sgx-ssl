@@ -52,6 +52,11 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		SGX_SHARED_LIB_FLAG := -Wl,-rpath,${SGX_LIBRARY_PATH}
+	else ifeq ($(LINUX_SGX_BUILD), 2)
+                include ../../../../../QuoteGeneration/buildenv.mk
+                SGX_EDGER8R := $(TD_MIGRATION_STD_LIB_PATH)/sgx_edger8r
+                SGX_SDK_INC := $(TD_MIGRATION_STD_INC_PATH)
+                LIBCXX_INC := $(TD_MIGRATION_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
 	else
 		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
