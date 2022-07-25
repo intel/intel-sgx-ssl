@@ -36,7 +36,7 @@ Rem
 set SGXSSL_VERSION=1.9.100.%errorlevel%
 
 REM Check if Prerequisites apps available
-echo "Validating Prerequisites (perl, nasm)"
+echo "Validating Prerequisites (Perl, NASM, OpenSSL source)"
 perl -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find perl."
@@ -48,12 +48,11 @@ if %errorlevel% neq 0 (
 	exit /b 1
 )
 
+set OPENSSL_VERSION=openssl-1.1.1q
 
-REM This variable must be set to the openssl file name (version) located in the openssl_source folder
-if "%1"=="" (
-	set OPENSSL_VERSION=openssl-1.1.1
-) else (
-	set OPENSSL_VERSION=%1
+if not exist ..\openssl_source\%OPENSSL_VERSION%.tar.gz (
+        echo "Please download %OPENSSL_VERSION%.tar.gz and put at ..\openssl_source\"
+	exit /b 1
 )
 
 for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version') DO (
