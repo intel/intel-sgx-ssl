@@ -32,12 +32,10 @@ include buildenv.mk
 include sgx/buildenv.mk
 LINUX_SGX_BUILD ?= 0
 EMPTY_SRC = check_lvi_toolset
-.PHONY: sgxssl sgxssl_no_mitigation clean install uninstall
+.PHONY: sgxssl clean install uninstall
 
 
-all: sgxssl
-
-sgxssl:
+all:
 	@rm -rf $(EMPTY_SRC).* && touch $(EMPTY_SRC).cpp
 	@gcc -Wa,-mlfence-after-load=yes -c $(EMPTY_SRC).cpp 2> /dev/null \
 		|| (echo "Please follow the instruction at https://github.com/intel/linux-sgx/blob/master/README.md#build-the-intelr-sgx-sdk-and-intelr-sgx-psw-package to install \"mitigation tools\" first."  &&  exit 1)
@@ -49,7 +47,7 @@ sgxssl:
 	$(MAKE) -C sgx/ clean
 	$(MAKE) -C sgx/ 
 
-sgxssl_no_mitigation:
+sgxssl:
 	$(MAKE) -C sgx/ all
 
 clean:
