@@ -32,7 +32,7 @@ include buildenv.mk
 include sgx/buildenv.mk
 LINUX_SGX_BUILD ?= 0
 EMPTY_SRC = check_lvi_toolset
-.PHONY: sgxssl clean install uninstall
+.PHONY: sgxssl sgxssl_no_mitigation clean install uninstall
 
 
 all:
@@ -49,6 +49,8 @@ all:
 
 sgxssl:
 	$(MAKE) -C sgx/ all
+
+sgxssl_no_mitigation:sgxssl
 
 clean:
 	$(MAKE) -C sgx/ clean
