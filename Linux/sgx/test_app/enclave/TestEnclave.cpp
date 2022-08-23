@@ -87,38 +87,36 @@ struct evp_pkey_st {
     STACK_OF(X509_ATTRIBUTE) *attributes; /* [ 0 ] */
     CRYPTO_RWLOCK *lock;
 } /* EVP_PKEY */ ;
-#if 0
+
 void rsa_key_gen()
 {
-	BIGNUM *bn = BN_new();
-	if (bn == NULL) {
-		printf("BN_new failure: %ld\n", ERR_get_error());
-	    return;
-	}
-	int ret = BN_set_word(bn, RSA_F4);
-    if (!ret) {
-       	printf("BN_set_word failure\n");
-	    return;
-	}
-	
-	RSA *keypair = RSA_new();
-	if (keypair == NULL) {
-		printf("RSA_new failure: %ld\n", ERR_get_error());
-	    return;
-	}
-	ret = RSA_generate_key_ex(keypair, 4096, bn, NULL);
-	if (!ret) {
-        printf("RSA_generate_key_ex failure: %ld\n", ERR_get_error());
-	    return;
-	}
-
-	EVP_PKEY *evp_pkey = EVP_PKEY_new();
-	if (evp_pkey == NULL) {
-		printf("EVP_PKEY_new failure: %ld\n", ERR_get_error());
-		return;
-	}
-	EVP_PKEY_assign_RSA(evp_pkey, keypair);
-
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
+    if (!ctx)
+    {
+        printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    int ret = EVP_PKEY_keygen_init(ctx);
+    if (!ret)
+    {
+        printf("EVP_PKEY_keygen_init: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 1024) <= 0)
+    {
+        printf("EVP_PKEY_CTX_set_rsa_keygen_bits: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    EVP_PKEY* evp_pkey = NULL;
+    if (EVP_PKEY_keygen(ctx, &evp_pkey) <= 0)
+    {
+        printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
 	// public key - string
 	int len = i2d_PublicKey(evp_pkey, NULL);
 	unsigned char *buf = (unsigned char *) malloc (len + 1);
@@ -150,46 +148,38 @@ void rsa_key_gen()
 
 	free(buf);
 
-	BN_free(bn);
-
 	EVP_PKEY_free(evp_pkey);
-
-	if (evp_pkey->pkey.ptr != NULL) {
-	  RSA_free(keypair);
-	}
 }
 
 void ec_key_gen()
 {
-	unsigned char entropy_buf[ADD_ENTROPY_SIZE] = {0};
-
-	RAND_add(entropy_buf, sizeof(entropy_buf), ADD_ENTROPY_SIZE);
-	RAND_seed(entropy_buf, sizeof(entropy_buf));
-
-	EC_KEY * ec = NULL;
-    int eccgroup;
-    eccgroup = OBJ_txt2nid("secp384r1");
-    ec = EC_KEY_new_by_curve_name(eccgroup);
-    if (ec == NULL) {
-    	printf("EC_KEY_new_by_curve_name failure: %ld\n", ERR_get_error());
-	    return;
+    EVP_PKEY_CTX * ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+    if (!ctx)
+    {
+        printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
     }
-    
-	EC_KEY_set_asn1_flag(ec, OPENSSL_EC_NAMED_CURVE);
-
-	int ret = EC_KEY_generate_key(ec);
-	if (!ret) {
-        printf("EC_KEY_generate_key failure\n");
-	    return;
-	}
-
-	EVP_PKEY *ec_pkey = EVP_PKEY_new();
-	if (ec_pkey == NULL) {
-		printf("EVP_PKEY_new failure: %ld\n", ERR_get_error());
-		return;
-	}
-	EVP_PKEY_assign_EC_KEY(ec_pkey, ec);
-
+    int ret = EVP_PKEY_keygen_init(ctx);
+    if (!ret)
+    {
+        printf("EVP_PKEY_keygen_init: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, NID_secp384r1) <= 0)
+    {
+        printf("EVP_PKEY_CTX_set_ec_paramgen_curve_nid: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    EVP_PKEY* ec_pkey = NULL;
+    if (EVP_PKEY_keygen(ctx, &ec_pkey) <= 0)
+    {
+        printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
 	// public key - string
 	int len = i2d_PublicKey(ec_pkey, NULL);
 	unsigned char *buf = (unsigned char *) malloc (len + 1);
@@ -222,11 +212,7 @@ void ec_key_gen()
 	free(buf);
 
 	EVP_PKEY_free(ec_pkey);
-	if (ec_pkey->pkey.ptr != NULL) {
-	  EC_KEY_free(ec);
-	}
 }
-#endif
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 {
@@ -282,13 +268,13 @@ void t_sgxssl_call_apis()
 
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
-#if 0
+
     rsa_key_gen();
     printf("test rsa_key_gen completed\n");
     
     ec_key_gen();
 	printf("test ec_key_gen completed\n");
-	
+#if 0	
     ret = rsa_test();
     if (ret != 0)
     {
