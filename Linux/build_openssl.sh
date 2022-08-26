@@ -37,13 +37,7 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
-OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*1.1.1q.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
-if [ "$OPENSSL_VERSION" == "" ] 
-then
-	echo "In order to run this script, OpenSSL 1.1.1q tar.gz package must be located in openssl_source/ directory."
-	exit 1
-fi
-echo $OPENSSL_VERSION
+OPENSSL_VERSION=openssl
 
 #Create required directories
 mkdir -p $SGXSSL_ROOT/package/include/openssl/
@@ -54,7 +48,7 @@ mkdir -p $SGXSSL_ROOT/package/lib64/
 # build openssl modules, clean previous openssl dir if it exist
 cd $SGXSSL_ROOT/../openssl_source || exit 1
 rm -rf $OPENSSL_VERSION
-tar xvf $OPENSSL_VERSION.tar.gz || exit 1
+cp -r $SGXSSL_ROOT/../openssl . || exit 1
 
 # Remove AESBS to support only AESNI and VPAES
 sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
