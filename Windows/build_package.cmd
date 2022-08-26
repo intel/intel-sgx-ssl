@@ -88,7 +88,7 @@ goto build_start
 cd %SGXSSL_ROOT%\..\openssl_source
 rmdir /s /q %OPENSSL_VERSION%
 mkdir %OPENSSL_VERSION%
-xcopy /Q /Y /S %SGXSSL_ROOT%\..\%OPENSSL_VERSION% %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
+xcopy /Q /Y /S %SGXSSL_ROOT%\..\%OPENSSL_VERSION% %OPENSSL_VERSION%
 
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
