@@ -290,15 +290,15 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ec_test completed\n");
-#if 0
+
 	ret = ecdh_test();
 	if (ret != 0)
     {
     	printf("test ecdh_test returned error %d\n", ret);
     	exit(ret);
     }
-	printf("test ecdh_test completed\n");
-
+	printf("test ecdh_test completed\n"); return ;
+#if 0
 	ret = ecdsa_test();
 	if (ret != 0)
     {

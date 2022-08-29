@@ -396,5 +396,6 @@ int rsa_test(void)
     ADD_ALL_TESTS(test_rsa_pkcs1, 3);
     ADD_ALL_TESTS(test_rsa_oaep, 3);
     ADD_ALL_TESTS(test_rsa_security_bit, OSSL_NELEM(rsa_security_bits_cases));
+    ERR_print_errors_fp((void*)(2));
     return 0;
 }
