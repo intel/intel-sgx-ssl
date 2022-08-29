@@ -67,6 +67,7 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems Laboratories.
  *
  */
+#include "internal/deprecated.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -432,8 +433,10 @@ static void prime_field_tests(void)
 
     if (!BN_hex2bn(&p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFF"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn(&a, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFC"))
         ABORT;
     if (!BN_hex2bn(&b, "1C97BEFC54BD7A8B65ACF89F81D4D4ADC565FA45"))
@@ -483,8 +486,10 @@ static void prime_field_tests(void)
 
     if (!BN_hex2bn(&p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn(&a, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC"))
         ABORT;
     if (!BN_hex2bn(&b, "64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1"))
@@ -533,8 +538,10 @@ static void prime_field_tests(void)
     if (!BN_hex2bn
         (&p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn
         (&a, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFE"))
         ABORT;
@@ -589,8 +596,10 @@ static void prime_field_tests(void)
         (&p,
          "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn
         (&a,
          "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC"))
@@ -648,8 +657,10 @@ static void prime_field_tests(void)
     if (!BN_hex2bn(&p, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                    "FFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn(&a, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                    "FFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC"))
         ABORT;
@@ -704,8 +715,10 @@ static void prime_field_tests(void)
                    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                    "FFFFFFFFFFFFFFFFFFFFFFFFFFFF"))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn(&a, "1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                    "FFFFFFFFFFFFFFFFFFFFFFFFFFFC"))
@@ -818,8 +831,10 @@ static void prime_field_tests(void)
         fprintf(stdout, ".");
         fflush(stdout);
 
-        if (!BN_pseudo_rand(y, BN_num_bits(y), 0, 0))
+#ifndef SGXSSL_NO_DEPRECATED_3_0
+	if (!BN_pseudo_rand(y, BN_num_bits(y), 0, 0))
             ABORT;
+#endif	
         if (!BN_add(z, z, y))
             ABORT;
         BN_set_negative(z, 1);
@@ -834,8 +849,10 @@ static void prime_field_tests(void)
         fprintf(stdout, ".");
         fflush(stdout);
 
-        if (!BN_pseudo_rand(x, BN_num_bits(y) - 1, 0, 0))
+#ifndef SGXSSL_NO_DEPRECATED_3_0
+	if (!BN_pseudo_rand(x, BN_num_bits(y) - 1, 0, 0))
             ABORT;
+#endif
         if (!BN_add(z, x, y))
             ABORT;
         BN_set_negative(z, 1);
@@ -1300,8 +1317,10 @@ static void char2_field_tests(void)
         fprintf(stdout, ".");
         fflush(stdout);
 
-        if (!BN_pseudo_rand(y, BN_num_bits(y), 0, 0))
+#ifndef SGXSSL_NO_DEPRECATED_3_0
+	if (!BN_pseudo_rand(y, BN_num_bits(y), 0, 0))
             ABORT;
+#endif
         if (!BN_add(z, z, y))
             ABORT;
         BN_set_negative(z, 1);
@@ -1316,8 +1335,10 @@ static void char2_field_tests(void)
         fprintf(stdout, ".");
         fflush(stdout);
 
-        if (!BN_pseudo_rand(x, BN_num_bits(y) - 1, 0, 0))
+#ifndef SGXSSL_NO_DEPRECATED_3_0
+	if (!BN_pseudo_rand(x, BN_num_bits(y) - 1, 0, 0))
             ABORT;
+#endif
         if (!BN_add(z, x, y))
             ABORT;
         BN_set_negative(z, 1);
@@ -1542,8 +1563,10 @@ static void nistp_single_test(const struct nistp_test_params *test)
         ABORT;
     if (!BN_hex2bn(&p, test->p))
         ABORT;
+#ifndef SGXSSL_NO_DEPRECATED_3_0
     if (1 != BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
         ABORT;
+#endif
     if (!BN_hex2bn(&a, test->a))
         ABORT;
     if (!BN_hex2bn(&b, test->b))

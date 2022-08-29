@@ -217,6 +217,9 @@ void test_perror(const char *s);
 
 # define TEST_true(a)         test_true(__FILE__, __LINE__, #a, (a) != 0)
 # define TEST_false(a)        test_false(__FILE__, __LINE__, #a, (a) != 0)
+
+# define TEST_BN_eq(a, b)     test_BN_eq(__FILE__, __LINE__, #a, #b, a, b)
+
 /*
  * TEST_error(desc, ...) prints an informative error message in the standard
  * format.  |desc| is a printf format string.
@@ -230,5 +233,17 @@ void test_perror(const char *s);
 #  define TEST_info(...)     test_info(__FILE__, __LINE__, __VA_ARGS__)
 #  define TEST_skip(...)     test_skip(__FILE__, __LINE__, __VA_ARGS__)
 # endif
+/* Fake non-secure random number generator */
+typedef int fake_random_generate_cb(unsigned char *out, size_t outlen,
+                                    const char *name, EVP_RAND_CTX *ctx);
+#define ADD_TEST(fn) \
+        if ( 1 != fn()) return 1;
+
+#define ADD_ALL_TESTS(fn, index) \
+        for ( int i = 0 ; i < index; i++)       \
+        {                                       \
+                if ( 1 != fn(i))                \
+                        return 1;               \
+        }
 
 #endif                          /* OSSL_TESTUTIL_H */
