@@ -1,75 +1,35 @@
-/* ====================================================================
- * Copyright (c) 1998-2017 The OpenSSL Project.  All rights reserved.
+/*
+ * Copyright 1999-2021 The OpenSSL Project Authors. All Rights Reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgment:
- *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
- *
- * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
- *    endorse or promote products derived from this software without
- *    prior written permission. For written permission, please contact
- *    openssl-core@openssl.org.
- *
- * 5. Products derived from this software may not be called "OpenSSL"
- *    nor may "OpenSSL" appear in their names without prior written
- *    permission of the OpenSSL Project.
- *
- * 6. Redistributions of any form whatsoever must retain the following
- *    acknowledgment:
- *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
- *
- * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
- * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
- * ====================================================================
- *
- * This product includes cryptographic software written by Eric Young
- * (eay@cryptsoft.com).  This product includes software written by Tim
- * Hudson (tjh@cryptsoft.com).
- *
- *
- * test vectors from p1ovect1.txt
- *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
  */
+
+/* test vectors from p1ovect1.txt */
+
+/*
+ * RSA low level APIs are deprecated for public use, but still ok for
+ * internal use.
+ */
+#include "internal/deprecated.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "e_os.h"
+#include "internal/nelem.h"
 
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/bn.h>
 
-# include <openssl/rsa.h>
+#include "testutil.h"
 
-#include "../TestEnclave.h"
+#include <openssl/rsa.h>
 
-# define SetKey \
+#define SetKey \
     RSA_set0_key(key,                                           \
                  BN_bin2bn(n, sizeof(n)-1, NULL),               \
                  BN_bin2bn(e, sizeof(e)-1, NULL),               \
@@ -81,8 +41,9 @@
                         BN_bin2bn(dmp1, sizeof(dmp1)-1, NULL),  \
                         BN_bin2bn(dmq1, sizeof(dmq1)-1, NULL),  \
                         BN_bin2bn(iqmp, sizeof(iqmp)-1, NULL)); \
-    memcpy(c, ctext_ex, sizeof(ctext_ex) - 1);                  \
-    return (sizeof(ctext_ex) - 1);
+    if (c != NULL)                                              \
+        memcpy(c, ctext_ex, sizeof(ctext_ex) - 1);              \
+    return sizeof(ctext_ex) - 1;
 
 static int key1(RSA *key, unsigned char *c)
 {
@@ -250,137 +211,190 @@ static int key3(RSA *key, unsigned char *c)
     SetKey;
 }
 
-static int pad_unknown(void)
+static int rsa_setkey(RSA** key, unsigned char *ctext, int idx)
 {
-    unsigned long l;
-    while ((l = ERR_get_error()) != 0)
-        if (ERR_GET_REASON(l) == RSA_R_UNKNOWN_PADDING_TYPE)
-            return (1);
-    return (0);
+    int clen = 0;
+
+    *key = RSA_new();
+    if (*key != NULL)
+        switch (idx) {
+        case 0:
+            clen = key1(*key, ctext);
+            break;
+        case 1:
+            clen = key2(*key, ctext);
+            break;
+        case 2:
+            clen = key3(*key, ctext);
+            break;
+        }
+    return clen;
 }
 
-static const char rnd_seed[] =
-    "string to make the random number generator think it has entropy";
-
-int rsa_test()
+static int test_rsa_simple(int idx, int en_pad_type, int de_pad_type,
+                           int success, unsigned char *ctext_ex, int *clen,
+                           RSA **retkey)
 {
-    int err = 0;
-    int v;
+    int ret = 0;
     RSA *key;
     unsigned char ptext[256];
     unsigned char ctext[256];
+    static unsigned char ptext_ex[] = "\x54\x85\x9b\x34\x2c\x49\xea\x2a";
+    int plen;
+    int clentmp = 0;
+    int num;
+
+    plen = sizeof(ptext_ex) - 1;
+    clentmp = rsa_setkey(&key, ctext_ex, idx);
+    if (clen != NULL)
+        *clen = clentmp;
+
+    num = RSA_public_encrypt(plen, ptext_ex, ctext, key, en_pad_type);
+    if (!TEST_int_eq(num, clentmp))
+        goto err;
+
+    num = RSA_private_decrypt(num, ctext, ptext, key, de_pad_type);
+    if (success) {
+        if (!TEST_int_gt(num, 0) || !TEST_mem_eq(ptext, num, ptext_ex, plen))
+            goto err;
+    } else {
+        if (!TEST_int_lt(num, 0))
+            goto err;
+    }
+
+    ret = 1;
+    if (retkey != NULL) {
+        *retkey = key;
+        key = NULL;
+    }
+err:
+    RSA_free(key);
+    return ret;
+}
+
+static int test_rsa_pkcs1(int idx)
+{
+    return test_rsa_simple(idx, RSA_PKCS1_PADDING, RSA_PKCS1_PADDING, 1, NULL,
+                           NULL, NULL);
+}
+
+static int test_rsa_oaep(int idx)
+{
+    int ret = 0;
+    RSA *key = NULL;
+    unsigned char ptext[256];
     static unsigned char ptext_ex[] = "\x54\x85\x9b\x34\x2c\x49\xea\x2a";
     unsigned char ctext_ex[256];
     int plen;
     int clen = 0;
     int num;
     int n;
-#ifndef OPENSSL_NO_CRYPTO_MDEBUG
-    CRYPTO_set_mem_debug(1);
-    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-#endif
-    RAND_seed(rnd_seed, sizeof rnd_seed); /* or OAEP may fail */
+
+    if (!test_rsa_simple(idx, RSA_PKCS1_OAEP_PADDING, RSA_PKCS1_OAEP_PADDING, 1,
+                         ctext_ex, &clen, &key))
+        goto err;
 
     plen = sizeof(ptext_ex) - 1;
 
-    for (v = 0; v < 3; v++) {
-        key = RSA_new();
-        switch (v) {
-        case 0:
-            clen = key1(key, ctext_ex);
-            break;
-        case 1:
-            clen = key2(key, ctext_ex);
-            break;
-        case 2:
-            clen = key3(key, ctext_ex);
-            break;
-        }
-        
-        num = RSA_public_encrypt(plen, ptext_ex, ctext, key,
-                                 RSA_PKCS1_PADDING);
-        if (num != clen) {
-            printf("PKCS#1 v1.5 encryption failed!\n");
-            err = 1;
-            goto oaep;
-        }
+    /* Different ciphertexts. Try decrypting ctext_ex */
+    num = RSA_private_decrypt(clen, ctext_ex, ptext, key,
+                              RSA_PKCS1_OAEP_PADDING);
+    if (num <= 0 || !TEST_mem_eq(ptext, num, ptext_ex, plen))
+        goto err;
 
-        num = RSA_private_decrypt(num, ctext, ptext, key, RSA_PKCS1_PADDING);
-        if (num != plen || memcmp(ptext, ptext_ex, num) != 0) {
-            printf("PKCS#1 v1.5 decryption failed!\n");
-            err = 1;
-        } else
-            printf("PKCS #1 v1.5 encryption/decryption ok\n");
-
- oaep:
-        ERR_clear_error();
-        num = RSA_public_encrypt(plen, ptext_ex, ctext, key,
-                                 RSA_PKCS1_OAEP_PADDING);
-        if (num == -1 && pad_unknown()) {
-            printf("No OAEP support\n");
-            goto next;
-        }
-        if (num != clen) {
-            printf("OAEP encryption failed!\n");
-            err = 1;
-            goto next;
-        }
-
-        num = RSA_private_decrypt(num, ctext, ptext, key,
-                                  RSA_PKCS1_OAEP_PADDING);
-        if (num != plen || memcmp(ptext, ptext_ex, num) != 0) {
-            printf("OAEP decryption (encrypted data) failed!\n");
-            err = 1;
-        } else if (memcmp(ctext, ctext_ex, num) == 0)
-            printf("OAEP test vector %d passed!\n", v);
-
-        /*
-         * Different ciphertexts (rsa_oaep.c without -DPKCS_TESTVECT). Try
-         * decrypting ctext_ex
-         */
-
+    /* Try decrypting corrupted ciphertexts. */
+    for (n = 0; n < clen; ++n) {
+        ctext_ex[n] ^= 1;
         num = RSA_private_decrypt(clen, ctext_ex, ptext, key,
-                                  RSA_PKCS1_OAEP_PADDING);
-
-        if (num != plen || memcmp(ptext, ptext_ex, num) != 0) {
-            printf("OAEP decryption (test vector data) failed!\n");
-            err = 1;
-        } else
-            printf("OAEP encryption/decryption ok\n");
-
-        /* Try decrypting corrupted ciphertexts. */
-        for (n = 0; n < clen; ++n) {
-            ctext[n] ^= 1;
-            num = RSA_private_decrypt(clen, ctext, ptext, key,
-                                          RSA_PKCS1_OAEP_PADDING);
-            if (num > 0) {
-                printf("Corrupt data decrypted!\n");
-                err = 1;
-                break;
-            }
-            ctext[n] ^= 1;
-        }
-
-        /* Test truncated ciphertexts, as well as negative length. */
-        for (n = -1; n < clen; ++n) {
-            num = RSA_private_decrypt(n, ctext, ptext, key,
                                       RSA_PKCS1_OAEP_PADDING);
-            if (num > 0) {
-                printf("Truncated data decrypted!\n");
-                err = 1;
-                break;
-            }
-        }
-
- next:
-        RSA_free(key);
+        if (!TEST_int_le(num, 0))
+            goto err;
+        ctext_ex[n] ^= 1;
     }
 
-#ifndef OPENSSL_NO_CRYPTO_MDEBUG
-    if (CRYPTO_mem_leaks_fp(stderr) <= 0)
-        err = 1;
-#endif
+    /* Test truncated ciphertexts, as well as negative length. */
+    for (n = -1; n < clen; ++n) {
+        num = RSA_private_decrypt(n, ctext_ex, ptext, key,
+                                  RSA_PKCS1_OAEP_PADDING);
+        if (!TEST_int_le(num, 0))
+            goto err;
+    }
 
-    return err;
+    ret = 1;
+err:
+    RSA_free(key);
+    return ret;
 }
 
+static const struct {
+    int bits;
+    unsigned int r;
+} rsa_security_bits_cases[] = {
+    /* NIST SP 800-56B rev 2 (draft) Appendix D Table 5 */
+    { 2048,     112 },
+    { 3072,     128 },
+    { 4096,     152 },
+    { 6144,     176 },
+    { 8192,     200 },
+    /* NIST FIPS 140-2 IG 7.5 */
+    { 7680,     192 },
+    { 15360,    256 },
+    /* Older values */
+    { 256,      40  },
+    { 512,      56  },
+    { 1024,     80  },
+    /* Some other values */
+    { 8888,     208 },
+    { 2468,     120 },
+    { 13456,    248 },
+    /* Edge points */
+    { 15359,    256 },
+    { 15361,    264 },
+    { 7679,     192 },
+    { 7681,     200 },
+};
+
+static int test_rsa_security_bit(int n)
+{
+    static const unsigned char vals[8] = {
+        0x80, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40
+    };
+    RSA *key = RSA_new();
+    const int bits = rsa_security_bits_cases[n].bits;
+    const int result = rsa_security_bits_cases[n].r;
+    const int bytes = (bits + 7) / 8;
+    int r = 0;
+    unsigned char num[2000];
+
+    if (!TEST_ptr(key) || !TEST_int_le(bytes, (int)sizeof(num)))
+        goto err;
+
+    /*
+     * It is necessary to set the RSA key in order to ask for the strength.
+     * A BN of an appropriate size is created, in general it won't have the
+     * properties necessary for RSA to function.  This is okay here since
+     * the RSA key is never used.
+     */
+    memset(num, vals[bits % 8], bytes);
+
+    /*
+     * The 'e' parameter is set to the same value as 'n'.  This saves having
+     * an extra BN to hold a sensible value for 'e'.  This is safe since the
+     * RSA key is not used.  The 'd' parameter can be NULL safely.
+     */
+    if (TEST_true(RSA_set0_key(key, BN_bin2bn(num, bytes, NULL),
+                               BN_bin2bn(num, bytes, NULL), NULL))
+            && TEST_uint_eq(RSA_security_bits(key), result))
+        r = 1;
+err:
+    RSA_free(key);
+    return r;
+}
+
+int rsa_test(void)
+{
+    ADD_ALL_TESTS(test_rsa_pkcs1, 3);
+    ADD_ALL_TESTS(test_rsa_oaep, 3);
+    ADD_ALL_TESTS(test_rsa_security_bit, OSSL_NELEM(rsa_security_bits_cases));
+    return 0;
+}

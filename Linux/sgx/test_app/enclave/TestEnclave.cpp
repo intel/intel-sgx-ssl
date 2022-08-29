@@ -274,7 +274,7 @@ void t_sgxssl_call_apis()
     
     ec_key_gen();
 	printf("test ec_key_gen completed\n");
-#if 0	
+
     ret = rsa_test();
     if (ret != 0)
     {
@@ -290,7 +290,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ec_test completed\n");
-
+#if 0
 	ret = ecdh_test();
 	if (ret != 0)
     {
