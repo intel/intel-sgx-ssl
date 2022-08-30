@@ -67,8 +67,6 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems Laboratories.
  *
  */
-#include "internal/deprecated.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
