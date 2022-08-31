@@ -38,6 +38,7 @@ set SGXSSL_ROOT=%cd%
 set SGXSSL_SOLUTION=%SGXSSL_ROOT%\sgx\
 set OPENSSL_VERSION=%2
 set TEST_MODE=%4
+set OPENSSL_INSTALL_DIR=%SGXSSL_ROOT%\..\openssl_source\OpenSSL_install_dir_tmp
 set PROCESSOR_ARCHITECTURE=AMD64
 set WIN_SDK_VER=8.1
 perl svn_revision.pl > sgx\libsgx_tsgxssl\tsgxssl_version.h
@@ -93,12 +94,12 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
+REM disable RWLOCK to avoid calling Windows API
+call powershell -Command "(get-content %OPENSSL_VERSION%\crypto\threads_win.c) -replace ('#  define USE_RWLOCK','//#  define USE_RWLOCK') | out-file %OPENSSL_VERSION%\crypto\threads_win.c"
 
 copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
 copy /y x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
-copy /y  threads_win.c %OPENSSL_VERSION%\crypto\
-
 
 if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
 	goto extra_copying_cf
@@ -143,7 +144,7 @@ if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
 		set CVE_2020_0551_MITIGATIONS=-Qspectre-load
 	)
 )
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% --api=1.1.1 no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
 call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .
