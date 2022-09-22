@@ -155,10 +155,12 @@ static void setup_cpuinfo(uint32_t *cpuinfo_table)
         }
     }
 
+#if !defined(SKIP_INTELCPU_CHECK)
 	// Leaf 0
 	if (!is_intel_cpu(cpuinfo[0]))	{
 		SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
 	}
+#endif
 
 	// Leaf 1
 	sgxssl_cpuid_leaf_info(1,

@@ -50,6 +50,11 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
+	else ifeq ($(LINUX_SGX_BUILD), 2)
+		include ../../../../../QuoteGeneration/buildenv.mk
+		SGX_EDGER8R := $(TD_MIGRATION_STD_LIB_PATH)/sgx_edger8r
+		SGX_SDK_INC := $(TD_MIGRATION_STD_INC_PATH)
+		LIBCXX_INC := $(TD_MIGRATION_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
 	else
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
@@ -93,6 +98,10 @@ Sgx_tssl_Include_Paths := -I. -I$(PACKAGE_INC) -I$(SGX_SDK_INC) -I$(SGX_SDK_INC)
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fdata-sections -ffunction-sections -Os -Wl,--gc-sections -fvisibility=hidden -fpie -fpic -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(Sgx_tssl_Include_Paths)
 Sgx_tssl_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11 $(MITIGATION_CFLAGS) $(NO_THREADS_CFLAG)
 Sgx_tssl_Cpp_Flags := $(Common_C_Cpp_Flags) -std=c++11 -nostdinc++ $(MITIGATION_CFLAGS)
+ifeq ($(SKIP_INTELCPU_CHECK), TRUE)
+Sgx_tssl_C_Flags += -DSKIP_INTELCPU_CHECK
+endif
+
 $(shell mkdir -p $(OBJDIR))
 
 .PHONY: all run

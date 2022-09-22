@@ -38,7 +38,6 @@ set SGXSSL_ROOT=%cd%
 set SGXSSL_SOLUTION=%SGXSSL_ROOT%\sgx\
 set OPENSSL_VERSION=%2
 set TEST_MODE=%4
-set OPENSSL_INSTALL_DIR=%SGXSSL_ROOT%\..\openssl_source\OpenSSL_install_dir_tmp
 set PROCESSOR_ARCHITECTURE=AMD64
 set WIN_SDK_VER=8.1
 perl svn_revision.pl > sgx\libsgx_tsgxssl\tsgxssl_version.h
@@ -143,7 +142,7 @@ if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
 		set CVE_2020_0551_MITIGATIONS=-Qspectre-load
 	)
 )
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32  --prefix=%OPENSSL_INSTALL_DIR%
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% no-dtls no-ssl2 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32 
 call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .

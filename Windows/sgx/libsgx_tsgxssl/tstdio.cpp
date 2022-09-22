@@ -34,7 +34,6 @@
 #include <wchar.h>
 #include <string.h>
 #include "tcommon.h"
-#include "libsgx_tsgxssl_t.h"
 #include "tSgxSSL_api.h"
 
 extern PRINT_TO_STDOUT_STDERR_CB s_print_cb;
