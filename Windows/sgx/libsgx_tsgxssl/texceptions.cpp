@@ -29,7 +29,6 @@
  *
  */
 
-#include <sgx_trts.h>
 #include <sgx_trts_exception.h>
 #include <sgx_cpuid.h>
 #include <stdlib.h>

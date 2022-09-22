@@ -29,8 +29,7 @@
  *
  */
 
-#include "libsgx_tsgxssl_t.h"
-#include "tCommon.h"
+#include "tcommon.h"
 #include <sgx_thread.h>
 #include <sgx_spinlock.h>
 #include <map>

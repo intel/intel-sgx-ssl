@@ -35,8 +35,7 @@
 // It contains masks for g_cpu_feature_indicator bits
 #include "se_cpu_feature_defs.h"
 
-#include "libsgx_tsgxssl_t.h"
-#include "tCommon.h"
+#include "tcommon.h"
 
 extern "C" {
 

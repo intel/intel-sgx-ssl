@@ -33,7 +33,6 @@
 #include <string.h>
 #include "tcommon.h"
 #include "errno.h"
-#include "libsgx_tsgxssl_t.h"
 #include "tSgxSSL_api.h"
 
 
