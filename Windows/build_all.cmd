@@ -48,7 +48,7 @@ if %errorlevel% neq 0 (
 	exit /b 1
 )
 
-set OPENSSL_VERSION=openssl-1.1.1q
+set OPENSSL_VERSION=openssl-1.1.1s
 
 if not exist ..\openssl_source\%OPENSSL_VERSION%.tar.gz (
         echo "Please download %OPENSSL_VERSION%.tar.gz and put at ..\openssl_source\"
