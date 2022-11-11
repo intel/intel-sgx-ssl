@@ -104,7 +104,7 @@ void rsa_key_gen()
         EVP_PKEY_CTX_free(ctx);
         return;
     }
-    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 1024) <= 0)
+    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 4096) <= 0)
     {
         printf("EVP_PKEY_CTX_set_rsa_keygen_bits: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
