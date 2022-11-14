@@ -58,7 +58,8 @@ public int ecdh_test();
 public int ecdsa_test();
 public int sha1_test();
 public int sha256_test();
-
+public void rsa_key_gen();
+public void ec_key_gen();
 		//public int t_base64_test();
 		//public int t_cipher_test();
 		public int rsa_test();

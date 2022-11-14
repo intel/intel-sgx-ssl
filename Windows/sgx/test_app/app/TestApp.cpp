@@ -203,7 +203,8 @@ int run_all_tests()
 	if (run_test("sha256_test", sha256_test) != 0 && stop_on_failure) {
 		return 1;
 	}
-
+	rsa_key_gen(enclaveID);
+	ec_key_gen(enclaveID);
 
 	//#define SUPPORT_FILES_APIS
 
