@@ -44,7 +44,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-#define ADD_ENTROPY_SIZE	32
+#define ADD_ENTROPY_SIZE    32
 
 /* 
  * printf: 
@@ -117,38 +117,50 @@ void rsa_key_gen()
         EVP_PKEY_CTX_free(ctx);
         return;
     }
-	// public key - string
-	int len = i2d_PublicKey(evp_pkey, NULL);
-	unsigned char *buf = (unsigned char *) malloc (len + 1);
-	unsigned char *tbuf = buf;
-	i2d_PublicKey(evp_pkey, &tbuf);
+    // public key - string
+    int len = i2d_PublicKey(evp_pkey, NULL);
+    unsigned char *buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    unsigned char *tbuf = buf;
+    i2d_PublicKey(evp_pkey, &tbuf);
 
-	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print public key
+    printf ("{\"public\":\"");
+    int i;
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	// private key - string
-	len = i2d_PrivateKey(evp_pkey, NULL);
-	buf = (unsigned char *) malloc (len + 1);
-	tbuf = buf;
-	i2d_PrivateKey(evp_pkey, &tbuf);
+    // private key - string
+    len = i2d_PrivateKey(evp_pkey, NULL);
+    buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    tbuf = buf;
+    i2d_PrivateKey(evp_pkey, &tbuf);
 
-	// print private key
-	printf ("{\"private\":\"");
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print private key
+    printf ("{\"private\":\"");
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	EVP_PKEY_free(evp_pkey);
+    EVP_PKEY_free(evp_pkey);
 }
 
 void ec_key_gen()
@@ -180,81 +192,91 @@ void ec_key_gen()
         EVP_PKEY_CTX_free(ctx);
         return;
     }
-	// public key - string
-	int len = i2d_PublicKey(ec_pkey, NULL);
-	unsigned char *buf = (unsigned char *) malloc (len + 1);
-	unsigned char *tbuf = buf;
-	i2d_PublicKey(ec_pkey, &tbuf);
+    // public key - string
+    int len = i2d_PublicKey(ec_pkey, NULL);
+    unsigned char *buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    unsigned char *tbuf = buf;
+    i2d_PublicKey(ec_pkey, &tbuf);
 
-	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print public key
+    printf ("{\"public\":\"");
+    int i;
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	// private key - string
-	len = i2d_PrivateKey(ec_pkey, NULL);
-	buf = (unsigned char *) malloc (len + 1);
-	tbuf = buf;
-	i2d_PrivateKey(ec_pkey, &tbuf);
+    // private key - string
+    len = i2d_PrivateKey(ec_pkey, NULL);
+    buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    tbuf = buf;
+    i2d_PrivateKey(ec_pkey, &tbuf);
 
-	// print private key
-	printf ("{\"private\":\"");
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print private key
+    printf ("{\"private\":\"");
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	EVP_PKEY_free(ec_pkey);
+    EVP_PKEY_free(ec_pkey);
 }
 
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 {
-	char buf[BUFSIZ] = {'\0'};
+    char buf[BUFSIZ] = {'\0'};
 
-	int res = vsnprintf(buf, BUFSIZ, fmt, arg);
-	if (res >=0) {
-		sgx_status_t sgx_ret = uprint((const char *) buf);
-		TEST_CHECK(sgx_ret);
-	}
-	return res;
+    int res = vsnprintf(buf, BUFSIZ, fmt, arg);
+    if (res >=0) {
+        sgx_status_t sgx_ret = uprint((const char *) buf);
+        TEST_CHECK(sgx_ret);
+    }
+    return res;
 }
 
-/*
 extern "C" int CRYPTO_set_mem_functions(
         void *(*m)(size_t, const char *, int),
         void *(*r)(void *, size_t, const char *, int),
         void (*f)(void *, const char *, int));
 void* priv_malloc(size_t size, const char *file, int line)
 {
-	void* addr = malloc(size);
-	
-	printf("[malloc:%s:%d] size: %d, addr: %p\n", file, line, size, addr);
-	
-	return addr;
+    void* addr = malloc(size);
+
+    printf("[malloc:%s:%d] size: %d, addr: %p\n", file, line, size, addr);
+ 
+    return addr;
 }
 void* priv_realloc(void* old_addr, size_t new_size, const char *file, int line)
 {
-	void* new_addr = realloc(old_addr, new_size);
-	
-	printf("[realloc:%s:%d] old_addr: %p, new_size: %d, new_addr: %p\n", file, line, old_addr, new_size, new_addr);
-	
-	return new_addr;
+    void* new_addr = realloc(old_addr, new_size);
+
+    printf("[realloc:%s:%d] old_addr: %p, new_size: %d, new_addr: %p\n", file, line, old_addr, new_size, new_addr);
+
+    return new_addr;
 }
 void priv_free(void* addr, const char *file, int line)
 {
-	printf("[free:%s:%d] addr: %p\n", file, line, addr);
-	
-	free(addr);
+    printf("[free:%s:%d] addr: %p\n", file, line, addr);
+
+    free(addr);
 }
-*/
 
 
 void t_sgxssl_call_apis()
@@ -274,80 +296,80 @@ void t_sgxssl_call_apis()
     printf("test rsa_key_gen completed\n");
            
     ec_key_gen();
-	printf("test ec_key_gen completed\n");
-	
+    printf("test ec_key_gen completed\n");
+
     ret = rsa_test();
     if (ret != 0)
     {
-    	printf("test rsa_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test rsa_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test rsa_test completed\n");
+    printf("test rsa_test completed\n");
 
-	ret = ec_test();
-	if (ret != 0)
+    ret = ec_test();
+    if (ret != 0)
     {
-    	printf("test ec_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test ec_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test ec_test completed\n");
-	
-	ret = ecdh_test();
-	if (ret != 0)
-    {
-    	printf("test ecdh_test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test ecdh_test completed\n");
-	
-	ret = ecdsa_test();
-	if (ret != 0)
-    {
-    	printf("test ecdsar_test returned error %d\n", ret);
-    	exit(ret);
-    }
-	printf("test ecdsa_test completed\n");
+    printf("test ec_test completed\n");
 
-	ret = bn_test();
-	if (ret != 0)
+    ret = ecdh_test();
+    if (ret != 0)
     {
-    	printf("test bn_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test ecdh_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test bn_test completed\n");
+    printf("test ecdh_test completed\n");
 
-	ret = dh_test();
-	if (ret != 0)
+    ret = ecdsa_test();
+    if (ret != 0)
     {
-    	printf("test dh_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test ecdsar_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test dh_test completed\n");
+    printf("test ecdsa_test completed\n");
 
-	ret = sha256_test();
-	if (ret != 0)
+    ret = bn_test();
+    if (ret != 0)
     {
-    	printf("test sha256_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test bn_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test sha256_test completed\n");
-	
-	ret = sha1_test();
-	if (ret != 0)
+    printf("test bn_test completed\n");
+
+    ret = dh_test();
+    if (ret != 0)
     {
-    	printf("test sha1_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test dh_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test sha1_test completed\n");
-	
-	ret = threads_test();
-	if (ret != 0)
+    printf("test dh_test completed\n");
+
+    ret = sha256_test();
+    if (ret != 0)
     {
-    	printf("test threads_test returned error %d\n", ret);
-    	exit(ret);
+        printf("test sha256_test returned error %d\n", ret);
+        exit(ret);
     }
-	printf("test threads_test completed\n");
-	
+    printf("test sha256_test completed\n");
+
+    ret = sha1_test();
+    if (ret != 0)
+    {
+        printf("test sha1_test returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test sha1_test completed\n");
+
+    ret = threads_test();
+    if (ret != 0)
+    {
+        printf("test threads_test returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test threads_test completed\n");
+
     //GM SM2 - sign and verify
     ret = ecall_sm2();
     if (ret != 0)
