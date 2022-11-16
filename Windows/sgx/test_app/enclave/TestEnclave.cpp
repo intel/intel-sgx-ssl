@@ -136,6 +136,12 @@ void rsa_key_gen()
 	// public key - string
 	int len = i2d_PublicKey(evp_pkey, NULL);
 	unsigned char* buf = (unsigned char*)malloc(len + 1);
+	if (!buf)
+	{
+		printf("Failed in calling malloc()\n");
+		EVP_PKEY_CTX_free(ctx);
+		return;
+	}	
 	unsigned char* tbuf = buf;
 	i2d_PublicKey(evp_pkey, &tbuf);
 
@@ -152,6 +158,12 @@ void rsa_key_gen()
 	// private key - string
 	len = i2d_PrivateKey(evp_pkey, NULL);
 	buf = (unsigned char*)malloc(len + 1);
+	if (!buf)
+	{
+		printf("Failed in calling malloc()\n");
+		EVP_PKEY_CTX_free(ctx);
+		return;
+	}	
 	tbuf = buf;
 	i2d_PrivateKey(evp_pkey, &tbuf);
 
@@ -199,6 +211,12 @@ void ec_key_gen()
 	// public key - string
 	int len = i2d_PublicKey(ec_pkey, NULL);
 	unsigned char* buf = (unsigned char*)malloc(len + 1);
+	if (!buf)
+	{
+		printf("Failed in calling malloc()\n");
+		EVP_PKEY_CTX_free(ctx);
+		return;
+	}	
 	unsigned char* tbuf = buf;
 	i2d_PublicKey(ec_pkey, &tbuf);
 
@@ -215,6 +233,12 @@ void ec_key_gen()
 	// private key - string
 	len = i2d_PrivateKey(ec_pkey, NULL);
 	buf = (unsigned char*)malloc(len + 1);
+	if (!buf)
+	{
+		printf("Failed in calling malloc()\n");
+		EVP_PKEY_CTX_free(ctx);
+		return;
+	}	
 	tbuf = buf;
 	i2d_PrivateKey(ec_pkey, &tbuf);
 
