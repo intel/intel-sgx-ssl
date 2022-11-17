@@ -110,7 +110,6 @@ void rsa_key_gen()
 	if (!ctx)
 	{
 		printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-		EVP_PKEY_CTX_free(ctx);
 		return;
 	}
 	int ret = EVP_PKEY_keygen_init(ctx);
@@ -185,7 +184,6 @@ void ec_key_gen()
 	if (!ctx)
 	{
 		printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-		EVP_PKEY_CTX_free(ctx);
 		return;
 	}
 	int ret = EVP_PKEY_keygen_init(ctx);
