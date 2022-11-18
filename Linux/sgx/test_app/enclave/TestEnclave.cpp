@@ -94,7 +94,6 @@ void rsa_key_gen()
     if (!ctx)
     {
         printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-        EVP_PKEY_CTX_free(ctx);
         return;
     }
     int ret = EVP_PKEY_keygen_init(ctx);
@@ -111,44 +110,61 @@ void rsa_key_gen()
         return;
     }
     EVP_PKEY* evp_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
     if (EVP_PKEY_keygen(ctx, &evp_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+    if (EVP_PKEY_generate(ctx, &evp_pkey) <= 0)
+#endif
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
         return;
     }
-	// public key - string
-	int len = i2d_PublicKey(evp_pkey, NULL);
-	unsigned char *buf = (unsigned char *) malloc (len + 1);
-	unsigned char *tbuf = buf;
-	i2d_PublicKey(evp_pkey, &tbuf);
+    // public key - string
+    int len = i2d_PublicKey(evp_pkey, NULL);
+    printf("Flen = %d\n", len);
+    unsigned char *buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    unsigned char *tbuf = buf;
+    i2d_PublicKey(evp_pkey, &tbuf);
 
-	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print public key
+    printf ("{\"public\":\"");
+    int i;
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	// private key - string
-	len = i2d_PrivateKey(evp_pkey, NULL);
-	buf = (unsigned char *) malloc (len + 1);
-	tbuf = buf;
-	i2d_PrivateKey(evp_pkey, &tbuf);
+    // private key - string
+    len = i2d_PrivateKey(evp_pkey, NULL);
+    buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    tbuf = buf;
+    i2d_PrivateKey(evp_pkey, &tbuf);
 
-	// print private key
-	printf ("{\"private\":\"");
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print private key
+    printf ("{\"private\":\"");
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	EVP_PKEY_free(evp_pkey);
+    EVP_PKEY_free(evp_pkey);
 }
 
 void ec_key_gen()
@@ -157,7 +173,6 @@ void ec_key_gen()
     if (!ctx)
     {
         printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-        EVP_PKEY_CTX_free(ctx);
         return;
     }
     int ret = EVP_PKEY_keygen_init(ctx);
@@ -174,44 +189,60 @@ void ec_key_gen()
         return;
     }
     EVP_PKEY* ec_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
     if (EVP_PKEY_keygen(ctx, &ec_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+    if (EVP_PKEY_generate(ctx, &ec_pkey) <= 0)
+#endif
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
         return;
     }
-	// public key - string
-	int len = i2d_PublicKey(ec_pkey, NULL);
-	unsigned char *buf = (unsigned char *) malloc (len + 1);
-	unsigned char *tbuf = buf;
-	i2d_PublicKey(ec_pkey, &tbuf);
+    // public key - string
+    int len = i2d_PublicKey(ec_pkey, NULL);
+    unsigned char *buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    unsigned char *tbuf = buf;
+    i2d_PublicKey(ec_pkey, &tbuf);
 
-	// print public key
-	printf ("{\"public\":\"");
-	int i;
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print public key
+    printf ("{\"public\":\"");
+    int i;
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	// private key - string
-	len = i2d_PrivateKey(ec_pkey, NULL);
-	buf = (unsigned char *) malloc (len + 1);
-	tbuf = buf;
-	i2d_PrivateKey(ec_pkey, &tbuf);
+    // private key - string
+    len = i2d_PrivateKey(ec_pkey, NULL);
+    buf = (unsigned char *) malloc (len + 1);
+    if (!buf)
+    {
+        printf("Failed in calling malloc()\n");
+        EVP_PKEY_CTX_free(ctx);
+        return;
+    }
+    tbuf = buf;
+    i2d_PrivateKey(ec_pkey, &tbuf);
 
-	// print private key
-	printf ("{\"private\":\"");
-	for (i = 0; i < len; i++) {
-	    printf("%02x", (unsigned char) buf[i]);
-	}
-	printf("\"}\n");
+    // print private key
+    printf ("{\"private\":\"");
+    for (i = 0; i < len; i++) {
+        printf("%02x", (unsigned char) buf[i]);
+    }
+    printf("\"}\n");
 
-	free(buf);
+    free(buf);
 
-	EVP_PKEY_free(ec_pkey);
+    EVP_PKEY_free(ec_pkey);
 }
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
