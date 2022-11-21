@@ -60,6 +60,7 @@ int ecdh_test();
 int ecdsa_test();
 int bn_test();
 int dhtest();
+int aesgcm_test();
 int sha256_test();
 int sha1_test();
 int threads_test();
