@@ -39,7 +39,6 @@ set SGXSSL_SOLUTION=%SGXSSL_ROOT%\sgx\
 set OPENSSL_VERSION=%2
 set TEST_MODE=%4
 set PROCESSOR_ARCHITECTURE=AMD64
-set WIN_SDK_VER=8.1
 perl svn_revision.pl > sgx\libsgx_tsgxssl\tsgxssl_version.h
 
 set build_mode=%1
@@ -88,8 +87,8 @@ goto build_start
 
 cd %SGXSSL_ROOT%\..\openssl_source
 rmdir /s /q %OPENSSL_VERSION%
-
-call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
+mkdir %OPENSSL_VERSION%
+xcopy /Q /Y /S %SGXSSL_ROOT%\..\%OPENSSL_VERSION% %OPENSSL_VERSION%
 
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"

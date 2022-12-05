@@ -46,7 +46,7 @@ ifeq ($(SGX_ARCH), x86)
 else
 	SGX_COMMON_CFLAGS := -m64 -Wall
 	ifeq ($(LINUX_SGX_BUILD), 1)
-		include ../../../../../buildenv.mk
+		include ../../../../../../../buildenv.mk
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include

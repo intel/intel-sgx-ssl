@@ -32,11 +32,8 @@ Rem
 
 @echo off
 
-
-set SGXSSL_VERSION=1.9.100.%errorlevel%
-
 REM Check if Prerequisites apps available
-echo "Validating Prerequisites (Perl, NASM, OpenSSL source)"
+echo "Validating Prerequisites (Perl, NASM)"
 perl -v > nul 2>&1
 if %errorlevel% neq 0 (
 	echo "Build failed, can't find perl."
@@ -48,12 +45,7 @@ if %errorlevel% neq 0 (
 	exit /b 1
 )
 
-set OPENSSL_VERSION=openssl-1.1.1q
-
-if not exist ..\openssl_source\%OPENSSL_VERSION%.tar.gz (
-        echo "Please download %OPENSSL_VERSION%.tar.gz and put at ..\openssl_source\"
-	exit /b 1
-)
+set OPENSSL_VERSION=openssl
 
 for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version') DO (
   for %%F in (%%B) do (
@@ -62,7 +54,7 @@ for /f "tokens=2*" %%A in ('REG QUERY "HKLM\SOFTWARE\Intel\SGX_PSW" /v Version')
   )
 )
 :break
-set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION:openssl-=%
+set SGXSSL_VERSION=%PSW_VER%_%OPENSSL_VERSION%-1.1.1q
 echo "Building SGXSSL with: %OPENSSL_VERSION%  %date% %time% to %SGXSSL_VERSION%"
 
 REM *********************************************************
