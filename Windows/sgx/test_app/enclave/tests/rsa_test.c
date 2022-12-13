@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mbusafecrt.h>
 
 //#include "e_os.h"
 
@@ -14,6 +15,8 @@
 # include <openssl/rsa.h>
 
 #include "../TestEnclave.h"
+
+
 
 #define stdout ((void*)1)
 #define stderr ((void*)2)
@@ -30,7 +33,7 @@
                         BN_bin2bn(dmp1, sizeof(dmp1)-1, NULL),  \
                         BN_bin2bn(dmq1, sizeof(dmq1)-1, NULL),  \
                         BN_bin2bn(iqmp, sizeof(iqmp)-1, NULL)); \
-    memcpy(c, ctext_ex, sizeof(ctext_ex) - 1);                  \
+    TEST_ASSERT(0 != memcpy_s(c, sizeof(ctext_ex)-1, ctext_ex, sizeof(ctext_ex) - 1));                  \
     return (sizeof(ctext_ex) - 1);
 
 static int key1(RSA *key, unsigned char *c)

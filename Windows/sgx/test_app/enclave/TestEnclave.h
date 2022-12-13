@@ -34,7 +34,9 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <openssl/bn.h>
 
+int BN_print_fp(void* fp, const BIGNUM* a);
 
 #ifdef DO_TEST_LOG
 #define TEST_LOG(...) sgxssl_printf("TLOG: " __VA_ARGS__);

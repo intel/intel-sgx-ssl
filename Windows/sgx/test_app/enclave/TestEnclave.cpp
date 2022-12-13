@@ -126,9 +126,13 @@ void rsa_key_gen()
 		return;
 	}
 	EVP_PKEY* evp_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	if (EVP_PKEY_keygen(ctx, &evp_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+	if (EVP_PKEY_generate(ctx, &evp_pkey) <= 0)
+#endif
 	{
-		printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
+		printf("EVP_PKEY_keygen/EVP_PKEY_generate: %ld\n", ERR_get_error());
 		EVP_PKEY_CTX_free(ctx);
 		return;
 	}
@@ -200,9 +204,13 @@ void ec_key_gen()
 		return;
 	}
 	EVP_PKEY* ec_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	if (EVP_PKEY_keygen(ctx, &ec_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+	if (EVP_PKEY_generate(ctx, &ec_pkey) <= 0)
+#endif
 	{
-		printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
+		printf("EVP_PKEY_keygen/EVP_PKEY_generate: %ld\n", ERR_get_error());
 		EVP_PKEY_CTX_free(ctx);
 		return;
 	}
@@ -263,95 +271,3 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 	}
 	return res;
 }
-
-void t_sgxssl_call_apis()
-{
-	int ret = 0;
-
-	printf("Start tests\n");
-
-	SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
-
-	//CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
-
-	rsa_key_gen();
-	printf("test rsa_key_gen completed\n");
-
-	ec_key_gen();
-	printf("test ec_key_gen completed\n");
-
-	ret = rsa_test();
-	if (ret != 0)
-	{
-		printf("test rsa_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test rsa_test completed\n");
-
-	ret = ec_test();
-	if (ret != 0)
-	{
-		printf("test ec_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test ec_test completed\n");
-
-	ret = ecdh_test();
-	if (ret != 0)
-	{
-		printf("test ecdh_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test ecdh_test completed\n");
-
-	ret = ecdsa_test();
-	if (ret != 0)
-	{
-		printf("test ecdsar_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test ecdsa_test completed\n");
-
-	ret = bn_test();
-	if (ret != 0)
-	{
-		printf("test bn_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test bn_test completed\n");
-
-	ret = dh_test();
-	if (ret != 0)
-	{
-		printf("test dh_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test dh_test completed\n");
-
-	ret = sha256_test();
-	if (ret != 0)
-	{
-		printf("test sha256_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test sha256_test completed\n");
-
-	ret = sha1_test();
-	if (ret != 0)
-	{
-		printf("test sha1_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test sha1_test completed\n");
-
-	//ret = threads_test();
-	if (ret != 0)
-	{
-		printf("test threads_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test threads_test completed\n");
-
-}
-
-
