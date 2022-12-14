@@ -110,7 +110,11 @@ void rsa_key_gen()
         return;
     }
     EVP_PKEY* evp_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
     if (EVP_PKEY_keygen(ctx, &evp_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+    if (EVP_PKEY_generate(ctx, &evp_pkey) <= 0)
+#endif
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
@@ -184,7 +188,11 @@ void ec_key_gen()
         return;
     }
     EVP_PKEY* ec_pkey = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
     if (EVP_PKEY_keygen(ctx, &ec_pkey) <= 0)
+#else //new API EVP_PKEY_generate() since 3.0
+    if (EVP_PKEY_generate(ctx, &ec_pkey) <= 0)
+#endif
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
@@ -244,7 +252,7 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
     int res = vsnprintf(buf, BUFSIZ, fmt, arg);
     if (res >=0) {
         sgx_status_t sgx_ret = uprint((const char *) buf);
-        TEST_CHECK(sgx_ret);
+        TEST_CHECK((int)sgx_ret);
     }
     return res;
 }
@@ -343,6 +351,14 @@ void t_sgxssl_call_apis()
         exit(ret);
     }
     printf("test dh_test completed\n");
+
+    ret = aesccm_test();
+    if (ret != 0)
+    {
+	    printf("test aesccm_test returned error %d\n", ret);
+	    exit(ret);
+    }
+    printf("test aesccm_test completed\n");
 
     ret = sha256_test();
     if (ret != 0)

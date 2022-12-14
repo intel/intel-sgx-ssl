@@ -100,7 +100,7 @@
 
 # define ABORT do { \
         fflush(stdout); \
-        fprintf(stderr, "%s:%d: ABORT\n"/*, __FILE__, __LINE__*/); \
+        fprintf(stderr, " ABORT!\n"); \
         ERR_print_errors_fp(stderr); \
         EXIT(1); \
 } while (0)
