@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <openssl/bn.h>
 
 #define TEST_CHECK(status)	\
 {	\
@@ -42,6 +43,8 @@
 		abort();	\
 	}	\
 }
+void ERR_print_errors_fp(FILE *fp);
+int BN_print_fp(FILE *fp, const BIGNUM *a);
 
 #if defined(__cplusplus)
 extern "C" {
@@ -60,6 +63,7 @@ int ecdh_test();
 int ecdsa_test();
 int bn_test();
 int dh_test();
+int aesccm_test();
 int sha256_test();
 int sha1_test();
 int threads_test();
