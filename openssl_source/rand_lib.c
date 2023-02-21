@@ -480,7 +480,7 @@ static void *rand_ossl_ctx_new(OSSL_LIB_CTX *libctx)
     return NULL;
 }
 
-static void rand_ossl_ctx_free(void *vdgbl)
+void ossl_rand_ctx_free(void *vdgbl)
 {
     RAND_GLOBAL *dgbl = vdgbl;
 
@@ -505,7 +505,7 @@ static void rand_ossl_ctx_free(void *vdgbl)
 static const OSSL_LIB_CTX_METHOD rand_drbg_ossl_ctx_method = {
     OSSL_LIB_CTX_METHOD_PRIORITY_2,
     rand_ossl_ctx_new,
-    rand_ossl_ctx_free,
+    ossl_rand_ctx_free,
 };
 
 static RAND_GLOBAL *rand_get_global(OSSL_LIB_CTX *libctx)
