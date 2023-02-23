@@ -271,7 +271,6 @@ static int test_ecdh_curve(int nid, BN_CTX *ctx, BIO *out)
         ret = 1;
     }
  err:
-    ERR_print_errors_fp(stderr);
 
     OPENSSL_free(abuf);
     OPENSSL_free(bbuf);
@@ -641,7 +640,6 @@ int ecdh_test()
     ret = 0;
 
  err:
-    ERR_print_errors_fp(stderr);
     OPENSSL_free(curves);
     BN_CTX_free(ctx);
     BIO_free(out);
