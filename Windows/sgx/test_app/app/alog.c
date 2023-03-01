@@ -69,7 +69,7 @@ int ALogInit (const char* pszFileName, ALLOGFORMAT type, ALLOGMEDIA media)
 		return AT_SUCCESS;
 	if(media & ALFILE)
 	{
-		if(pszFileName == NULL || strlen(pszFileName) < 1) goto FILEEX;
+		if(pszFileName == NULL || strnlen_s(pszFileName, 128) < 1) goto FILEEX;
 
 		if((gFile = fopen(pszFileName, AT_FILE_OPEN_MODE)) == NULL) goto FILEEX;
 
@@ -89,8 +89,8 @@ void ALogClose()
 {
 	if(gNoLog == 1)
 		return;
-    strcpy(gCategory, "");
-    strcpy(gCaseID, "");
+    strcpy_s(gCategory, 64, "");
+    strcpy_s(gCaseID, 64, "");
     alogPrintMessage(END, SPLIT_LINE);
 
 	if(gFile != NULL)
@@ -108,13 +108,13 @@ void ALogPrint(const char* format, ...)
 
 	if(gNoLog == 1)
 		return;
-	if(strlen(format) >= AT_MESSAGE_MAX_LEN / 2)
+	if(strnlen_s(format, AT_MESSAGE_MAX_LEN) >= AT_MESSAGE_MAX_LEN / 2)
 	{
 		printf("%s: Message is too long!\n", LOGLIB_INDICATOR);
 		return;
 	}
 	va_start(args, format);
-	vsprintf(buffer, format, args);
+	vsprintf_s(buffer, AT_MESSAGE_MAX_LEN * 2, format, args);
 	va_end(args);
 
 	alogPrintCommon(INFO, buffer);
@@ -128,13 +128,13 @@ void ALogPrintEx(AErrorLevel el, const char* format, ...)
 	if(gNoLog == 1)
 		return;
 
-	if(strlen(format) >= AT_MESSAGE_MAX_LEN)
+	if(strnlen_s(format, AT_MESSAGE_MAX_LEN) >= AT_MESSAGE_MAX_LEN)
 	{
 		printf("%s: Message is too long!\n", LOGLIB_INDICATOR);
 		return;
 	}
 	va_start(args, format);
-	vsprintf(buffer, format, args);
+	vsprintf_s(buffer, AT_MESSAGE_MAX_LEN * 2, format, args);
 	va_end(args);
 
 	alogPrintCommon(el, buffer);
@@ -142,25 +142,25 @@ void ALogPrintEx(AErrorLevel el, const char* format, ...)
 
 int ALogSetCategory(const char* category)
 {
-	if(category == NULL || strlen(category) >= AT_CATEGORY_MAX_LEN || strlen(category) < 1)
+	if(category == NULL || strnlen_s(category, AT_MESSAGE_MAX_LEN) >= AT_CATEGORY_MAX_LEN || strnlen_s(category, 128) < 1)
 	{
 		printf("%s: Invalid case category!\n", LOGLIB_INDICATOR);
 		gInitialized = 0;
 		return AT_FAIL;
 	}
-	strcpy(gCategory, category);
+	strcpy_s(gCategory, 64, category);
 	return AT_SUCCESS;
 }
 
 int ALogSetCaseID(const char* id)
 {
-	if(id == NULL || strlen(id) >= AT_CASEID_MAX_LEN || strlen(id) < 1)
+	if(id == NULL || strnlen_s(id, AT_CASEID_MAX_LEN) >= AT_CASEID_MAX_LEN || strnlen_s(id, 128) < 1)
 	{
 		printf("%s: Invalid case ID!\n", LOGLIB_INDICATOR);
 		gInitialized = 0;
 		return AT_FAIL;
 	}
-	strcpy(gCaseID, id);
+	strcpy_s(gCaseID, 64, id);
 	return AT_SUCCESS;
 }
 
@@ -189,7 +189,8 @@ static void alogGetTimeString(char* dateDest, char* timeDest)
 {
 	time_t currentTime;
 
-	time(&currentTime);               
+	time(&currentTime);
+	if (!currentTime) abort();
 	strftime(dateDest, AT_DATE_STRING_LENGTH, "%Y-%m-%d", localtime(&currentTime));
 	strftime(timeDest, AT_TIME_STRING_LENGTH, "%H:%M:%S", localtime(&currentTime));
 }
@@ -200,7 +201,7 @@ static int alogInitChk()
 		return 1;
 	gInitialized = 1;
 
-	if(strlen(gCategory) == 0 || strlen(gCaseID) ==0)
+	if(strnlen_s(gCategory, 128) == 0 || strnlen_s(gCaseID, 128) ==0)
 	{
 		printf("%s: Please set category or case ID!\n", LOGLIB_INDICATOR);
 		gInitialized = 0;
@@ -210,11 +211,11 @@ static int alogInitChk()
 		printf("%s: Probably, no file name is specified!\n", LOGLIB_INDICATOR);
 		gInitialized = 0;
 	}
-	if(gType != ALCSV) 
+	/*if (gType != ALCSV)
 	{
 		printf("%s: Output format can only be CSV!\n", LOGLIB_INDICATOR);
 		gInitialized = 0;
-	}
+	}*/
 	if(!(gMedia & ALFILE) && !(gMedia & ALCONSOLE))
 	{
 		printf("%s: Invalid output media!\n", LOGLIB_INDICATOR);
@@ -245,7 +246,7 @@ static void alogProcessMessage(const char* source, char* dest)
 	}
 	else
 	{
-		strcpy(dest, source);
+		strcpy_s(dest, AT_MESSAGE_MAX_LEN, source);
 	}
 }
 

@@ -6,7 +6,7 @@
     <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebuggerFlavor>SGXDebugLauncher</DebuggerFlavor>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <IntelSGXDebuggerWorkingDirectory>$(OutDir)</IntelSGXDebuggerWorkingDirectory>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>

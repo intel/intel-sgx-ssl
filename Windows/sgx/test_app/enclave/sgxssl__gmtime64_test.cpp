@@ -34,13 +34,15 @@
 
 #include "time.h"
 #include "string.h"
+#include <mbusafecrt.h>
 
-extern "C" struct tm* sgxssl__gmtime64(const uint64_t* timer);
+extern "C" struct tm* sgxssl__gmtime64(const uint64_t * timer);
 
 void t_sgxssl__gmtime64(uint64_t timer, void* tm, uint32_t length)
 {
 	TEST_ASSERT(length == sizeof(struct tm));
 
 	struct tm* time = sgxssl__gmtime64(&timer);
-	memcpy(tm, (const void *)time, length);
+	if (!time) abort();
+	TEST_ASSERT(0 != memcpy_s(tm, length, (const void*)time, length));
 }
