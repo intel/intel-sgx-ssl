@@ -55,13 +55,13 @@ static int create_key_pair_sm2(char** private_key, char** public_key)
 {
 	int ret = 0;
 	EC_GROUP *ec_group = NULL;
-	EC_KEY *ec_key = NULL;
 	BIO *pri_bio = NULL, *pub_bio = NULL;
 	size_t pri_len = 0, pub_len = 0;
 	EVP_PKEY *evp_pkey = NULL;
 	EVP_PKEY_CTX *evp_pkey_ctx = NULL;
 
 #if OPENSSL_VERSION_NUMBER < 0x30000000
+	EC_KEY *ec_key = NULL;
 	printf("OpenSSL version: 1.1.1 or lower\n");
 	// 1. Create an EC_GROUP object with a curve specified by SM2 NID
 	ec_group = EC_GROUP_new_by_curve_name(NID_sm2);
@@ -221,13 +221,13 @@ end:
 static int sign_sm2(const char* private_key, char* data, size_t data_size, unsigned char* signature, size_t* sign_len)
 { 
 	int ret = 0;
-	EC_KEY *ec_key = NULL;
 	BIO *pri_bio = NULL;
 	EVP_PKEY* evp_pkey = NULL;
 	EVP_MD_CTX *evp_md_ctx = NULL;
 	EVP_PKEY_CTX* evp_pkey_ctx = NULL;
 
 #if OPENSSL_VERSION_NUMBER < 0x30000000
+	EC_KEY *ec_key = NULL;
 	// 1.1 Read SM2 private key using EC_KEY
 	pri_bio = BIO_new_mem_buf(private_key, -1);
 	ec_key = PEM_read_bio_ECPrivateKey(pri_bio, NULL, NULL, NULL);
@@ -327,13 +327,13 @@ end:
 static int verify_sm2(const char* public_key, char* data, size_t data_size, unsigned char* signature, size_t sign_len)
 {
 	int ret = 0;
-	EC_KEY *ec_key = NULL;
 	BIO *pub_bio = NULL;
 	EVP_PKEY* evp_pkey = NULL;
 	EVP_MD_CTX *evp_md_ctx = NULL;
 	EVP_PKEY_CTX* evp_pkey_ctx = NULL;
 
 #if OPENSSL_VERSION_NUMBER < 0x30000000
+	EC_KEY *ec_key = NULL;
 	// 1.1 Read SM2 public key using EC_KEY
 	pub_bio = BIO_new_mem_buf(public_key, -1);
 	ec_key = PEM_read_bio_EC_PUBKEY(pub_bio, NULL, NULL, NULL);
