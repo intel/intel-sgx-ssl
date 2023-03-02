@@ -91,9 +91,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestEnclave_private.pem">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
