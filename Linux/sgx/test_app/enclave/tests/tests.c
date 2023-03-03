@@ -47,7 +47,9 @@ static void test_fail_message(const char *prefix, const char *file, int line,
 void test_error(const char *file, int line, const char *desc, ...)
 {
 }
-
+void test_info(const char *file, int line, const char *desc, ...)
+{
+}
 void test_perror(const char *s)
 {
     /*
@@ -204,3 +206,23 @@ int test_mem_ne(const char *file, int line, const char *st1, const char *st2,
     }
     return 1;
 }
+
+#define DEFINE_BN_COMPARISONS(opname, op, zero_cond)                    \
+    int test_BN_ ## opname(const char *file, int line,                  \
+                           const char *s1, const char *s2,              \
+                           const BIGNUM *t1, const BIGNUM *t2)          \
+    {                                                                   \
+        if (BN_cmp(t1, t2) op 0)                                        \
+            return 1;                                                   \
+        return 0;                                                       \
+    }                                                                   \
+    int test_BN_ ## opname ## _zero(const char *file, int line,         \
+                                    const char *s, const BIGNUM *a)     \
+    {                                                                   \
+        if (a != NULL &&(zero_cond))                                    \
+            return 1;                                                   \
+        return 0;                                                       \
+    }
+
+DEFINE_BN_COMPARISONS(eq, ==, BN_is_zero(a))
+

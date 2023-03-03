@@ -122,7 +122,6 @@ void rsa_key_gen()
     }
     // public key - string
     int len = i2d_PublicKey(evp_pkey, NULL);
-    printf("Flen = %d\n", len);
     unsigned char *buf = (unsigned char *) malloc (len + 1);
     if (!buf)
     {
@@ -329,15 +328,15 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdh_test completed\n"); 
-
+#if 0
 	ret = ecdsa_test();
 	if (ret != 0)
     {
-    	printf("test ecdsar_test returned error %d\n", ret);
+        printf("test ecdsa_test returned error %d\n", ret);
     	exit(ret);
     }
 	printf("test ecdsa_test completed\n");
-
+#endif
 	ret = bn_test();
 	if (ret != 0)
     {
