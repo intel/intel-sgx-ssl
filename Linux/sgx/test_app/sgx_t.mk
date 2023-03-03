@@ -183,5 +183,5 @@ endif
 	@echo "SIGN =>  $@"
 
 clean:
-	@rm -f TestEnclave.* $(ENCLAVE_DIR)/TestEnclave_t.* $(TestEnclave_Cpp_Objects) $(TestEnclave_C_Objects)
+	@rm -f TestEnclave.* $(ENCLAVE_DIR)/TestEnclave_t.* $(TestEnclave_Cpp_Objects) $(TestEnclave_C_Objects) $(Enclave_Test_Key)
 
