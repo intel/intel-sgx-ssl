@@ -65,6 +65,8 @@
  * Hudson (tjh@cryptsoft.com).
  *
  */
+#include "internal/deprecated.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
