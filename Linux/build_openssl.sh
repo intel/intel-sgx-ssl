@@ -76,6 +76,10 @@ if [[ "$*" == *"no-threads"* ]] ; then
 	ADDITIONAL_CONF+="no-threads"
 fi
 
+if [[ "$*" == *"only3x"* ]] ; then
+	ADDITIONAL_CONF+="--api=3.0 no-deprecated "
+fi
+
 # Mitigation flags
 MITIGATION_OPT=""
 MITIGATION_FLAGS=""

@@ -67,6 +67,7 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems Laboratories.
  *
  */
+#include "internal/deprecated.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,8 +111,8 @@ static const RAND_METHOD *old_rand;
 int change_rand(void)
 {
     /* save old rand method */
-    if ((old_rand = RAND_get_rand_method()) == NULL)
-        return 0;
+ //   if ((old_rand = RAND_get_rand_method()) == NULL)
+ //       return 0;
 
     fake_rand.seed = old_rand->seed;
     fake_rand.cleanup = old_rand->cleanup;
@@ -121,16 +122,16 @@ int change_rand(void)
     fake_rand.bytes = fbytes;
     fake_rand.pseudorand = old_rand->bytes;
     /* set new RAND_METHOD */
-    if (!RAND_set_rand_method(&fake_rand))
-        return 0;
+//    if (!RAND_set_rand_method(&fake_rand))
+//        return 0;
     return 1;
 }
 
 int restore_rand(void)
 {
-    if (!RAND_set_rand_method(old_rand))
-        return 0;
-    else
+ //   if (!RAND_set_rand_method(old_rand))
+ //       return 0;
+ //   else
         return 1;
 }
 

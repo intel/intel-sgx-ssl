@@ -1,4 +1,5 @@
 /* test vectors from p1ovect1.txt */
+#include "internal/deprecated.h"
 
 #include <stdio.h>
 #include <stdlib.h>

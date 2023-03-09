@@ -49,6 +49,10 @@ ifeq ($(NO_THREADS), 1)
 	export NO_THREADS_CFLAG = -DNO_THREADS
 endif
 
+ifeq ($(OSSL3ONLY), 1)
+	OPENSSL_CONFIG += only3x
+endif
+
 all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
 ifneq ($(CRYPTO_ONLY), 1)
 	$(MAKE) -C $(TRUSTED_LIB_DIR) all

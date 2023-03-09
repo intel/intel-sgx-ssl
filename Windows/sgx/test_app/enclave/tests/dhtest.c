@@ -54,6 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
+#include "internal/deprecated.h"
 
 #include <stdio.h>
 #include <stdlib.h>

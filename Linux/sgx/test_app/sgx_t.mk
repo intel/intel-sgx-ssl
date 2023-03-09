@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2022 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -53,6 +53,11 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
+	else ifeq ($(LINUX_SGX_BUILD), 2)
+                include ../../../../../QuoteGeneration/buildenv.mk
+                SGX_EDGER8R := $(TD_MIGRATION_STD_LIB_PATH)/sgx_edger8r
+                SGX_SDK_INC := $(TD_MIGRATION_STD_INC_PATH)
+                LIBCXX_INC := $(TD_MIGRATION_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
 	else
 		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
 		SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
@@ -131,6 +136,7 @@ TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nod
 	-Wl,--defsym,__ImageBase=0 \
 	-Wl,--version-script=$(ENCLAVE_DIR)/TestEnclave.lds
 
+Enclave_Test_Key := $(ENCLAVE_DIR)/TestEnclave_private_test.pem
 
 .PHONY: all test
 
@@ -168,9 +174,14 @@ TestEnclave.so: $(ENCLAVE_DIR)/TestEnclave_t.o $(TestEnclave_Cpp_Objects) $(Test
 	@echo "LINK =>  $@"
 
 TestEnclave.signed.so: TestEnclave.so
-	@$(SGX_ENCLAVE_SIGNER) sign -key $(ENCLAVE_DIR)/TestEnclave_private.pem -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.config.xml
+ifeq ($(wildcard $(Enclave_Test_Key)),)
+	@echo "There is no enclave test key<Enclave_private_test.pem>."
+	@echo "The project will generate a key<Enclave_private_test.pem> for test."
+	@openssl genrsa -out $(Enclave_Test_Key) -3 3072
+endif
+	@$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.config.xml
 	@echo "SIGN =>  $@"
 
 clean:
-	@rm -f TestEnclave.* $(ENCLAVE_DIR)/TestEnclave_t.* $(TestEnclave_Cpp_Objects) $(TestEnclave_C_Objects)
+	@rm -f TestEnclave.* $(ENCLAVE_DIR)/TestEnclave_t.* $(TestEnclave_Cpp_Objects) $(TestEnclave_C_Objects) $(Enclave_Test_Key)
 
