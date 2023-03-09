@@ -5,7 +5,7 @@ Introduction
 ------------
 The Intel® Software Guard Extensions SSL (Intel® SGX SSL) cryptographic library is intended to provide cryptographic services for Intel® Software Guard Extensions (SGX) enclave applications.
 The Intel® SGX SSL cryptographic library is based on the underlying OpenSSL* Open Source project, providing a full-strength general purpose cryptography library.
-Supported OpenSSL version is 1.1.1t. To work with 1.1.0 version please use "openssl_1.1.0" branch.
+Supported OpenSSL version is 1.1.1t.
 
 In order to build Intel® SGX SSL libraries based on old OpenSSL version, checkout the tag with the corresponding versioning, e.g. lin_2.5_1.1.1c. Tag naming convention ``[lin/win]_<Intel(R) SGX SDK VERSION>_<OpenSSL VERSION>``.
 
