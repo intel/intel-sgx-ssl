@@ -200,7 +200,7 @@ static void update_feature_mask(unsigned long long* exx_feature_mask, unsigned i
 	// Suppress information, whenever possible, from g_cpu_feature_indicator SDK variable
 	for (int bit_ix = 0; bit_ix < FEATURES_BITS_NUM; bit_ix++) {
 		if (exx_feature_mask[bit_ix] != CPU_FEATURE_UNAVAILABLE) {
-			if (g_cpu_feature_indicator & exx_feature_mask[bit_ix] == 0) {
+			if ((g_cpu_feature_indicator & exx_feature_mask[bit_ix]) == 0) {
 				*p_exx_value = *p_exx_value & (~(1 << bit_ix));
 			}
 			else {
