@@ -144,6 +144,7 @@ perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $
 sed -i 's/ENGINE_set_default_RAND/dummy_ENGINE_set_default_RAND/' crypto/engine/tb_rand.c || exit 1
 sed -i 's/build_docs$//' Makefile || exit 1
 sed -i 's/return RUN_ONCE(&locale_base, ossl_init_locale_base);/return 1;/' crypto/ctype.c || exit 1
+sed -i '/RAND_get0_private/,+1d'  crypto/rsa/rsa_sp800_56b_gen.c || exit 1
 make build_all_generated || exit 1
 
 if [[ "$MITIGATION_OPT" == "LOAD" ]]

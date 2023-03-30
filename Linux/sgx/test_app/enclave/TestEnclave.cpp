@@ -88,26 +88,26 @@ struct evp_pkey_st {
     CRYPTO_RWLOCK *lock;
 } /* EVP_PKEY */ ;
 
-void rsa_key_gen()
+int rsa_key_gen()
 {
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
     if (!ctx)
     {
         printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-        return;
+        return -1;
     }
     int ret = EVP_PKEY_keygen_init(ctx);
     if (!ret)
     {
         printf("EVP_PKEY_keygen_init: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
-    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 1024) <= 0)
+    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 4096) <= 0)
     {
         printf("EVP_PKEY_CTX_set_rsa_keygen_bits: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     EVP_PKEY* evp_pkey = NULL;
 #if OPENSSL_VERSION_NUMBER < 0x30000000
@@ -118,7 +118,7 @@ void rsa_key_gen()
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     // public key - string
     int len = i2d_PublicKey(evp_pkey, NULL);
@@ -127,7 +127,7 @@ void rsa_key_gen()
     {
         printf("Failed in calling malloc()\n");
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     unsigned char *tbuf = buf;
     i2d_PublicKey(evp_pkey, &tbuf);
@@ -149,7 +149,7 @@ void rsa_key_gen()
     {
         printf("Failed in calling malloc()\n");
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     tbuf = buf;
     i2d_PrivateKey(evp_pkey, &tbuf);
@@ -164,28 +164,29 @@ void rsa_key_gen()
     free(buf);
 
     EVP_PKEY_free(evp_pkey);
+    return 0;
 }
 
-void ec_key_gen()
+int ec_key_gen()
 {
     EVP_PKEY_CTX * ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
     if (!ctx)
     {
         printf("EVP_PKEY_CTX_new_id: %ld\n", ERR_get_error());
-        return;
+        return -1;
     }
     int ret = EVP_PKEY_keygen_init(ctx);
     if (!ret)
     {
         printf("EVP_PKEY_keygen_init: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, NID_secp384r1) <= 0)
     {
         printf("EVP_PKEY_CTX_set_ec_paramgen_curve_nid: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     EVP_PKEY* ec_pkey = NULL;
 #if OPENSSL_VERSION_NUMBER < 0x30000000
@@ -196,7 +197,7 @@ void ec_key_gen()
     {
         printf("EVP_PKEY_keygen: %ld\n", ERR_get_error());
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     // public key - string
     int len = i2d_PublicKey(ec_pkey, NULL);
@@ -205,7 +206,7 @@ void ec_key_gen()
     {
         printf("Failed in calling malloc()\n");
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     unsigned char *tbuf = buf;
     i2d_PublicKey(ec_pkey, &tbuf);
@@ -227,7 +228,7 @@ void ec_key_gen()
     {
         printf("Failed in calling malloc()\n");
         EVP_PKEY_CTX_free(ctx);
-        return;
+        return -1;
     }
     tbuf = buf;
     i2d_PrivateKey(ec_pkey, &tbuf);
@@ -242,6 +243,7 @@ void ec_key_gen()
     free(buf);
 
     EVP_PKEY_free(ec_pkey);
+    return 0;
 }
 
 int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
@@ -299,10 +301,20 @@ void t_sgxssl_call_apis()
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
 
-    rsa_key_gen();
+    ret = rsa_key_gen();
+    if (ret != 0)
+    {
+        printf("test rsa_key_gen returned error %d\n", ret);
+        exit(ret);
+    }
     printf("test rsa_key_gen completed\n");
-    
-    ec_key_gen();
+
+    ret = ec_key_gen();
+    if (ret != 0)
+    {
+        printf("test ec_key_gen returned error %d\n", ret);
+        exit(ret);
+    }
 	printf("test ec_key_gen completed\n");
 
     ret = rsa_test();
