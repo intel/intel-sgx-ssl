@@ -328,7 +328,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdh_test completed\n"); 
-#if 0
+
 	ret = ecdsa_test();
 	if (ret != 0)
     {
@@ -336,7 +336,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ecdsa_test completed\n");
-#endif
+
 	ret = bn_test();
 	if (ret != 0)
     {

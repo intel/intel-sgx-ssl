@@ -32,6 +32,7 @@ static size_t crv_len = 0;
 static EC_builtin_curve *curves = NULL;
 static OSSL_PROVIDER *fake_rand = NULL;
 
+#if 0 //debugging
 static int fbytes(unsigned char *buf, size_t num, ossl_unused const char *name,
                   EVP_RAND_CTX *ctx)
 {
@@ -55,7 +56,7 @@ static int fbytes(unsigned char *buf, size_t num, ossl_unused const char *name,
     BN_free(tmp);
     return ret;
 }
-
+#endif //debugging
 /*-
  * This function hijacks the RNG to feed it the chosen ECDSA key and nonce.
  * The ECDSA KATs are from:
@@ -366,9 +367,9 @@ int setup_tests(void)
 # ifndef OPENSSL_NO_SM2
     ADD_ALL_TESTS(test_builtin_as_sm2, crv_len);
 # endif
-    ADD_ALL_TESTS(x9_62_tests, OSSL_NELEM(ecdsa_cavs_kats));printf("%d\n", __LINE__);
+//debugging    ADD_ALL_TESTS(x9_62_tests, OSSL_NELEM(ecdsa_cavs_kats));
 #endif
-    printf("all ecdsa cases passed.\n");
+    //debugging printf("all ecdsa cases passed.\n");
     return 0;
 }
 
