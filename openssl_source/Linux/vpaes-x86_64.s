@@ -99,7 +99,7 @@ _vpaes_encrypt_core:
 	pxor	%xmm4,%xmm0
 .byte	102,15,56,0,193
 	nop
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_encrypt_core,.-_vpaes_encrypt_core
 
@@ -208,7 +208,7 @@ _vpaes_decrypt_core:
 	pxor	%xmm4,%xmm0
 .byte	102,15,56,0,194
 	nop
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_decrypt_core,.-_vpaes_decrypt_core
 
@@ -386,7 +386,7 @@ _vpaes_schedule_core:
 	pxor	%xmm5,%xmm5
 	pxor	%xmm6,%xmm6
 	pxor	%xmm7,%xmm7
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_schedule_core,.-_vpaes_schedule_core
 
@@ -415,7 +415,7 @@ _vpaes_schedule_192_smear:
 	pxor	%xmm0,%xmm6
 	movdqa	%xmm6,%xmm0
 	movhlps	%xmm1,%xmm6
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_schedule_192_smear,.-_vpaes_schedule_192_smear
 
@@ -493,7 +493,7 @@ _vpaes_schedule_low_round:
 
 	pxor	%xmm7,%xmm0
 	movdqa	%xmm0,%xmm7
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_schedule_round,.-_vpaes_schedule_round
 
@@ -519,7 +519,7 @@ _vpaes_schedule_transform:
 	movdqa	16(%r11),%xmm0
 .byte	102,15,56,0,193
 	pxor	%xmm2,%xmm0
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_schedule_transform,.-_vpaes_schedule_transform
 
@@ -613,7 +613,7 @@ _vpaes_schedule_mangle:
 	addq	$-16,%r8
 	andq	$0x30,%r8
 	movdqu	%xmm3,(%rdx)
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_schedule_mangle,.-_vpaes_schedule_mangle
 
@@ -625,6 +625,7 @@ _vpaes_schedule_mangle:
 .align	16
 vpaes_set_encrypt_key:
 .cfi_startproc	
+.byte	243,15,30,250
 	movl	%esi,%eax
 	shrl	$5,%eax
 	addl	$5,%eax
@@ -634,7 +635,7 @@ vpaes_set_encrypt_key:
 	movl	$0x30,%r8d
 	call	_vpaes_schedule_core
 	xorl	%eax,%eax
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	vpaes_set_encrypt_key,.-vpaes_set_encrypt_key
 
@@ -643,6 +644,7 @@ vpaes_set_encrypt_key:
 .align	16
 vpaes_set_decrypt_key:
 .cfi_startproc	
+.byte	243,15,30,250
 	movl	%esi,%eax
 	shrl	$5,%eax
 	addl	$5,%eax
@@ -657,7 +659,7 @@ vpaes_set_decrypt_key:
 	xorl	$32,%r8d
 	call	_vpaes_schedule_core
 	xorl	%eax,%eax
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	vpaes_set_decrypt_key,.-vpaes_set_decrypt_key
 
@@ -666,11 +668,12 @@ vpaes_set_decrypt_key:
 .align	16
 vpaes_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	movdqu	(%rdi),%xmm0
 	call	_vpaes_preheat
 	call	_vpaes_encrypt_core
 	movdqu	%xmm0,(%rsi)
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	vpaes_encrypt,.-vpaes_encrypt
 
@@ -679,11 +682,12 @@ vpaes_encrypt:
 .align	16
 vpaes_decrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	movdqu	(%rdi),%xmm0
 	call	_vpaes_preheat
 	call	_vpaes_decrypt_core
 	movdqu	%xmm0,(%rsi)
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	vpaes_decrypt,.-vpaes_decrypt
 .globl	vpaes_cbc_encrypt
@@ -691,6 +695,7 @@ vpaes_decrypt:
 .align	16
 vpaes_cbc_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	xchgq	%rcx,%rdx
 	subq	$16,%rcx
 	jc	.Lcbc_abort
@@ -725,7 +730,7 @@ vpaes_cbc_encrypt:
 .Lcbc_done:
 	movdqu	%xmm6,(%r8)
 .Lcbc_abort:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	vpaes_cbc_encrypt,.-vpaes_cbc_encrypt
 
@@ -746,7 +751,7 @@ _vpaes_preheat:
 	movdqa	64(%r10),%xmm12
 	movdqa	80(%r10),%xmm15
 	movdqa	96(%r10),%xmm14
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	_vpaes_preheat,.-_vpaes_preheat
 
@@ -853,3 +858,24 @@ _vpaes_consts:
 .byte	86,101,99,116,111,114,32,80,101,114,109,117,116,97,116,105,111,110,32,65,69,83,32,102,111,114,32,120,56,54,95,54,52,47,83,83,83,69,51,44,32,77,105,107,101,32,72,97,109,98,117,114,103,32,40,83,116,97,110,102,111,114,100,32,85,110,105,118,101,114,115,105,116,121,41,0
 .align	64
 .size	_vpaes_consts,.-_vpaes_consts
+	.section ".note.gnu.property", "a"
+	.p2align 3
+	.long 1f - 0f
+	.long 4f - 1f
+	.long 5
+0:
+	# "GNU" encoded with .byte, since .asciz isn't supported
+	# on Solaris.
+	.byte 0x47
+	.byte 0x4e
+	.byte 0x55
+	.byte 0
+1:
+	.p2align 3
+	.long 0xc0000002
+	.long 3f - 2f
+2:
+	.long 3
+3:
+	.p2align 3
+4:

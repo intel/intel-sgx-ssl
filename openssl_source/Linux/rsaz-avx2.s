@@ -652,7 +652,7 @@ rsaz_1024_sqr_avx2:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lsqr_1024_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_sqr_avx2,.-rsaz_1024_sqr_avx2
 .globl	rsaz_1024_mul_avx2
@@ -1207,7 +1207,7 @@ rsaz_1024_mul_avx2:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_1024_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_mul_avx2,.-rsaz_1024_mul_avx2
 .globl	rsaz_1024_red2norm_avx2
@@ -1405,7 +1405,7 @@ rsaz_1024_red2norm_avx2:
 	adcq	$0,%r11
 	movq	%rax,120(%rdi)
 	movq	%r11,%rax
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_red2norm_avx2,.-rsaz_1024_red2norm_avx2
 
@@ -1565,7 +1565,7 @@ rsaz_1024_norm2red_avx2:
 	movq	%r8,168(%rdi)
 	movq	%r8,176(%rdi)
 	movq	%r8,184(%rdi)
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_norm2red_avx2,.-rsaz_1024_norm2red_avx2
 .globl	rsaz_1024_scatter5_avx2
@@ -1591,7 +1591,7 @@ rsaz_1024_scatter5_avx2:
 	jnz	.Loop_scatter_1024
 
 	vzeroupper
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_scatter5_avx2,.-rsaz_1024_scatter5_avx2
 
@@ -1712,7 +1712,7 @@ rsaz_1024_gather5_avx2:
 	vzeroupper
 	leaq	(%r11),%rsp
 .cfi_def_cfa_register	%rsp
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .LSEH_end_rsaz_1024_gather5:
 .size	rsaz_1024_gather5_avx2,.-rsaz_1024_gather5_avx2
@@ -1729,11 +1729,10 @@ rsaz_avx2_eligible:
 	cmovel	%edx,%eax
 	andl	$32,%eax
 	shrl	$5,%eax
-	ret
+	ret ; .byte	0xf3,0xc3
 .size	rsaz_avx2_eligible,.-rsaz_avx2_eligible
 
 .align	64
-
 .Land_mask:
 .quad	0x1fffffff,0x1fffffff,0x1fffffff,0x1fffffff
 .Lscatter_permd:
@@ -1744,5 +1743,25 @@ rsaz_avx2_eligible:
 .long	0,0,0,0, 1,1,1,1
 .long	2,2,2,2, 3,3,3,3
 .long	4,4,4,4, 4,4,4,4
-
 .align	64
+	.section ".note.gnu.property", "a"
+	.p2align 3
+	.long 1f - 0f
+	.long 4f - 1f
+	.long 5
+0:
+	# "GNU" encoded with .byte, since .asciz isn't supported
+	# on Solaris.
+	.byte 0x47
+	.byte 0x4e
+	.byte 0x55
+	.byte 0
+1:
+	.p2align 3
+	.long 0xc0000002
+	.long 3f - 2f
+2:
+	.long 3
+3:
+	.p2align 3
+4:

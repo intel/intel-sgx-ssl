@@ -424,11 +424,11 @@ rsaz_512_sqr:
 	adcxq	%rcx,%r9
 
 .byte	0xc4,0x62,0xf3,0xf6,0xa6,0x20,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rax,%r10
 
 .byte	0xc4,0x62,0xfb,0xf6,0xae,0x28,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rcx,%r11
 
 	mulxq	48(%rsi),%rcx,%r14
@@ -452,7 +452,7 @@ rsaz_512_sqr:
 
 
 .byte	0xc4,0xe2,0xfb,0xf6,0x9e,0x10,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rax,%r10
 	adcxq	%rbx,%r11
 
@@ -470,18 +470,18 @@ rsaz_512_sqr:
 	adcxq	%r8,%r14
 
 .byte	0xc4,0xe2,0xfb,0xf6,0x9e,0x30,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rax,%r14
 	adcxq	%rbx,%r15
 
 .byte	0xc4,0x62,0xc3,0xf6,0x86,0x38,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rdi,%r15
 	adcxq	%rbp,%r8
 	mulxq	%rdx,%rax,%rdi
 	adoxq	%rbp,%r8
 .byte	0x48,0x8b,0x96,0x10,0x00,0x00,0x00
-    lfence
+	lfence
 
 	xorq	%rbx,%rbx
 	adoxq	%r9,%r9
@@ -506,12 +506,12 @@ rsaz_512_sqr:
 	adcxq	%rcx,%r14
 
 .byte	0xc4,0x62,0xc3,0xf6,0x8e,0x28,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rdi,%r14
 	adcxq	%r9,%r15
 
 .byte	0xc4,0xe2,0xfb,0xf6,0x8e,0x30,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rax,%r15
 	adcxq	%rcx,%r8
 
@@ -599,12 +599,12 @@ rsaz_512_sqr:
 
 
 .byte	0xc4,0xe2,0xfb,0xf6,0x9e,0x30,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rax,%r10
 	adcxq	%rbx,%r11
 
 .byte	0xc4,0x62,0xc3,0xf6,0xa6,0x38,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rdi,%r11
 	adcxq	%rbp,%r12
 	mulxq	%rdx,%rax,%rdi
@@ -626,7 +626,7 @@ rsaz_512_sqr:
 
 
 .byte	0xc4,0x62,0xfb,0xf6,0xae,0x38,0x00,0x00,0x00
-    lfence
+	lfence
 	adoxq	%rax,%r12
 	adoxq	%rbp,%r13
 
@@ -712,7 +712,7 @@ rsaz_512_sqr:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lsqr_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_sqr,.-rsaz_512_sqr
 .globl	rsaz_512_mul
@@ -818,7 +818,7 @@ rsaz_512_mul:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_mul,.-rsaz_512_mul
 .globl	rsaz_512_mul_gather4
@@ -1159,7 +1159,7 @@ rsaz_512_mul_gather4:
 .byte	102,76,15,126,194
 
 .byte	0xc4,0x62,0xfb,0xf6,0x86,0x00,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rax,%rbx
 	adoxq	%r9,%r8
 
@@ -1172,7 +1172,7 @@ rsaz_512_mul_gather4:
 	adoxq	%r11,%r10
 
 .byte	0xc4,0x62,0xfb,0xf6,0x9e,0x18,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rax,%r10
 	adoxq	%r12,%r11
 
@@ -1185,7 +1185,7 @@ rsaz_512_mul_gather4:
 	adoxq	%r14,%r13
 
 .byte	0xc4,0x62,0xfb,0xf6,0xb6,0x30,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rax,%r13
 .byte	0x67
 	adoxq	%r15,%r14
@@ -1254,7 +1254,7 @@ rsaz_512_mul_gather4:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_gather4_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_mul_gather4,.-rsaz_512_mul_gather4
 .globl	rsaz_512_mul_scatter4
@@ -1374,7 +1374,7 @@ rsaz_512_mul_scatter4:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_scatter4_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_mul_scatter4,.-rsaz_512_mul_scatter4
 .globl	rsaz_512_mul_by_one
@@ -1461,7 +1461,7 @@ rsaz_512_mul_by_one:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_by_one_epilogue:
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_mul_by_one,.-rsaz_512_mul_by_one
 .type	__rsaz_512_reduce,@function
@@ -1546,7 +1546,7 @@ __rsaz_512_reduce:
 	decl	%ecx
 	jne	.Lreduction_loop
 
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	__rsaz_512_reduce,.-__rsaz_512_reduce
 .type	__rsaz_512_reducex,@function
@@ -1579,7 +1579,7 @@ __rsaz_512_reducex:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xe3,0xf6,0xa5,0x20,0x00,0x00,0x00
-    lfence
+	lfence
 	movq	%rdx,%rax
 	movq	%r8,%rdx
 	adcxq	%rbx,%r11
@@ -1593,7 +1593,7 @@ __rsaz_512_reducex:
 	adoxq	%r14,%r13
 
 .byte	0xc4,0x62,0xfb,0xf6,0xb5,0x30,0x00,0x00,0x00
-    lfence
+	lfence
 	adcxq	%rax,%r13
 	adoxq	%r15,%r14
 
@@ -1606,7 +1606,7 @@ __rsaz_512_reducex:
 	decl	%ecx
 	jne	.Lreduction_loopx
 
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	__rsaz_512_reducex,.-__rsaz_512_reducex
 .type	__rsaz_512_subtract,@function
@@ -1665,7 +1665,7 @@ __rsaz_512_subtract:
 	movq	%r14,48(%rdi)
 	movq	%r15,56(%rdi)
 
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	__rsaz_512_subtract,.-__rsaz_512_subtract
 .type	__rsaz_512_mul,@function
@@ -1809,7 +1809,7 @@ __rsaz_512_mul:
 	movq	%r14,48(%rdi)
 	movq	%r15,56(%rdi)
 
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	__rsaz_512_mul,.-__rsaz_512_mul
 .type	__rsaz_512_mulx,@function
@@ -1936,7 +1936,7 @@ __rsaz_512_mulx:
 	movq	%r14,8+64+48(%rsp)
 	movq	%r15,8+64+56(%rsp)
 
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	__rsaz_512_mulx,.-__rsaz_512_mulx
 .globl	rsaz_512_scatter4
@@ -1955,7 +1955,7 @@ rsaz_512_scatter4:
 	leaq	128(%rdi),%rdi
 	decl	%r9d
 	jnz	.Loop_scatter
-	ret
+	ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_512_scatter4,.-rsaz_512_scatter4
 
@@ -2025,13 +2025,33 @@ rsaz_512_gather4:
 	leaq	8(%rdi),%rdi
 	decl	%r9d
 	jnz	.Loop_gather
-	ret
+	ret ; .byte	0xf3,0xc3
 .LSEH_end_rsaz_512_gather4:
 .cfi_endproc	
 .size	rsaz_512_gather4,.-rsaz_512_gather4
 
 .align	64
-
 .Linc:
 .long	0,0, 1,1
 .long	2,2, 2,2
+	.section ".note.gnu.property", "a"
+	.p2align 3
+	.long 1f - 0f
+	.long 4f - 1f
+	.long 5
+0:
+	# "GNU" encoded with .byte, since .asciz isn't supported
+	# on Solaris.
+	.byte 0x47
+	.byte 0x4e
+	.byte 0x55
+	.byte 0
+1:
+	.p2align 3
+	.long 0xc0000002
+	.long 3f - 2f
+2:
+	.long 3
+3:
+	.p2align 3
+4:
