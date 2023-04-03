@@ -255,7 +255,7 @@ __KeccakF1600:
 	jnz	.Loop
 
 	leaq	-192(%r15),%r15
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__KeccakF1600,.-__KeccakF1600
 
@@ -327,7 +327,7 @@ KeccakF1600:
 	popq	%rbx
 .cfi_adjust_cfa_offset	-8
 .cfi_restore	%rbx
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	KeccakF1600,.-KeccakF1600
 .globl	SHA3_absorb
@@ -428,7 +428,7 @@ SHA3_absorb:
 	popq	%rbx
 .cfi_adjust_cfa_offset	-8
 .cfi_restore	%rbx
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	SHA3_absorb,.-SHA3_absorb
 .globl	SHA3_squeeze
@@ -490,7 +490,7 @@ SHA3_squeeze:
 	popq	%r12
 .cfi_adjust_cfa_offset	-8
 .cfi_restore	%r13
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	SHA3_squeeze,.-SHA3_squeeze
 .align	256

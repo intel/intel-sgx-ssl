@@ -712,7 +712,7 @@ rsaz_512_sqr:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lsqr_epilogue:
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_sqr,.-rsaz_512_sqr
 .globl	rsaz_512_mul
@@ -818,7 +818,7 @@ rsaz_512_mul:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_epilogue:
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_mul,.-rsaz_512_mul
 .globl	rsaz_512_mul_gather4
@@ -1254,7 +1254,7 @@ rsaz_512_mul_gather4:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_gather4_epilogue:
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_mul_gather4,.-rsaz_512_mul_gather4
 .globl	rsaz_512_mul_scatter4
@@ -1374,7 +1374,7 @@ rsaz_512_mul_scatter4:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_scatter4_epilogue:
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_mul_scatter4,.-rsaz_512_mul_scatter4
 .globl	rsaz_512_mul_by_one
@@ -1461,7 +1461,7 @@ rsaz_512_mul_by_one:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_by_one_epilogue:
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_mul_by_one,.-rsaz_512_mul_by_one
 .type	__rsaz_512_reduce,@function
@@ -1546,7 +1546,7 @@ __rsaz_512_reduce:
 	decl	%ecx
 	jne	.Lreduction_loop
 
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__rsaz_512_reduce,.-__rsaz_512_reduce
 .type	__rsaz_512_reducex,@function
@@ -1606,7 +1606,7 @@ __rsaz_512_reducex:
 	decl	%ecx
 	jne	.Lreduction_loopx
 
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__rsaz_512_reducex,.-__rsaz_512_reducex
 .type	__rsaz_512_subtract,@function
@@ -1665,7 +1665,7 @@ __rsaz_512_subtract:
 	movq	%r14,48(%rdi)
 	movq	%r15,56(%rdi)
 
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__rsaz_512_subtract,.-__rsaz_512_subtract
 .type	__rsaz_512_mul,@function
@@ -1809,7 +1809,7 @@ __rsaz_512_mul:
 	movq	%r14,48(%rdi)
 	movq	%r15,56(%rdi)
 
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__rsaz_512_mul,.-__rsaz_512_mul
 .type	__rsaz_512_mulx,@function
@@ -1936,7 +1936,7 @@ __rsaz_512_mulx:
 	movq	%r14,8+64+48(%rsp)
 	movq	%r15,8+64+56(%rsp)
 
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	__rsaz_512_mulx,.-__rsaz_512_mulx
 .globl	rsaz_512_scatter4
@@ -1955,7 +1955,7 @@ rsaz_512_scatter4:
 	leaq	128(%rdi),%rdi
 	decl	%r9d
 	jnz	.Loop_scatter
-	ret ; .byte	0xf3,0xc3
+	ret
 .cfi_endproc	
 .size	rsaz_512_scatter4,.-rsaz_512_scatter4
 
@@ -2025,7 +2025,7 @@ rsaz_512_gather4:
 	leaq	8(%rdi),%rdi
 	decl	%r9d
 	jnz	.Loop_gather
-	ret ; .byte	0xf3,0xc3
+	ret
 .LSEH_end_rsaz_512_gather4:
 .cfi_endproc	
 .size	rsaz_512_gather4,.-rsaz_512_gather4
