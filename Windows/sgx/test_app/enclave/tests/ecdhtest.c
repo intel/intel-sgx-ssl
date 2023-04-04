@@ -274,7 +274,7 @@ static int test_ecdh_curve(int nid, BN_CTX *ctx, BIO *out)
         ret = 1;
     }
  err:
-    ERR_print_errors_fp(stderr);
+    //ERR_print_errors_fp(stderr);
 
     OPENSSL_free(abuf);
     OPENSSL_free(bbuf);
@@ -456,7 +456,7 @@ static int ecdh_kat(BIO *out, const ecdh_kat_t *kat)
         BIO_puts(out, " ok\n");
     else {
         fprintf(stderr, "Error in ECDH routines\n");
-        ERR_print_errors_fp(stderr);
+        //ERR_print_errors_fp(stderr);
     }
     return rv;
 }
@@ -642,7 +642,6 @@ int ecdh_test()
     ret = 0;
 
  err:
-    ERR_print_errors_fp(stderr);
     OPENSSL_free(curves);
     BN_CTX_free(ctx);
     BIO_free(out);
