@@ -28,9 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-// This srting should be updated before every release!!
-#define STRFILEVER "3.0.2"
+#include "../osslverstr.h"
+#define STRFILEVER OPENSSL_VERSION_STR
 
 #define __CONCAT(x, y) x/**/y
 
