@@ -30,7 +30,7 @@
  */
 
 // This string should be updated before every release!!
-#define STRFILEVER "1.1.1t"
+#define STRFILEVER "1.1.1u"
 
 #define __CONCAT(x, y) x/**/y
 
