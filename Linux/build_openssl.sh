@@ -37,10 +37,10 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
-OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*1.1.1t.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*1.1.1u.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
-	echo "In order to run this script, OpenSSL 1.1.1t tar.gz package must be located in openssl_source/ directory."
+	echo "In order to run this script, OpenSSL 1.1.1u.tar.gz package must be located in openssl_source/ directory."
 	exit 1
 fi
 echo $OPENSSL_VERSION
