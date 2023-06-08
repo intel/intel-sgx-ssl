@@ -37,6 +37,8 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
+BUILD_SSL_LIB=1
+
 OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.0.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
@@ -67,8 +69,14 @@ sed -i '/OPENSSL_die("assertion failed/d' $OPENSSL_VERSION/include/openssl/crypt
 fi
 
 OUTPUT_LIB=libsgx_tsgxssl_crypto.a
+if [[ $BUILD_SSL_LIB == 1 ]]; then
+	OUTPUT_SSL_LIB=libsgx_tsgxssl_ssl.a
+fi
 if [[ "$*" == *"debug"* ]] ; then
 	OUTPUT_LIB=libsgx_tsgxssl_cryptod.a
+	if [[ $BUILD_SSL_LIB == 1 ]]; then
+		OUTPUT_SSL_LIB=libsgx_tsgxssl_ssld.a
+	fi
     ADDITIONAL_CONF="-g "
 fi
 
@@ -167,6 +175,12 @@ fi
 make libcrypto.a || exit 1
 cp libcrypto.a $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
 objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_LIB || exit 1
+if [[ $BUILD_SSL_LIB == 1 ]]; then
+	make libssl.a || exit 1
+	cp libssl.a $SGXSSL_ROOT/package/lib64/$OUTPUT_SSL_LIB || exit 1
+	objcopy --rename-section .init=Q6A8dc14f40efc4288a03b32cba4e $SGXSSL_ROOT/package/lib64/$OUTPUT_SSL_LIB || exit 1
+fi
+
 cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 grep OPENSSL_VERSION_STR include/openssl/opensslv.h > $SGXSSL_ROOT/sgx/osslverstr.h || exit 1
 cp -r include/crypto $SGXSSL_ROOT/sgx/test_app/enclave/ || exit 1

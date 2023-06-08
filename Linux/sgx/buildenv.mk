@@ -61,6 +61,7 @@ export VCXX := @$(CXX)
 export OBJDIR := release
 DESTDIR ?= /opt/intel/sgxssl/
 DEBUG ?= 0
+export BUILD_SSL_LIB ?= 1
 $(shell mkdir -p $(PACKAGE_LIB))
 UBUNTU_CONFNAME:=/usr/include/x86_64-linux-gnu/bits/confname.h
 ifneq ("$(wildcard $(UBUNTU_CONFNAME))","")
@@ -73,11 +74,17 @@ endif
 ifeq ($(DEBUG), 1)
 	OBJDIR := debug
 	OPENSSL_LIB := libsgx_tsgxssl_cryptod.a
+ifeq ($(BUILD_SSL_LIB), 1)
+	OPENSSL_SSL_LIB := libsgx_tsgxssl_ssld.a
+endif
 	TRUSTED_LIB := libsgx_tsgxssld.a
 	UNTRUSTED_LIB := libsgx_usgxssld.a
 else
 	OBJDIR := release
 	OPENSSL_LIB := libsgx_tsgxssl_crypto.a
+ifeq ($(BUILD_SSL_LIB), 1)
+	OPENSSL_SSL_LIB := libsgx_tsgxssl_ssl.a
+endif
 	TRUSTED_LIB := libsgx_tsgxssl.a
 	UNTRUSTED_LIB := libsgx_usgxssl.a
 endif
