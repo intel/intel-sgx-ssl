@@ -406,13 +406,22 @@ void t_sgxssl_call_apis()
 	printf("test threads_test completed\n");
 
     //GM SM2 - sign and verify
-    ret = ecall_sm2();
+    ret = ecall_sm2_sign_verify();
     if (ret != 0)
     {
-        printf("test evp_sm2 returned error %d\n", ret);
+        printf("test evp_sm2_sign_verify returned error %d\n", ret);
         exit(ret);
     }
-    printf("test evp_sm2 completed\n");
+    printf("test evp_sm2_sign_verify completed\n");
+
+    //GM SM2 - encrypt and decrypt
+    ret = ecall_sm2_encrypt_decrypt();
+    if (ret != 0)
+    {
+        printf("test evp_sm2_encrypt_decrypt returned error %d\n", ret);
+        exit(ret);
+    }
+    printf("test evp_sm2_encrypt_decrypt completed\n");
 
     //GM SM3 - compute digest of message
     ret = ecall_sm3();

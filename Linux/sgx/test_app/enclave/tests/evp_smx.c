@@ -425,7 +425,7 @@ end:
 }
 
 /* Signing and verification using ECC context for SM2 */
-int ecall_sm2(void)
+int ecall_sm2_sign_verify(void)
 {
 	char* private_key = NULL;
 	char* public_key = NULL;
@@ -461,6 +461,182 @@ end:
 	SAFE_FREE(private_key, strlen(private_key)+1);
 	SAFE_FREE(public_key, strlen(public_key)+1);
 	SAFE_FREE(signature, 1024);
+
+	return ret;
+}
+
+// Encrypt the text
+static int encrypt_sm2(const char* public_key, const unsigned char* plain_text, size_t plain_len, unsigned char** cipher_text, size_t* cipher_len)
+{
+	int ret = 0;
+	size_t buf_len = 0;
+	BIO* pub_bio = NULL;
+	EVP_PKEY* evp_pkey = NULL;
+	EVP_PKEY_CTX* evp_pkey_ctx = NULL;
+
+	// 1. Get SM2 public key using SM2 EVP_PKEY directly
+	pub_bio = BIO_new_mem_buf(public_key, -1);
+	evp_pkey = PEM_read_bio_PUBKEY(pub_bio, &evp_pkey, NULL, NULL);
+	if (evp_pkey == NULL) {
+		printf("Error: fail to get SM2 public key using SM2 EVP_PKEY\n");
+		ret = -1;
+		goto end;
+	}
+
+	evp_pkey_ctx = EVP_PKEY_CTX_new(evp_pkey, NULL);
+	if (evp_pkey_ctx == NULL) {
+		printf("Error: fail to create a new EVP_PKEY_CTX\n");
+		ret = -2;
+		goto end;
+	}
+	if (EVP_PKEY_CTX_set1_id(evp_pkey_ctx, sm2_user_id, sm2_user_id_len) != 1) {
+		printf("Error: fail to set user_id to the EVP_PKEY_CTX\n");
+		ret = -3;
+		goto end;
+	}
+
+	// 2. Encrypt
+	if (EVP_PKEY_encrypt_init(evp_pkey_ctx) <= 0) {
+		printf("Error: fail to init encrypt\n");
+		ret = -4;
+		goto end;
+	}
+	if (EVP_PKEY_encrypt(evp_pkey_ctx, NULL, &buf_len, plain_text, plain_len) <= 0) {
+		printf("Error: fail to calculate buffer length\n");
+		ret = -5;
+		goto end; 
+	}
+	*cipher_text = malloc(buf_len);
+	memset(*cipher_text, 0, buf_len);
+	if (*cipher_text == NULL) {
+		printf("Error: fail to allocate buffer for encrypted text\n");
+		ret = -6;
+		goto end;
+	}
+	if (EVP_PKEY_encrypt(evp_pkey_ctx, *cipher_text, &buf_len, plain_text, plain_len) <= 0) {
+		printf("Error: fail to encrypt\n");
+		ret = -7;
+		goto end;
+	}
+	*cipher_len = buf_len;
+
+end:
+	// 3. Finalize
+	BIO_free(pub_bio);
+	EVP_PKEY_free(evp_pkey);
+	EVP_PKEY_CTX_free(evp_pkey_ctx);
+
+	return ret;
+}
+
+// Decrypt the text
+static int decrypt_sm2(const char* private_key, const char* cipher_text, size_t cipher_len, unsigned char** plain_text, size_t* plain_len)
+{
+	int ret = 0;
+	size_t buf_len = 0;
+	BIO* pri_bio = NULL;
+	EVP_PKEY* evp_pkey = NULL;
+	EVP_PKEY_CTX* evp_pkey_ctx = NULL;
+
+	// 1. Get SM2 private key using SM2 EVP_PKEY directly
+	pri_bio = BIO_new_mem_buf(private_key, -1);
+	evp_pkey = PEM_read_bio_PrivateKey(pri_bio, &evp_pkey, NULL, NULL);
+	if (evp_pkey == NULL) {
+		printf("Error: fail to get SM2 private key using SM2 EVP_PKEY\n");
+		ret = -1;
+		goto end;
+	}
+	
+	evp_pkey_ctx = EVP_PKEY_CTX_new(evp_pkey, NULL);
+	if (evp_pkey_ctx == NULL) {
+		printf("Error: fail to create a EVP_PKEY_CTX\n");
+		ret = -2;
+		goto end;
+	}
+	if (EVP_PKEY_CTX_set1_id(evp_pkey_ctx, sm2_user_id, sm2_user_id_len) != 1) {
+		printf("Error: fail to set sm2_user_id to the EVP_PKEY_CTX\n");
+		ret = -3;
+		goto end;
+	}
+
+	// 2. Decrypt
+	if (EVP_PKEY_decrypt_init(evp_pkey_ctx) <= 0) {
+		printf("Error: fail to init decrypt\n");
+		ret = -4;
+		goto end;
+	}
+	if (EVP_PKEY_decrypt(evp_pkey_ctx, NULL, &buf_len, cipher_text, cipher_len) <= 0) {
+		printf("Error: fail to calculate buffer length\n");
+		ret = -5;
+		goto end; 
+	}
+	*plain_text = malloc(buf_len);
+	memset(*plain_text, 0, buf_len);
+	if (*plain_text == NULL) {
+		printf("Error: fail to allocate buffer for decrypted text\n");
+		ret = -6;
+		goto end;
+	}
+	if (EVP_PKEY_decrypt(evp_pkey_ctx, *plain_text, &buf_len, cipher_text, cipher_len) <= 0) {
+		printf("Error: fail to decrypt\n");
+		ret = -7;
+		goto end; 
+	}
+	*plain_len = buf_len;
+
+end:
+	// 3. Finalize
+	BIO_free(pri_bio);
+	EVP_PKEY_free(evp_pkey);
+	EVP_PKEY_CTX_free(evp_pkey_ctx);
+
+	return ret;
+}
+
+/* Encryption and decryption using ECC context for SM2 */
+int ecall_sm2_encrypt_decrypt(void)
+{
+	char *private_key = NULL, *public_key = NULL;
+	const unsigned char plain_text[] = "context need to be encrypted";
+	size_t plain_len = sizeof(plain_text) - 1;
+	unsigned char *encrypted_text = NULL, *decrypted_text = NULL;
+	size_t encrypted_len = 0, decrypted_len = 0;
+	int ret = 0;
+
+	// 1. Create key pair
+	if (create_key_pair_sm2(&private_key, &public_key) != 0) {
+		printf("Error: fail to create key pair\n");
+		ret = -1;
+		goto end;
+	}
+
+	// 2. Encrypt
+	if (encrypt_sm2(public_key, plain_text, plain_len, &encrypted_text, &encrypted_len) != 0) {
+		printf("Error: fail to encrypt\n");
+		ret = -2;
+		goto end;
+	}
+
+	// 3. Decrypt
+	if (decrypt_sm2(private_key, encrypted_text, encrypted_len, &decrypted_text, &decrypted_len) != 0) {
+		printf("Error: fail to decrypt\n");
+		ret = -3;
+		goto end;
+	}
+
+	// 4. Compare plain text and decrypted text
+    if (memcmp(plain_text, decrypted_text, decrypted_len) != 0) {
+		printf("Error: decrypted text does not match plain text\n");
+		ret = -4;
+		goto end;
+	}
+
+end:
+	// 5. Finalize
+	SAFE_FREE(encrypted_text, encrypted_len);
+	SAFE_FREE(decrypted_text, decrypted_len);
+	SAFE_FREE(private_key, strlen(private_key)+1);
+	SAFE_FREE(public_key, strlen(public_key)+1);
 
 	return ret;
 }
