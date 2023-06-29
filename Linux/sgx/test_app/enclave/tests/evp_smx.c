@@ -507,12 +507,12 @@ static int encrypt_sm2(const char* public_key, const unsigned char* plain_text, 
 		goto end; 
 	}
 	*cipher_text = malloc(buf_len);
-	memset(*cipher_text, 0, buf_len);
 	if (*cipher_text == NULL) {
 		printf("Error: fail to allocate buffer for encrypted text\n");
 		ret = -6;
 		goto end;
 	}
+	memset(*cipher_text, 0, buf_len);
 	if (EVP_PKEY_encrypt(evp_pkey_ctx, *cipher_text, &buf_len, plain_text, plain_len) <= 0) {
 		printf("Error: fail to encrypt\n");
 		ret = -7;
@@ -571,12 +571,12 @@ static int decrypt_sm2(const char* private_key, const char* cipher_text, size_t 
 		goto end; 
 	}
 	*plain_text = malloc(buf_len);
-	memset(*plain_text, 0, buf_len);
 	if (*plain_text == NULL) {
 		printf("Error: fail to allocate buffer for decrypted text\n");
 		ret = -6;
 		goto end;
 	}
+	memset(*plain_text, 0, buf_len);
 	if (EVP_PKEY_decrypt(evp_pkey_ctx, *plain_text, &buf_len, cipher_text, cipher_len) <= 0) {
 		printf("Error: fail to decrypt\n");
 		ret = -7;
