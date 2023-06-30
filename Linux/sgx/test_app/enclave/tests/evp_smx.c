@@ -489,11 +489,6 @@ static int encrypt_sm2(const char* public_key, const unsigned char* plain_text, 
 		ret = -2;
 		goto end;
 	}
-	if (EVP_PKEY_CTX_set1_id(evp_pkey_ctx, sm2_user_id, sm2_user_id_len) != 1) {
-		printf("Error: fail to set user_id to the EVP_PKEY_CTX\n");
-		ret = -3;
-		goto end;
-	}
 
 	// 2. Encrypt
 	if (EVP_PKEY_encrypt_init(evp_pkey_ctx) <= 0) {
@@ -551,11 +546,6 @@ static int decrypt_sm2(const char* private_key, const char* cipher_text, size_t 
 	if (evp_pkey_ctx == NULL) {
 		printf("Error: fail to create a EVP_PKEY_CTX\n");
 		ret = -2;
-		goto end;
-	}
-	if (EVP_PKEY_CTX_set1_id(evp_pkey_ctx, sm2_user_id, sm2_user_id_len) != 1) {
-		printf("Error: fail to set sm2_user_id to the EVP_PKEY_CTX\n");
-		ret = -3;
 		goto end;
 	}
 
