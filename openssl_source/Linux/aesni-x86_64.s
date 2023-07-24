@@ -5,6 +5,7 @@
 .align	16
 aesni_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	movups	(%rdi),%xmm2
 	movl	240(%rdx),%eax
 	movups	(%rdx),%xmm0
@@ -31,6 +32,7 @@ aesni_encrypt:
 .align	16
 aesni_decrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	movups	(%rdi),%xmm2
 	movl	240(%rdx),%eax
 	movups	(%rdx),%xmm0
@@ -528,6 +530,7 @@ _aesni_decrypt8:
 .align	16
 aesni_ecb_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	andq	$-16,%rdx
 	jz	.Lecb_ret
 
@@ -872,6 +875,7 @@ aesni_ecb_encrypt:
 .align	16
 aesni_ccm64_encrypt_blocks:
 .cfi_startproc	
+.byte	243,15,30,250
 	movl	240(%rcx),%eax
 	movdqu	(%r8),%xmm6
 	movdqa	.Lincrement64(%rip),%xmm9
@@ -937,6 +941,7 @@ aesni_ccm64_encrypt_blocks:
 .align	16
 aesni_ccm64_decrypt_blocks:
 .cfi_startproc	
+.byte	243,15,30,250
 	movl	240(%rcx),%eax
 	movups	(%r8),%xmm6
 	movdqu	(%r9),%xmm3
@@ -1036,6 +1041,7 @@ aesni_ccm64_decrypt_blocks:
 .align	16
 aesni_ctr32_encrypt_blocks:
 .cfi_startproc	
+.byte	243,15,30,250
 	cmpq	$1,%rdx
 	jne	.Lctr32_bulk
 
@@ -1614,6 +1620,7 @@ aesni_ctr32_encrypt_blocks:
 .align	16
 aesni_xts_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	leaq	(%rsp),%r11
 .cfi_def_cfa_register	%r11
 	pushq	%rbp
@@ -1849,19 +1856,19 @@ aesni_xts_encrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,221,84,36,0
-    lfence
+	lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,221,92,36,16
-    lfence
+	lfence
 .byte	102,15,56,221,100,36,32
 	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,221,108,36,48
-    lfence
+	lfence
 .byte	102,15,56,221,116,36,64
-    lfence
+	lfence
 .byte	102,15,56,221,124,36,80
 	lfence
 	pxor	%xmm9,%xmm15
@@ -2090,6 +2097,7 @@ aesni_xts_encrypt:
 .align	16
 aesni_xts_decrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	leaq	(%rsp),%r11
 .cfi_def_cfa_register	%r11
 	pushq	%rbp
@@ -2331,19 +2339,19 @@ aesni_xts_decrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,223,84,36,0
-    lfence
+	lfence
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,223,92,36,16
-    lfence
+	lfence
 .byte	102,15,56,223,100,36,32
 	lfence
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,223,108,36,48
-    lfence
+	lfence
 .byte	102,15,56,223,116,36,64
-    lfence
+	lfence
 .byte	102,15,56,223,124,36,80
 	lfence
 	pxor	%xmm9,%xmm15
@@ -2603,6 +2611,7 @@ aesni_xts_decrypt:
 .align	32
 aesni_ocb_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	leaq	(%rsp),%rax
 	pushq	%rbx
 .cfi_adjust_cfa_offset	8
@@ -3033,6 +3042,7 @@ __ocb_encrypt1:
 .align	32
 aesni_ocb_decrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	leaq	(%rsp),%rax
 	pushq	%rbx
 .cfi_adjust_cfa_offset	8
@@ -3473,6 +3483,7 @@ __ocb_decrypt1:
 .align	16
 aesni_cbc_encrypt:
 .cfi_startproc	
+.byte	243,15,30,250
 	testq	%rdx,%rdx
 	jz	.Lcbc_ret
 
@@ -4481,7 +4492,6 @@ __aesni_set_encrypt_key:
 .size	aesni_set_encrypt_key,.-aesni_set_encrypt_key
 .size	__aesni_set_encrypt_key,.-__aesni_set_encrypt_key
 .align	64
-
 .Lbswap_mask:
 .byte	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 .Lincrement32:
@@ -4502,5 +4512,25 @@ __aesni_set_encrypt_key:
 .long	0x1b,0x1b,0x1b,0x1b
 
 .byte	65,69,83,32,102,111,114,32,73,110,116,101,108,32,65,69,83,45,78,73,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
-
 .align	64
+	.section ".note.gnu.property", "a"
+	.p2align 3
+	.long 1f - 0f
+	.long 4f - 1f
+	.long 5
+0:
+	# "GNU" encoded with .byte, since .asciz isn't supported
+	# on Solaris.
+	.byte 0x47
+	.byte 0x4e
+	.byte 0x55
+	.byte 0
+1:
+	.p2align 3
+	.long 0xc0000002
+	.long 3f - 2f
+2:
+	.long 3
+3:
+	.p2align 3
+4:

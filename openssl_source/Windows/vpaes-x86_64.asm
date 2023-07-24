@@ -639,6 +639,7 @@ $L$SEH_begin_vpaes_set_encrypt_key:
 
 
 
+DB	243,15,30,250
 	lea	rsp,[((-184))+rsp]
 	movaps	XMMWORD[16+rsp],xmm6
 	movaps	XMMWORD[32+rsp],xmm7
@@ -692,6 +693,7 @@ $L$SEH_begin_vpaes_set_decrypt_key:
 
 
 
+DB	243,15,30,250
 	lea	rsp,[((-184))+rsp]
 	movaps	XMMWORD[16+rsp],xmm6
 	movaps	XMMWORD[32+rsp],xmm7
@@ -750,6 +752,7 @@ $L$SEH_begin_vpaes_encrypt:
 
 
 
+DB	243,15,30,250
 	lea	rsp,[((-184))+rsp]
 	movaps	XMMWORD[16+rsp],xmm6
 	movaps	XMMWORD[32+rsp],xmm7
@@ -798,6 +801,7 @@ $L$SEH_begin_vpaes_decrypt:
 
 
 
+DB	243,15,30,250
 	lea	rsp,[((-184))+rsp]
 	movaps	XMMWORD[16+rsp],xmm6
 	movaps	XMMWORD[32+rsp],xmm7
@@ -848,6 +852,7 @@ $L$SEH_begin_vpaes_cbc_encrypt:
 
 
 
+DB	243,15,30,250
 	xchg	rdx,rcx
 	sub	rcx,16
 	jc	NEAR $L$cbc_abort
