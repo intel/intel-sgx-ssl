@@ -78,6 +78,7 @@ extern "C" {
 		}
 		
 		if (sgx_thread_mutex_init(mutex, NULL) != 0) {
+			delete mutex;
 			errno = EINVAL;
 			FEND;
 			return 0;
@@ -88,10 +89,10 @@ extern "C" {
 		}
 		catch (std::bad_alloc e)
 		{
-			sgx_spin_unlock(&mutex_map_lock);
 			(void)e; // remove warning
 			if (p_mutex_dat != NULL) // second memory allocation failed
 				delete p_mutex_dat;
+			delete mutex;
 			errno = ENOMEM;
 			FEND;
 			return 0;
@@ -200,10 +201,12 @@ extern "C" {
 		}
 
 		// Free mutex and delete the mutex_it
+		mutex_count * p_mutex_count = it->second;
 		sgx_thread_mutex_t * mutex_it = it->second->mutex;
 
 		sgx_thread_mutex_destroy(mutex_it);
 		delete mutex_it;
+		delete p_mutex_count;
 
 		// delete the mutex_info_map entry
 		mutex_info_map.erase(it);
@@ -213,7 +216,4 @@ extern "C" {
 		FEND;
 		return;
 	}
-
-
-
 }
