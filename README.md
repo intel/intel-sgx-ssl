@@ -23,6 +23,14 @@ Documentation
   * [Windows developer guide](Windows/package/docs/Intel(R)%20Software%20Guard%20Extensions%20SSL%20Library%20Windows%20Developer%20Guide.pdf)
 
 
+Special NOTES to branch 'support_tls_openssl3_dev'
+-------
+Branch 'support_tls_openssl3_dev' supports basic functionalities of TLS session inside enclave based on openssl3.x.x.
+But there are limitations:
+- Only Linux version supported, sample code refer to SampleCode/SampleAttestedTLS.
+- Basic functionalities work in happy path, but no full tests done for all functions.
+- For sample code, please refer to SampleCode/SampleAttestedTLS in Intel® SGX SDK package.
+
 Build Intel® SGX SSL package
 ----------------------------
 Windows
