@@ -396,7 +396,15 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test sha1_test completed\n");
-	
+
+	ret = hmac_tests();
+        if (ret != 0)
+    {
+        printf("test hmac_test returned error %d\n", ret);
+        exit(ret);
+    }
+        printf("test hmac_test completed\n");
+
 	ret = threads_test();
 	if (ret != 0)
     {

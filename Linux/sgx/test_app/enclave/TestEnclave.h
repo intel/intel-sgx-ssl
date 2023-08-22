@@ -64,6 +64,7 @@ int aesccm_test();
 int aesgcm_test();
 int sha256_test();
 int sha1_test();
+int hmac_tests();
 int threads_test();
 int ecall_sm2_sign_verify();
 int ecall_sm2_encrypt_decrypt();
