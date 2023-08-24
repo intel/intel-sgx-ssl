@@ -438,7 +438,9 @@ bn_mul_mont_gather5:
 	leaq	(%rsi),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_mul_mont_gather5,.-bn_mul_mont_gather5
 .type	bn_mul4x_mont_gather5,@function
@@ -543,7 +545,9 @@ bn_mul4x_mont_gather5:
 	leaq	(%rsi),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul4x_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_mul4x_mont_gather5,.-bn_mul4x_mont_gather5
 
@@ -1205,7 +1209,9 @@ bn_power5:
 	leaq	(%rsi),%rsp
 .cfi_def_cfa_register	%rsp
 .Lpower5_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_power5,.-bn_power5
 
@@ -1989,7 +1995,9 @@ __bn_sqr8x_reduction:
 
 	cmpq	%rdx,%rdi
 	jb	.L8x_reduction_loop
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_sqr8x_internal,.-bn_sqr8x_internal
 .type	__bn_post4x_internal,@function
@@ -2045,7 +2053,9 @@ __bn_post4x_internal:
 
 	movq	%r9,%r10
 	negq	%r9
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	__bn_post4x_internal,.-__bn_post4x_internal
 .type	bn_mulx4x_mont_gather5,@function
@@ -2155,7 +2165,9 @@ bn_mulx4x_mont_gather5:
 	leaq	(%rsi),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmulx4x_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_mulx4x_mont_gather5,.-bn_mulx4x_mont_gather5
 
@@ -2714,7 +2726,9 @@ bn_powerx5:
 	leaq	(%rsi),%rsp
 .cfi_def_cfa_register	%rsp
 .Lpowerx5_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_powerx5,.-bn_powerx5
 
@@ -2809,11 +2823,11 @@ __bn_sqrx8x_internal:
 	adcxq	%r10,%r9
 	adoxq	%rax,%r11
 .byte	0xc4,0xe2,0xab,0xf6,0x86,0x18,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%r11,%r10
 	adoxq	%rax,%r12
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x20,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%r12,%r11
 	adoxq	%rax,%r13
 	mulxq	40(%rsi),%r12,%rax
@@ -2841,15 +2855,15 @@ __bn_sqrx8x_internal:
 	adcxq	%r11,%r9
 	adoxq	%rax,%r10
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x28,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%r12,%r10
 	adoxq	%rbx,%r11
 .byte	0xc4,0xe2,0x9b,0xf6,0x9e,0x30,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%r13,%r11
 	adoxq	%r14,%r12
 .byte	0xc4,0x62,0x93,0xf6,0xb6,0x38,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	movq	16(%rsi),%rdx
 	adcxq	%rax,%r12
 	adoxq	%rbx,%r13
@@ -2868,11 +2882,11 @@ __bn_sqrx8x_internal:
 	adcxq	%r11,%r9
 	adoxq	%rax,%r10
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x30,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%r12,%r10
 	adoxq	%r13,%r11
 .byte	0xc4,0x62,0x9b,0xf6,0xae,0x38,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 .byte	0x3e
 	movq	24(%rsi),%rdx
 	adcxq	%rbx,%r11
@@ -2976,7 +2990,7 @@ __bn_sqrx8x_internal:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xfb,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%rax,%r11
 	adoxq	%r13,%r12
 
@@ -2991,7 +3005,7 @@ __bn_sqrx8x_internal:
 	adoxq	%r15,%r14
 
 .byte	0xc4,0x62,0xfb,0xf6,0xbd,0x38,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	movq	8(%rsi,%rcx,8),%rdx
 	adcxq	%rax,%r14
 	adoxq	%rbx,%r15
@@ -3085,9 +3099,9 @@ __bn_sqrx8x_internal:
 	adoxq	%r12,%r12
 	adcxq	%r10,%rax
 .byte	0x48,0x8b,0x94,0x0e,0x08,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 .byte	0x4c,0x8b,0x97,0x20,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adoxq	%r13,%r13
 	adcxq	%r11,%rbx
 	movq	40(%rdi),%r11
@@ -3122,7 +3136,7 @@ __bn_sqrx8x_internal:
 	adcxq	%r12,%rax
 	jrcxz	.Lsqrx4x_shift_n_add_break
 .byte	0x48,0x8b,0x94,0x0e,0x00,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adoxq	%r11,%r11
 	adcxq	%r13,%rbx
 	movq	80(%rdi),%r12
@@ -3190,7 +3204,7 @@ __bn_sqrx8x_reduction:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xe3,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	movq	%rdx,%rax
 	movq	%r8,%rdx
 	adcxq	%rbx,%r11
@@ -3260,7 +3274,7 @@ __bn_sqrx8x_reduction:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xfb,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence
+	lfence	# mgadd
 	adcxq	%rax,%r11
 	adoxq	%r13,%r12
 
@@ -3349,7 +3363,9 @@ __bn_sqrx8x_reduction:
 	leaq	64(%rdi,%rcx,1),%rdi
 	cmpq	8+8(%rsp),%r8
 	jb	.Lsqrx8x_reduction_loop
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_sqrx8x_internal,.-bn_sqrx8x_internal
 .align	32
@@ -3401,7 +3417,9 @@ __bn_postx4x_internal:
 
 	negq	%r9
 
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	__bn_postx4x_internal,.-__bn_postx4x_internal
 .globl	bn_get_bits5
@@ -3421,7 +3439,9 @@ bn_get_bits5:
 	movzwl	(%r10,%rsi,2),%eax
 	shrl	%cl,%eax
 	andl	$31,%eax
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_get_bits5,.-bn_get_bits5
 
@@ -3441,7 +3461,9 @@ bn_scatter5:
 	subl	$1,%esi
 	jnz	.Lscatter
 .Lscatter_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	bn_scatter5,.-bn_scatter5
 
@@ -3606,7 +3628,9 @@ bn_gather5:
 	jnz	.Lgather
 
 	leaq	(%r10),%rsp
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .LSEH_end_bn_gather5:
 .cfi_endproc	
 .size	bn_gather5,.-bn_gather5
