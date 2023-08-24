@@ -116,12 +116,9 @@ int sgxssl_open(const char *filename, int flags)
 	FSTART;
 
     if (filename == NULL) return -1;
-	// In addition, the function is used by b_sock2.c as closesocket function.
-	// It is unreachable under the assumption that TLS support is not required.
-	// Otherwise should be implemented as OCALL.
-	int retval = 0;
-	sgx_status_t ret = 
-        u_sgxssl_open(&retval, filename, flags);
+
+    int retval = 0;
+    sgx_status_t ret = u_sgxssl_open(&retval, filename, flags);
 	if (ret != SGX_SUCCESS)
 	{
 		FEND;
@@ -131,25 +128,22 @@ int sgxssl_open(const char *filename, int flags)
 	FEND;
 
 	return retval;
-
 }
+
 int sgxssl_close(int fd)
 {
 	FSTART;
 
 	if (fd == FAKE_PIPE_READ_FD ||
 		fd == FAKE_PIPE_WRITE_FD) {
-		// With pipes the function is used only by the engines/e_dasync.c (dummy async engine).
-		SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
+
+        SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
 
 		FEND;
 		// On error, -1 is returned, and errno is set appropriately
 		return -1;
 	}
 
-	// In addition, the function is used by b_sock2.c as closesocket function.
-	// It is unreachable under the assumption that TLS support is not required.
-	// Otherwise should be implemented as OCALL.
 	int retval = 0;
 	sgx_status_t ret = u_sgxssl_close(&retval, fd);
 	if (ret != SGX_SUCCESS)
