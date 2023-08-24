@@ -30,19 +30,20 @@
  */
 
 #include <unistd.h>
+#include <fcntl.h>
 #include "ucommon.h"
 
 extern "C" {
 
-	size_t u_sgxssl_write(int fd, const void* buf, size_t n)
+	ssize_t u_sgxssl_write(int fd, const void* buf, size_t n)
 	{
-		size_t ret = write(fd, buf, n);
+		ssize_t ret = write(fd, buf, n);
 		return ret;
 	}
 	
-	size_t u_sgxssl_read(int fd, void* buf, size_t count)
+	ssize_t u_sgxssl_read(int fd, void* buf, size_t count)
 	{
-		size_t ret = read(fd, buf, count);
+		ssize_t ret = read(fd, buf, count);
 		return ret;
 	}
 	
@@ -52,4 +53,10 @@ extern "C" {
 		return ret;
 	}
 
+	int u_sgxssl_open(const char *filename, int flags)
+	{
+		if (filename == NULL) return -1;
+		int ret = open(filename, flags);
+		return ret;
+	}
 }
