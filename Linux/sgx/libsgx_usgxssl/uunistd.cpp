@@ -53,10 +53,10 @@ extern "C" {
 		return ret;
 	}
 
-    int u_sgxssl_open(const char *filename, int flags)
-    {
-        if (filename == NULL) return -1;
-        int ret = open(filename, flags);
-        return ret;
-    }
+	int u_sgxssl_open(const char *filename, int flags)
+	{
+		if (filename == NULL) return -1;
+		int ret = open(filename, flags);
+		return ret;
+	}
 }

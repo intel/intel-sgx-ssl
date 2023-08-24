@@ -115,10 +115,10 @@ int sgxssl_open(const char *filename, int flags)
 {
 	FSTART;
 
-    if (filename == NULL) return -1;
+	if (filename == NULL) return -1;
 
-    int retval = 0;
-    sgx_status_t ret = u_sgxssl_open(&retval, filename, flags);
+	int retval = 0;
+	sgx_status_t ret = u_sgxssl_open(&retval, filename, flags);
 	if (ret != SGX_SUCCESS)
 	{
 		FEND;
@@ -137,7 +137,7 @@ int sgxssl_close(int fd)
 	if (fd == FAKE_PIPE_READ_FD ||
 		fd == FAKE_PIPE_WRITE_FD) {
 
-        SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
+		SGX_UNSUPPORTED_FUNCTION(SET_ERRNO);
 
 		FEND;
 		// On error, -1 is returned, and errno is set appropriately
