@@ -37,10 +37,10 @@ enclave {
    
     untrusted {
         void u_sgxssl_ftime([out, size=timeb_len] void * timeptr, uint32_t timeb_len);
-        ssize_t u_sgxssl_write (int fd, [in,size=n]const void *buf, size_t n);
-        ssize_t u_sgxssl_read(int fd, [out, size=count]void *buf, size_t count);
-        int u_sgxssl_close(int fd);
-        int u_sgxssl_open([user_check]const char* fname, int flags);
+        ssize_t u_sgxssl_write (int fd, [in,size=n]const void *buf, size_t n) propagate_errno;
+        ssize_t u_sgxssl_read(int fd, [out, size=count]void *buf, size_t count) propagate_errno;
+        int u_sgxssl_close(int fd) propagate_errno;
+        int u_sgxssl_open([user_check]const char* fname, int flags) propagate_errno;
     };
    
     trusted {
