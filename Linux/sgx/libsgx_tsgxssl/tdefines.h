@@ -83,7 +83,8 @@ struct timezone
 #elif OS_ID == CentOS
 	#include "/usr/include/bits/confname.h"
 #elif OS_ID == NixPKG
-	#include "bits/confname.h"
+        // This value is from bits/confname.h in nix env
+        #define _SC_PAGESIZE 30
 #else
 	#error Invalid OS ID
 #endif
