@@ -114,7 +114,7 @@ goto end_copying
 
 :extra_copying_cf
 
-copy /y  windows\crypto %OPENSSL_VERSION%\crypto
+xcopy /Y /Q /S  Windows\crypto %OPENSSL_VERSION%\crypto
 
 :end_copying
 
