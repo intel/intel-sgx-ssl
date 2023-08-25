@@ -315,6 +315,7 @@ $L$6x_done:
 	vpxor	xmm8,xmm8,XMMWORD[((16+8))+rsp]
 	vpxor	xmm8,xmm8,xmm4
 
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -453,6 +454,7 @@ $L$gcm_dec_abort:
 	mov	rax,r10
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_gcm_decrypt:
@@ -523,6 +525,7 @@ $L$oop_ctr32:
 	vmovups	XMMWORD[80+rsi],xmm14
 	lea	rsi,[96+rsi]
 
+	lfence
 	DB	0F3h,0C3h		;repret
 ALIGN	32
 $L$handle_ctr32_2:
@@ -848,6 +851,7 @@ $L$gcm_enc_abort:
 	mov	rax,r10
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_gcm_encrypt:

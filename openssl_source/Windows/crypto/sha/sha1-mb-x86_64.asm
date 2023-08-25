@@ -2604,6 +2604,7 @@ $L$done:
 $L$epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha1_multi_block:
@@ -3015,6 +3016,7 @@ $L$done_shaext:
 $L$epilogue_shaext:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha1_multi_block_shaext:
@@ -5139,6 +5141,7 @@ $L$done_avx:
 $L$epilogue_avx:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha1_multi_block_avx:
@@ -7416,6 +7419,7 @@ $L$done_avx2:
 $L$epilogue_avx2:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha1_multi_block_avx2:

@@ -22,6 +22,7 @@ aesni_cbc_sha1_enc:
 	cmp	r10d,1342177280
 	je	NEAR aesni_cbc_sha1_enc_avx
 	jmp	NEAR aesni_cbc_sha1_enc_ssse3
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1428,6 +1429,7 @@ DB	102,15,56,221,209
 $L$epilogue_ssse3:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha1_enc_ssse3:
@@ -2778,6 +2780,7 @@ $L$vaesenclast10:
 $L$epilogue_avx:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha1_enc_avx:
@@ -3135,6 +3138,7 @@ DB	102,15,56,221,209
 $L$epilogue_shaext:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha1_enc_shaext:

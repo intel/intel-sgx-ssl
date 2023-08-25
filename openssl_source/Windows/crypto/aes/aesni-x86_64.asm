@@ -1997,15 +1997,21 @@ DB	102,15,56,220,249
 
 	pxor	xmm14,xmm15
 DB	102,15,56,221,84,36,0
+	lfence
 	psrad	xmm9,31
 	paddq	xmm15,xmm15
 DB	102,15,56,221,92,36,16
+	lfence
 DB	102,15,56,221,100,36,32
+	lfence
 	pand	xmm9,xmm8
 	mov	rax,r10
 DB	102,15,56,221,108,36,48
+	lfence
 DB	102,15,56,221,116,36,64
+	lfence
 DB	102,15,56,221,124,36,80
+	lfence
 	pxor	xmm15,xmm9
 
 	lea	rsi,[96+rsi]
@@ -2509,15 +2515,21 @@ DB	102,15,56,222,249
 
 	pxor	xmm14,xmm15
 DB	102,15,56,223,84,36,0
+	lfence
 	psrad	xmm9,31
 	paddq	xmm15,xmm15
 DB	102,15,56,223,92,36,16
+	lfence
 DB	102,15,56,223,100,36,32
+	lfence
 	pand	xmm9,xmm8
 	mov	rax,r10
 DB	102,15,56,223,108,36,48
+	lfence
 DB	102,15,56,223,116,36,64
+	lfence
 DB	102,15,56,223,124,36,80
+	lfence
 	pxor	xmm15,xmm9
 
 	lea	rsi,[96+rsi]
@@ -3778,6 +3790,7 @@ $L$cbc_enc_tail:
 	mov	rcx,rdx
 	xchg	rsi,rdi
 	DD	0x9066A4F3
+	lfence
 	mov	ecx,16
 	sub	rcx,rdx
 	xor	eax,eax
@@ -4308,6 +4321,7 @@ $L$cbc_dec_tail_partial:
 	sub	rcx,rdx
 	lea	rsi,[rsp]
 	DD	0x9066A4F3
+	lfence
 	movdqa	XMMWORD[rsp],xmm2
 
 $L$cbc_dec_ret:

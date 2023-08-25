@@ -260,6 +260,7 @@ $L$oop:
 	jnz	NEAR $L$oop
 
 	lea	r15,[((-192))+r15]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -320,6 +321,7 @@ KeccakF1600:
 
 	pop	rbx
 
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -421,6 +423,7 @@ $L$done_absorb:
 
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_SHA3_absorb:
@@ -478,6 +481,7 @@ $L$tail_squeeze:
 	mov	rdi,r12
 	mov	rcx,r13
 DB	0xf3,0xa4
+	lfence
 
 $L$done_squeeze:
 	pop	r14
@@ -488,6 +492,7 @@ $L$done_squeeze:
 
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_SHA3_squeeze:

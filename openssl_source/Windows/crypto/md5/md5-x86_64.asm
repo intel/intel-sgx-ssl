@@ -689,6 +689,7 @@ $L$end:
 $L$epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ossl_md5_block_asm_data_order:

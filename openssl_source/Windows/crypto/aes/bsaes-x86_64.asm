@@ -478,6 +478,7 @@ $L$enc_done:
 	pxor	xmm4,xmm7
 	pxor	xmm15,xmm7
 	pxor	xmm0,xmm7
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -986,6 +987,7 @@ $L$dec_done:
 	pxor	xmm4,xmm7
 	pxor	xmm15,xmm7
 	pxor	xmm0,xmm7
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1070,6 +1072,7 @@ DB	102,15,56,0,244
 
 	movdqa	xmm7,XMMWORD[80+r11]
 
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1364,6 +1367,7 @@ $L$cbc_dec_tail:
 	lea	rsp,[rax]
 
 $L$cbc_dec_epilogue:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1607,6 +1611,7 @@ $L$ctr_enc_tail:
 	lea	rsp,[rax]
 
 $L$ctr_enc_epilogue:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -2101,6 +2106,7 @@ $L$xts_enc_tail:
 	lea	rsp,[rax]
 
 $L$xts_enc_epilogue:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -2621,6 +2627,7 @@ $L$xts_dec_tail:
 	lea	rsp,[rax]
 
 $L$xts_dec_epilogue:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 

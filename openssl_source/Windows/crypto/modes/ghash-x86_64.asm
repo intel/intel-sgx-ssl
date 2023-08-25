@@ -119,6 +119,7 @@ $L$break1:
 $L$gmult_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_gcm_gmult_4bit:
@@ -715,6 +716,7 @@ $L$outer_loop:
 $L$ghash_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_gcm_ghash_4bit:
@@ -880,6 +882,7 @@ DB	102,15,58,15,227,8
 	movaps	xmm6,XMMWORD[rsp]
 	lea	rsp,[24+rsp]
 $L$SEH_end_gcm_init_clmul:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -934,6 +937,7 @@ DB	102,15,58,68,220,0
 	pxor	xmm0,xmm1
 DB	102,15,56,0,197
 	movdqu	XMMWORD[rcx],xmm0
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1346,6 +1350,7 @@ DB	102,65,15,56,0,194
 	movaps	xmm15,XMMWORD[144+rsp]
 	lea	rsp,[168+rsp]
 $L$SEH_end_gcm_ghash_clmul:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1462,6 +1467,7 @@ $L$init_start_avx:
 	movaps	xmm6,XMMWORD[rsp]
 	lea	rsp,[24+rsp]
 $L$SEH_end_gcm_init_avx:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1876,6 +1882,7 @@ $L$tail_no_xor_avx:
 	movaps	xmm15,XMMWORD[144+rsp]
 	lea	rsp,[168+rsp]
 $L$SEH_end_gcm_ghash_avx:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 

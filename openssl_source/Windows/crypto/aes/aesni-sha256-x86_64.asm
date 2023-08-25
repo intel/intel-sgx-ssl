@@ -35,6 +35,7 @@ aesni_cbc_sha256_enc:
 	je	NEAR $L$probe
 	ud2
 $L$probe:
+	lfence
 	DB	0F3h,0C3h		;repret
 
 
@@ -1280,6 +1281,7 @@ DB	143,232,120,194,239,2
 $L$epilogue_xop:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha256_enc_xop:
@@ -2509,6 +2511,7 @@ $L$avx_00_47:
 $L$epilogue_avx:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha256_enc_avx:
@@ -4166,6 +4169,7 @@ $L$done_avx2:
 $L$epilogue_avx2:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha256_enc_avx2:
@@ -4559,6 +4563,7 @@ DB	102,15,58,15,211,8
 $L$epilogue_shaext:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
+	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_sha256_enc_shaext:
