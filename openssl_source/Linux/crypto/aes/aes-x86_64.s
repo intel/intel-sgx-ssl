@@ -1509,7 +1509,7 @@ AES_cbc_encrypt:
 	leaq	80(%rsp),%r15
 	movl	$30,%ecx
 .long	0x90A548F3
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movl	%eax,(%rdi)
 .Lcbc_skip_ecopy:
 	movq	%r15,0(%rsp)
@@ -1775,7 +1775,7 @@ AES_cbc_encrypt:
 	movq	%r8,%rsi
 	movq	%r9,%rdi
 .long	0x9066A4F3
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movq	$16,%rcx
 	subq	%r10,%rcx
 	xorq	%rax,%rax
@@ -1861,7 +1861,7 @@ AES_cbc_encrypt:
 	leaq	64(%rsp),%rsi
 	leaq	16(%r10),%rcx
 .long	0x9066A4F3
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	jmp	.Lcbc_exit
 
 .align	16

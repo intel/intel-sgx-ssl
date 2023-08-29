@@ -484,7 +484,7 @@ SHA3_squeeze:
 	movq	%r12,%rdi
 	movq	%r13,%rcx
 .byte	0xf3,0xa4
-	lfence	# mgadd
+	lfence	# mgadd load_only
 
 .Ldone_squeeze:
 	popq	%r14

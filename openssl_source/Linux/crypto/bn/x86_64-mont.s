@@ -985,7 +985,7 @@ bn_mulx4x_mont:
 	adcxq	%rax,%r10
 	adoxq	%r12,%r11
 .byte	0xc4,0x62,0xfb,0xf6,0xa1,0x10,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movq	48(%rsp),%rdi
 	movq	%r10,-32(%rbx)
 	adcxq	%rax,%r11

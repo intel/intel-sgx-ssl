@@ -152,7 +152,11 @@ then
 fi
 if [[ "$MITIGATION_OPT" == "CF" ]]
 then
-    cp -rf $SGXSSL_ROOT/../openssl_source/Linux/crypto .
+    rm -rf ../crypto
+    cp -rf $SGXSSL_ROOT/../openssl_source/Linux/crypto ..
+    find ../crypto -type f | xargs sed -i '/load_only/ d'
+    cp -rf ../crypto .
+    rm -rf ../crypto
 fi
 
 make libcrypto.a || exit 1

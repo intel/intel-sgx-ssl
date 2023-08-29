@@ -1862,21 +1862,21 @@ aesni_xts_encrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,221,84,36,0
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,221,92,36,16
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,221,100,36,32
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,221,108,36,48
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,221,116,36,64
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,221,124,36,80
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	pxor	%xmm9,%xmm15
 
 	leaq	96(%rsi),%rsi
@@ -2346,21 +2346,21 @@ aesni_xts_decrypt:
 
 	pxor	%xmm15,%xmm14
 .byte	102,15,56,223,84,36,0
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	psrad	$31,%xmm9
 	paddq	%xmm15,%xmm15
 .byte	102,15,56,223,92,36,16
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,223,100,36,32
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	pand	%xmm8,%xmm9
 	movq	%r10,%rax
 .byte	102,15,56,223,108,36,48
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,223,116,36,64
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	102,15,56,223,124,36,80
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	pxor	%xmm9,%xmm15
 
 	leaq	96(%rsi),%rsi
@@ -3544,7 +3544,7 @@ aesni_cbc_encrypt:
 	movq	%rdx,%rcx
 	xchgq	%rdi,%rsi
 .long	0x9066A4F3
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movl	$16,%ecx
 	subq	%rdx,%rcx
 	xorl	%eax,%eax
@@ -4068,7 +4068,7 @@ aesni_cbc_encrypt:
 	subq	%rdx,%rcx
 	leaq	(%rsp),%rsi
 .long	0x9066A4F3
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movdqa	%xmm2,(%rsp)
 
 .Lcbc_dec_ret:

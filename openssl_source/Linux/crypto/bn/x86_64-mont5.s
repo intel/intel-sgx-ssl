@@ -2823,11 +2823,11 @@ __bn_sqrx8x_internal:
 	adcxq	%r10,%r9
 	adoxq	%rax,%r11
 .byte	0xc4,0xe2,0xab,0xf6,0x86,0x18,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%r11,%r10
 	adoxq	%rax,%r12
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x20,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%r12,%r11
 	adoxq	%rax,%r13
 	mulxq	40(%rsi),%r12,%rax
@@ -2855,15 +2855,15 @@ __bn_sqrx8x_internal:
 	adcxq	%r11,%r9
 	adoxq	%rax,%r10
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x28,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%r12,%r10
 	adoxq	%rbx,%r11
 .byte	0xc4,0xe2,0x9b,0xf6,0x9e,0x30,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%r13,%r11
 	adoxq	%r14,%r12
 .byte	0xc4,0x62,0x93,0xf6,0xb6,0x38,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movq	16(%rsi),%rdx
 	adcxq	%rax,%r12
 	adoxq	%rbx,%r13
@@ -2882,11 +2882,11 @@ __bn_sqrx8x_internal:
 	adcxq	%r11,%r9
 	adoxq	%rax,%r10
 .byte	0xc4,0xe2,0xa3,0xf6,0x86,0x30,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%r12,%r10
 	adoxq	%r13,%r11
 .byte	0xc4,0x62,0x9b,0xf6,0xae,0x38,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	0x3e
 	movq	24(%rsi),%rdx
 	adcxq	%rbx,%r11
@@ -2990,7 +2990,7 @@ __bn_sqrx8x_internal:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xfb,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%rax,%r11
 	adoxq	%r13,%r12
 
@@ -3005,7 +3005,7 @@ __bn_sqrx8x_internal:
 	adoxq	%r15,%r14
 
 .byte	0xc4,0x62,0xfb,0xf6,0xbd,0x38,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movq	8(%rsi,%rcx,8),%rdx
 	adcxq	%rax,%r14
 	adoxq	%rbx,%r15
@@ -3099,9 +3099,9 @@ __bn_sqrx8x_internal:
 	adoxq	%r12,%r12
 	adcxq	%r10,%rax
 .byte	0x48,0x8b,0x94,0x0e,0x08,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 .byte	0x4c,0x8b,0x97,0x20,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adoxq	%r13,%r13
 	adcxq	%r11,%rbx
 	movq	40(%rdi),%r11
@@ -3136,7 +3136,7 @@ __bn_sqrx8x_internal:
 	adcxq	%r12,%rax
 	jrcxz	.Lsqrx4x_shift_n_add_break
 .byte	0x48,0x8b,0x94,0x0e,0x00,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adoxq	%r11,%r11
 	adcxq	%r13,%rbx
 	movq	80(%rdi),%r12
@@ -3204,7 +3204,7 @@ __bn_sqrx8x_reduction:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xe3,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	movq	%rdx,%rax
 	movq	%r8,%rdx
 	adcxq	%rbx,%r11
@@ -3274,7 +3274,7 @@ __bn_sqrx8x_reduction:
 	adoxq	%r12,%r11
 
 .byte	0xc4,0x62,0xfb,0xf6,0xa5,0x20,0x00,0x00,0x00
-	lfence	# mgadd
+	lfence	# mgadd load_only
 	adcxq	%rax,%r11
 	adoxq	%r13,%r12
 
