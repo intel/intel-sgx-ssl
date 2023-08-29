@@ -423,7 +423,7 @@ $L$done_absorb:
 
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
+	lfence		;load_only
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_SHA3_absorb:
