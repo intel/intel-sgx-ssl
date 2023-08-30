@@ -66,16 +66,16 @@ Goal: Knowledge of where to *manually* add LFENCEs in assembly source
 code that sometimes encodes instructions using constant directives.
 
 For example, knowing that:
-
-> .long 0x90A548F3
-
+```
+.long 0x90A548F3
+```
 In the original assembly code should change to (for "load level" LVI
 mitigation)
+```
+ .long 0x90A548F3
 
-> .long 0x90A548F3
->
-> lfence
-
+ lfence
+```
 ## Prepare Process
 
 ### Use of .byte 0xf3,0xc3 Instead of RET
@@ -86,14 +86,14 @@ This file stands out because it generates .byte 0xf3,0xc3 instead of
 RET[^1]. The process of mitigating LVI in OpenSSL includes manual steps.
 Changing crypto\\perlasm\\x86_64-xlate.pl to generate
 
-> nop
->
-> rep ret
-
+```
+ nop
+ rep ret
+```
 instead of
-
-> .byte 0xf3,0xc3
-
+```
+.byte 0xf3,0xc3
+```
 makes the manual steps much easier. The rest of this document explains
 why this is the case, including why the addition of a NOP.
 
@@ -436,30 +436,21 @@ earlier in a file the first mistake of this type is made.
 
 The following is from an OpenSSL assembly file
 (crypto\\bn\\asm\\x86_64-mont5.s):
-
-> movdqa %xmm1,%xmm4
->
-> .byte 0x67
->
-> movdqa %xmm1,%xmm2
->
-> .byte 0x67
->
-> paddd %xmm0,%xmm1
-
+```
+    movdqa %xmm1,%xmm4
+ .byte 0x67
+    movdqa %xmm1,%xmm2
+ .byte 0x67
+    paddd %xmm0,%xmm1
+```
 With such code and with this approach, we would end with the following
 in the temp assembly file:
-
-> \<nops and constant directives specifying code earlier in the original
-> (generated) assembly file (not shown above)\>
->
-> .byte 0x67
->
-> .byte 0x67
->
-> \<nops and constant directives specifying code later in the original
-> (generated) assembly file (not shown above)\>
-
+```
+<nops and constant directives specifying code earlier in the original (generated) assembly file (not shown above)\>
+ .byte 0x67
+ .byte 0x67
+ \<nops and constant directives specifying code later in the original (generated) assembly file (not shown above)\>
+```
 Would this cause a problem? I don't know. It's tempting to say that if
 it does cause a problem, then the situation is hopeless since it would
 suggest that constants and mnemonics are somehow being combined in
@@ -495,93 +486,13 @@ As stated above,
 
 The Prepare Process has several options here:
 
-+----------------------+-----------------------+-----------------------+
-| Option               | Pros                  | Cons                  |
-+======================+=======================+=======================+
-| don't affect the     | Don't have to worry   | Have to manually add  |
-| generation of the    | about any perl files  | the corresponding     |
-| assembly files, that | changing.             | mitigations to the    |
-| is, don't change the |                       | assembly files        |
-| perl scripts         |                       |                       |
-+----------------------+-----------------------+-----------------------+
-| change the perl      | Don't have to         | Have to manually add  |
-| scripts to generate  | manually add the      | *some of* the         |
-| REP RET              | corresponding         | corresponding         |
-|                      | mitigations to the    | mitigations to the    |
-|                      | assembly files except | assembly files.       |
-|                      | in cases where        |                       |
-|                      | OpenSSL would         |                       |
-|                      | normally generate a   |                       |
-|                      | constant directive    |                       |
-|                      | immediately followed  |                       |
-|                      | by .byte 0xf3,0xc3.   |                       |
-|                      | This case is          |                       |
-|                      | relatively common.    |                       |
-+----------------------+-----------------------+-----------------------+
-| change the perl      | Same as directly      | Same as directly      |
-| scripts to generate  | above                 | above                 |
-| RET                  |                       |                       |
-|                      |                       | Removing the REP will |
-|                      |                       | break things if an    |
-|                      |                       | exceedingly rare      |
-|                      |                       | constant directive    |
-|                      |                       | pattern is present -- |
-|                      |                       | see directly below.   |
-+----------------------+-----------------------+-----------------------+
-| change the perl      | Don't have to         | Could break code in   |
-| scripts to generate  | manually add the      | cases where OpenSSL   |
-| NOP REP RET          | corresponding         | would normally        |
-|                      | mitigations to the    | generate a constant   |
-|                      | assembly files, that  | directive immediately |
-|                      | is, allows assembler  | followed by .byte     |
-|                      | to mitigate the case  | 0xf3,0xc3 AND the     |
-|                      | where OpenSSL would   | constant directive is |
-|                      | normally generate a   | somehow associated    |
-|                      | constant directive    | with the .byte        |
-|                      | immediately followed  | 0xf3,0xc3, that is:   |
-|                      | by .byte 0xf3,0xc3.   |                       |
-|                      | The assembler won't   | \<constant            |
-|                      | mitigate              | directive\>           |
-|                      |                       |                       |
-|                      | .byte 0xf3,0xc3       | .byte 0xf3,0xc3       |
-|                      |                       |                       |
-|                      | Since the assembler   | And what if the two   |
-|                      | needs mnemonics. The  | directives together   |
-|                      | assembler won't       | were intended to      |
-|                      | mitigate              | encode a different    |
-|                      |                       | instruction or        |
-|                      | \<constant            | different             |
-|                      | directive\>           | instructions? In this |
-|                      |                       | case, you can't       |
-|                      | REP RET               | change either         |
-|                      |                       | directive or insert   |
-|                      | Since the assembler   | anything between the  |
-|                      | doesn't know if the   | two directives, which |
-|                      | constant directive    | is exactly what this  |
-|                      | applies to the RET.   | option does.          |
-|                      | The assembler will    |                       |
-|                      | mitigate              | This pattern is not   |
-|                      |                       | known to exist. If in |
-|                      | \<constant            | doubt, the            |
-|                      | directive\>           | disassembly of the    |
-|                      |                       | object code           |
-|                      | NOP                   | corresponding to      |
-|                      |                       | untouched             |
-|                      | REP RET               | perl/assembly files   |
-|                      |                       | will show whether     |
-|                      | But, if the constant  | this exceedingly rare |
-|                      | directive really is   | pattern existed.      |
-|                      | associated with the   |                       |
-|                      | REP RET, then the     |                       |
-|                      | assembler-added       |                       |
-|                      | mitigation as well as |                       |
-|                      | the NOP may break the |                       |
-|                      | code.                 |                       |
-+----------------------+-----------------------+-----------------------+
-| change the perl      | Analogous to directly | Same as directly      |
-| scripts to generate  | above                 | above                 |
-| NOP RET              |                       |                       |
-+----------------------+-----------------------+-----------------------+
+|Option|Pros|Pros|
+| ------------ | ------------ | ------------ |
+|don’t affect the generation of the assembly | files, that is, don’t change the perl scripts | Don’t have to worry about any perl files changing. Have to manually add the corresponding mitigations to the assembly files|
+|change the perl scripts to generate REP RET|Don’t have to manually add the corresponding mitigations to the assembly files except in cases where OpenSSL would normally generate a constant directive immediately followed by .byte 0xf3,0xc3. This case is relatively common.|Have to manually add some of the corresponding mitigations to the assembly files.|
+|change the perl scripts to generate RET|Same as directly above|Same as directly above Removing the REP will break things if an exceedingly rare constant directive pattern is present – see directly below.|
+|change the perl scripts to generate NOP REP RET|Don’t have to manually add the corresponding mitigations to the assembly files, that is, allows assembler to mitigate the case where OpenSSL would normally generate a constant directive immediately followed by .byte 0xf3,0xc3. The assembler won’t mitigate .byte 0xf3,0xc3 Since the assembler needs mnemonics. The assembler won’t mitigate <constant directive> REP RET Since the assembler doesn’t know if the constant directive applies to the RET. The assembler will mitigate <constant directive> NOP REP RET But, if the constant directive really is associated with the REP RET, then the assembler-added mitigation as well as the NOP may break the code.|Could break code in cases where OpenSSL would normally generate a constant directive immediately followed by .byte 0xf3,0xc3 AND the constant directive is somehow associated with the .byte 0xf3,0xc3, that is: <constant directive> .byte 0xf3,0xc3 And what if the two directives together were intended to encode a different instruction or different instructions? In this case, you can’t change either directive or insert anything between the two directives, which is exactly what this option does. This pattern is not known to exist. If in doubt, the disassembly of the object code corresponding to untouched perl/assembly files will show whether this exceedingly rare pattern existed.|
+|change the perl scripts to generate NOP RET|Analogous to directly above|Same as directly above|
 
 ##### Manual Addition of LFENCEs
 
@@ -596,35 +507,29 @@ line number of the line with the constant directive so that it
 survives/is preserved across assembly and subsequent disassembly.
 
 [Original]{.underline}
-
+```
 340: .byte 243,15,30,250
-
 341: movq %rsp,%rax
-
+```
 [Option 1:]{.underline} convey the line number in an immediate operand
 (after something identifiable)
-
+```
 n: .byte 243,15,30,250
-
 n+1: mov \$511233000**340**, %r9
-
+```
 The scripts don't currently process any files line by line so [this
 option is on hold]{.mark}.
 
 [Option 2:]{.underline} add nops to keep the line number of the line
 with the mnemonic corresponding to the directive close to the line
 number of the line with the directive in the original assembly file.
-
-\~1: nop
-
-\~2: nop
-
+```
+~1: nop
+~2: nop
 ...
-
-\~339: nop
-
-\~340: \<mnemonic for some constant-encoded instruction\>
-
+~339: nop
+~340: \<mnemonic for some constant-encoded instruction\>
+```
 As of this writing, [this is what we do]{.mark}. The line numbers of the
 mnemonics won't exactly match the line numbers of the original constant
 directives but they should be close.
@@ -632,31 +537,20 @@ directives but they should be close.
 The scripts also currently cause labels of functions to be preserved,
 which also provides valuable context. For example, you can see something
 like the following in the Disassemble-2 output:
-
-> 95: nop
->
-> 96: nop
->
-> 97: nop
->
-> 98: shlq \$0x0,(%rsp)
->
-> 9d: lfence
->
-> a0: repz ret
->
-> a2: nop
->
-> a3: nop
->
-> 00000000000000a4 \<prepare\_x86_64_AES_encrypt_compact\>:
->
-> a4: nop
->
-> a5: nop
->
-> a6: nop
-
+```
+ 95: nop
+ 96: nop
+ 97: nop
+ 98: shlq \$0x0,(%rsp)
+ 9d: lfence
+ a0: repz ret
+ a2: nop
+ a3: nop
+ 00000000000000a4 \<prepare\_x86_64_AES_encrypt_compact\>:
+ a4: nop
+ a5: nop
+ a6: nop
+```
 This tells you that there was a constant-encoded instruction close to
 and before a function named \_x86_64_AES_encrypt_compact (the scripts
 add "prepare\_"). This is in addition to the line numbers being close as
@@ -789,72 +683,42 @@ it's also a judgment call whether to resort to Starting from Scratch.
 # Appendix: Assembly Files
 
 These are the assembly files that SGX SSL uses from OpenSSL release
-3.0.10 ([openssl/openssl at openssl-3.0.10
-(github.com)](https://github.com/openssl/openssl/tree/openssl-3.0.10))
+3.0.10 ([openssl-3.0.10
+](https://github.com/openssl/openssl/tree/openssl-3.0.10))
 along with some information that was helpful during the Prepare Process
 for 3.0.10-based SGX SSL.
 
-  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                                                                                                                                                                                 Common, OE  Unexplained
-                                                                                                                                                                                 and SGX SSL diffs in OE
-                                                                                                                                                                                             files?
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ----------- -------------
-  \\crypto\\aes\\aesni-mb-x86_64.s                                                                                                                                               y           N
+||Common, OE and SGX SSL | Unexplained diffs in OE files?|
+| ------------ | ------------ | ------------ |
+|crypto\aes\aesni-mb-x86_64.s | y | n |
+|crypto\aes\aesni-sha1-x86_64.s | y | n |
+|crypto\aes\aesni-sha256-x86_64.s | y | n |
+|crypto\aes\aes-x86_64.s | y | n |
+|crypto\aes\bsaes-x86_64.s | y | n |
+|crypto\aes\aesni-x86_64.s | y | y |
+|crypto\aes\vpaes-x86_64.s | y | y |
+|crypto\bn\rsaz-avx2.s | y | n |
+|crypto\bn\rsaz-x86_64.s | y | n |
+|crypto\bn\x86_64-gf2m.s | y | n |
+|crypto\bn\x86_64-mont.s | y | n |
+|crypto\bn\x86_64-mont5.s | y | n |
+|crypto\ec\ecp_nistz256-x86_64.s | y | n |
+|crypto\ec\x25519-x86_64.s | y | n |
+|crypto\md5\md5-x86_64.s | y | n |
+|crypto\modes\aesni-gcm-x86_64.s | y | n |
+|crypto\modes\ghash-x86_64.s | y | n |
+|crypto\sha\keccak1600-x86_64.s | y | n |
+|crypto\sha\sha1-mb-x86_64.s | y | n |
+|crypto\sha\sha1-x86_64.s | y | n |
+|crypto\sha\sha256-mb-x86_64.s | y | n |
+|crypto\sha\sha256-x86_64.s | y | n |
+|crypto\sha\sha512-x86_64.s | y | n |
+|crypto\x86_64cpuid.s | y | y |
+|crypto\bn\rsaz-avx512.s | N | n.a. |
+|crypto\chacha\chacha-x86_64.s | N | n.a. |
+|crypto\poly1305\poly1305-x86_64.s | N | n.a. |
+|crypto\whrlpool\wp-x86_64.s | N | n.a. |
 
-  [crypto\\aes\\aesni-sha1-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\aesni-sha1-x86_64.s)         y           n
-
-  [crypto\\aes\\aesni-sha256-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\aesni-sha256-x86_64.s)     y           n
-
-  [crypto\\aes\\aes-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\aes-x86_64.s)                       y           n
-
-  [crypto\\aes\\bsaes-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\bsaes-x86_64.s)                   y           n
-
-  [crypto\\aes\\aesni-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\aesni-x86_64.s)                   y           y
-
-  [crypto\\aes\\vpaes-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\aes\vpaes-x86_64.s)                   y           y
-
-  [crypto\\bn\\rsaz-avx2.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\rsaz-avx2.s)                           y           n
-
-  [crypto\\bn\\rsaz-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\rsaz-x86_64.s)                       y           n
-
-  [crypto\\bn\\x86_64-gf2m.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\x86_64-gf2m.s)                       y           n
-
-  [crypto\\bn\\x86_64-mont.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\x86_64-mont.s)                       y           n
-
-  [crypto\\bn\\x86_64-mont5.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\x86_64-mont5.s)                     y           n
-
-  [crypto\\ec\\ecp_nistz256-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\ec\ecp_nistz256-x86_64.s)       y           n
-
-  [crypto\\ec\\x25519-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\ec\x25519-x86_64.s)                   y           n
-
-  [crypto\\md5\\md5-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\md5\md5-x86_64.s)                       y           n
-
-  [crypto\\modes\\aesni-gcm-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\modes\aesni-gcm-x86_64.s)       y           n
-
-  [crypto\\modes\\ghash-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\modes\ghash-x86_64.s)               y           n
-
-  [crypto\\sha\\keccak1600-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\keccak1600-x86_64.s)         y           n
-
-  [crypto\\sha\\sha1-mb-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\sha1-mb-x86_64.s)               y           n
-
-  [crypto\\sha\\sha1-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\sha1-x86_64.s)                     y           n
-
-  [crypto\\sha\\sha256-mb-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\sha256-mb-x86_64.s)           y           n
-
-  [crypto\\sha\\sha256-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\sha256-x86_64.s)                 y           n
-
-  [crypto\\sha\\sha512-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\sha\sha512-x86_64.s)                 y           n
-
-  [crypto\\x86_64cpuid.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\x86_64cpuid.s)                              y           y
-
-  [crypto\\bn\\rsaz-avx512.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\bn\rsaz-avx512.s)                       N            n.a.
-
-  [crypto\\chacha\\chacha-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\chacha\chacha-x86_64.s)           N            n.a.
-
-  [crypto\\poly1305\\poly1305-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\poly1305\poly1305-x86_64.s)   N            n.a.
-
-  [crypto\\whrlpool\\wp-x86_64.s](file:///\\WSL.LOCALHOST\Ubuntu-22.04\home\markg\dev\git\intel-sgx-ssl\openssl_source\openssl-3.0.10\crypto\whrlpool\wp-x86_64.s)               N            n.a.
-  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Appendix: Status August 20, 2023
 
@@ -907,9 +771,9 @@ Also, other than assembler warnings, -mlfence-after-load=yes
 
 ## Case 1
 
-> \<constant directive\>
->
-> mnemonic for indirect jump/call through register
+ \<constant directive\>
+
+ mnemonic for indirect jump/call through register
 
 Apply load level: an LFENCE would be added for the load, wherever it is.
 
@@ -928,20 +792,19 @@ instructions, they should always be paid attention to.
 
 ## Case 2
 
-> mnemonic
->
-> \<constant directive for indirect jump/call through register\>
+ mnemonic
+
+ \<constant directive for indirect jump/call through register\>
 
 Apply load level: an LFENCE would be added for the load, wherever it is.
 
 Apply CF level: an LFENCE would be added before the indirect.
 
 ## Case 3
-
-> \<constant directive\>
->
-> ret
-
+```
+ \<constant directive\>
+ ret
+```
 Either level: nothing. Manual Analysis would ignore the RET mnemonic and
 then the constant directive would prevent the assembler from mitigating
 the original assembly file.
@@ -953,11 +816,10 @@ the need to pay attention to this warning is independent of
 constant-encoded instructions, it should always be paid attention to.
 
 ## Case 4
-
-> mnemonic
->
-> .byte 0xc3 ; ret
-
+```
+ mnemonic
+ .byte 0xc3 ; ret
+```
 Either level: would be mitigated.
 
 ## Conclusion
@@ -992,22 +854,20 @@ ultimately means that the PR corresponds to a mix of approaches for
 mitigating the .byte 0xf3,0xc3 (f3 c3 is REP RET) instances. For the
 OE - SGX SSL common files, the mitigation has been added manually and
 you'll see
-
-> Shl \$0,(%rsp)
->
-> Lfence
->
-> .byte 0xf3,0xc3
-
+```
+ Shl \$0,(%rsp)
+ Lfence
+ .byte 0xf3,0xc3
+```
 In the "final" assembly files.
 
 For the SGX SSL only files, we change the one "xlate" perl script to not
 generate .byte 0xf3,0xc3 and you'll see
+```
+ Nop
 
-> Nop
->
-> Rep ret
-
+ Rep ret
+```
 In the final assembly files. Note that we've always had SGX SSL change
 the one "xlate" perl script to not generate .byte 0xf3,0xc3 but before,
 I think we changed it to simply generate RET. If the perl script doesn't
@@ -1020,7 +880,7 @@ Note that the modified xlate perl script must be used during the Build
 Process. While it's the case that most of the files will be overwritten,
 the ones that aren't need to not have .byte 0xf3,0xc3.
 
-[^1]: Note that 0xf3,0xc3 is REP RET. 0xc3 alone is RET. The two are
+Note that 0xf3,0xc3 is REP RET. 0xc3 alone is RET. The two are
     architecturally equivalent. My understanding is that REP RET
     corresponds to a workaround needed on some AMD processors. The
     assembler treats REP RET the same as RET wrt LVI mitigations.
