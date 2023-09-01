@@ -1,73 +1,32 @@
-Mitigating LVI in OpenSSL
+SGX Mitigating LVI in OpenSSL
+=============================
 
-Revision 0.51
 
-August 28, 2023
+* [Introduction](#introduction)
+* [Goal](#goal)
+* [Prepare Process](#prepare-process)
+    * [Use of .byte 0xf3,0xc3 Instead of RET](#use-of-byte-0xf30xc3-instead-of-ret)
+* [Approach 1: Distinguish Constant Directives](#approach-1-distinguish-constant-directives)
+* [Approach 2: Do Not Distinguish Constant Directives](#approach-2-do-not-distinguish-constant-directives)
+* [Appendix: Assembly Files](#appendix-assembly-files)
 
-# Table of Contents {#table-of-contents .TOC-Heading}
-
-[Revision History
-[3](#_Toc143512966)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512966)
-
-[1 Introduction
-[4](#introduction)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512967)
-
-[2 Goal
-[4](#goal)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512968)
-
-[2.1 Prepare Process
-[4](#prepare-process)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512969)
-
-[2.1.1 Use of .byte 0xf3,0xc3 Instead of RET
-[4](#use-of-.byte-0xf30xc3-instead-of-ret)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512970)
-
-[2.1.2 Starting from Scratch
-[5](#starting-from-scratch)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512971)
-
-[2.1.3 First Steps for a New OpenSSL Release
-[12](#first-steps-for-a-new-openssl-release)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512972)
-
-[3 Appendix: Assembly Files
-[13](#appendix-assembly-files)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512973)
-
-[4 Appendix: Status August 20, 2023
-[16](#appendix-status-august-20-2023)](file:///C:\Users\qiangfu1\Downloads\lvi-openssl3.0.docx#_Toc143512974)
-
-[]{#_Toc143512966 .anchor}Revision History
-
-+-----------+-------+-------------------------------------------------+
-| Date      | Rev   | Description                                     |
-|           | ision |                                                 |
-+===========+=======+=================================================+
-| 8/15/2023 | 0.3   |                                                 |
-+-----------+-------+-------------------------------------------------+
-| 8/21/2023 | 0.4   | Add info on NOP RET vs RET.                     |
-|           |       |                                                 |
-|           |       | Misc.                                           |
-+-----------+-------+-------------------------------------------------+
-| 8/23/2023 | 0.5   | Clean up                                        |
-|           |       |                                                 |
-|           |       | Correct details about original assembly's use   |
-|           |       | of .byte 0xf3,0xc3.                             |
-+-----------+-------+-------------------------------------------------+
-| 8/28/2023 | 0.51  | Embed more files.                               |
-+-----------+-------+-------------------------------------------------+
-
-# Introduction
+Introduction
+------------
 
 With either approach below, disassembly of the unmitigated assembly
 (object) code should be consulted at the end, to vet the manual addition
 of any LFENCEs. [Both approaches below ultimately depend on the number
-of LFENCEs that need to be manually added being manageable.]{.mark}
+of LFENCEs that need to be manually added being manageable.]
 
-# Goal
+Goal
+----
 
 Goal: Knowledge of where to *manually* add LFENCEs in assembly source
 code that sometimes encodes instructions using constant directives.
 
 For example, knowing that:
 ```
-.long 0x90A548F3
+ .long 0x90A548F3
 ```
 In the original assembly code should change to (for "load level" LVI
 mitigation)
@@ -76,7 +35,8 @@ mitigation)
 
  lfence
 ```
-## Prepare Process
+Prepare Process
+---------------
 
 ### Use of .byte 0xf3,0xc3 Instead of RET
 
@@ -85,14 +45,13 @@ files/scripts. One such perl file is crypto\\perlasm\\x86_64-xlate.pl.
 This file stands out because it generates .byte 0xf3,0xc3 instead of
 RET[^1]. The process of mitigating LVI in OpenSSL includes manual steps.
 Changing crypto\\perlasm\\x86_64-xlate.pl to generate
-
 ```
  nop
  rep ret
 ```
 instead of
 ```
-.byte 0xf3,0xc3
+ .byte 0xf3,0xc3
 ```
 makes the manual steps much easier. The rest of this document explains
 why this is the case, including why the addition of a NOP.
@@ -130,301 +89,38 @@ item 2. Having item 4 lets you sanity check before adding. You could
 also imagine a situation where the LVI changes break the build or cause
 tests to fail. Having item 4 can also help in situations like this.
 
-#### Approach 1: Distinguish Constant Directives
+Approach 1: Distinguish Constant Directives
+-------------------------------------------
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  Time
-  \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|Manual Analysis|Construction|Assemble-1| Disassemble-1 |Assemble-2 | Disassemble-2 | Manual addition Test Build |
+| ------------ | ------------ | ------------ | ------------ |------------ |------------ |------------ |
+| Analyze assembly filles to distinguish constant directives that are encoding code/instructions from those that are specifying data. Basically, mark the constant directives specifying data. | Use the scripts to construct temp assembly files consisting of the constant-encoded instructions from the original assembly files. This step is done when all constant-encoded instructions are in their own assembly files. | Use the scripts basically to generate something that can be disassembled. It’s best NOT to have the build tools add LVI mitigations in this step. | Use the scripts. This helps effect a conversion from the original constant-encoded instructions to mnemonics. | Use the scripts. See Appendix: Do You Need Both load Level and CF Level LVI Mitigations? below. | These steps are for manual addition of LFENCEs to the original (generated) assembly files Use the scripts for Disassemble-2 step. Mitigations in the result of Disassemble-2 need to be manually added to the original (generated) assembly files.One approach for manually adding: the mnemonics of the instructions that need LFENCEs are in the Disassemble-2 output. You can search for these in the disassembly of the object files built without LVI mitigations. The disassembly will have the same instruction bytes for the constant-encoded instructions as the original assembly so you can search for them in the original assembly files. (This may require hex to dec conversion.) Then, you can know where to add the mitigations to the original assembly files. The instruction bytes in the Disassemble-2 output may be (and often are) different than those specified in the original assembly file, due to Intel mnemonic ambiguity (same mnemonic can be encoded in multiple ways). | Build and pay attention to the following assembler warnings: constant directive` skips -mlfence-before-indirect-branch on `jmp` `constant directive` skips -mlfence-before-indirect-branch on `call` `constant directive` skips -mlfence-before-ret on `ret` They may be indicating that NOPs need to added and where to add them. See Appendix: Do You Need Both load Level and CF Level LVI Mitigations? below. |
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-+------------+------+------+------+------+------+------+-------------+
-| Manual     | Cons | As   | D    | As   | D    | Ma   | Test Build  |
-| Analysis   | truc | semb | isas | semb | isas | nual |             |
-|            | tion | le-1 | semb | le-2 | semb | addi |             |
-|            |      |      | le-1 |      | le-2 | tion |             |
-+============+======+======+======+======+======+======+=============+
-| Analyze    | Use  | Use  | Use  | Use  | T    |      | Build and   |
-| assembly   | the  | the  | the  | the  | hese |      | pay         |
-| filles to  | scr  | scr  | scri | scri | s    |      | attention   |
-| d          | ipts | ipts | pts. | pts. | teps |      | to the      |
-| istinguish | to   | b    | This | See  | are  |      | following   |
-| constant   | c    | asic | h    | A    | for  |      | assembler   |
-| directives | onst | ally | elps | ppen | ma   |      | warnings:   |
-| that are   | ruct | to   | ef   | dix: | nual |      |             |
-| encoding   | temp | gene | fect | Do   | addi |      | \`constant  |
-| code/in    | asse | rate | a    | You  | tion |      | directive\` |
-| structions | mbly | s    | co   | Need | of   |      | skips       |
-| from those | f    | omet | nver | Both | LFE  |      | -mlfence-   |
-| that are   | iles | hing | sion | load | NCEs |      | before-indi |
-| specifying | co   | that | from | L    | to   |      | rect-branch |
-| data.      | nsis | can  | the  | evel | the  |      | on \`jmp\`  |
-| Basically, | ting | be   | orig | and  | orig |      |             |
-| mark the   | of   | d    | inal | CF   | inal |      | \`constant  |
-| constant   | the  | isas | cons | L    | (ge  |      | directive\` |
-| directives | cons | semb | tant | evel | nera |      | skips       |
-| specifying | tant | led. | -enc | LVI  | ted) |      | -mlfence-   |
-| data.      | -enc | It's | oded | Miti | asse |      | before-indi |
-|            | oded | best | inst | gati | mbly |      | rect-branch |
-|            | inst | NOT  | ruct | ons? | f    |      | on \`call\` |
-|            | ruct | to   | ions | be   | iles |      |             |
-|            | ions | have | to   | low. | Use  |      | \`constant  |
-|            | from | the  | mn   |      | the  |      | directive\` |
-|            | the  | b    | emon |      | scr  |      | skips       |
-|            | orig | uild | ics. |      | ipts |      | -mlfence    |
-|            | inal | t    |      |      | for  |      | -before-ret |
-|            | asse | ools |      |      | D    |      | on \`ret\`  |
-|            | mbly | add  |      |      | isas |      |             |
-|            | fi   | LVI  |      |      | semb |      | They may be |
-|            | les. | mit  |      |      | le-2 |      | indicating  |
-|            |      | igat |      |      | s    |      | that NOPs   |
-|            | This | ions |      |      | tep. |      | need to     |
-|            | step | in   |      |      | Mit  |      | added and   |
-|            | is   | this |      |      | igat |      | where to    |
-|            | done | s    |      |      | ions |      | add them.   |
-|            | when | tep. |      |      | in   |      | See         |
-|            | all  |      |      |      | the  |      | Appendix:   |
-|            | cons |      |      |      | re   |      | Do You Need |
-|            | tant |      |      |      | sult |      | Both load   |
-|            | -enc |      |      |      | of   |      | Level and   |
-|            | oded |      |      |      | D    |      | CF Level    |
-|            | inst |      |      |      | isas |      | LVI         |
-|            | ruct |      |      |      | semb |      | M           |
-|            | ions |      |      |      | le-2 |      | itigations? |
-|            | are  |      |      |      | need |      | below.      |
-|            | in   |      |      |      | to   |      |             |
-|            | t    |      |      |      | be   |      |             |
-|            | heir |      |      |      | manu |      |             |
-|            | own  |      |      |      | ally |      |             |
-|            | asse |      |      |      | a    |      |             |
-|            | mbly |      |      |      | dded |      |             |
-|            | fi   |      |      |      | to   |      |             |
-|            | les. |      |      |      | the  |      |             |
-|            |      |      |      |      | orig |      |             |
-|            |      |      |      |      | inal |      |             |
-|            |      |      |      |      | (ge  |      |             |
-|            |      |      |      |      | nera |      |             |
-|            |      |      |      |      | ted) |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | fi   |      |             |
-|            |      |      |      |      | les. |      |             |
-|            |      |      |      |      |      |      |             |
-|            |      |      |      |      | One  |      |             |
-|            |      |      |      |      | appr |      |             |
-|            |      |      |      |      | oach |      |             |
-|            |      |      |      |      | for  |      |             |
-|            |      |      |      |      | manu |      |             |
-|            |      |      |      |      | ally |      |             |
-|            |      |      |      |      | add  |      |             |
-|            |      |      |      |      | ing: |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | m    |      |             |
-|            |      |      |      |      | nemo |      |             |
-|            |      |      |      |      | nics |      |             |
-|            |      |      |      |      | of   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | inst |      |             |
-|            |      |      |      |      | ruct |      |             |
-|            |      |      |      |      | ions |      |             |
-|            |      |      |      |      | that |      |             |
-|            |      |      |      |      | need |      |             |
-|            |      |      |      |      | LFE  |      |             |
-|            |      |      |      |      | NCEs |      |             |
-|            |      |      |      |      | are  |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | D    |      |             |
-|            |      |      |      |      | isas |      |             |
-|            |      |      |      |      | semb |      |             |
-|            |      |      |      |      | le-2 |      |             |
-|            |      |      |      |      | out  |      |             |
-|            |      |      |      |      | put. |      |             |
-|            |      |      |      |      | You  |      |             |
-|            |      |      |      |      | can  |      |             |
-|            |      |      |      |      | se   |      |             |
-|            |      |      |      |      | arch |      |             |
-|            |      |      |      |      | for  |      |             |
-|            |      |      |      |      | t    |      |             |
-|            |      |      |      |      | hese |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | dis  |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | of   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | ob   |      |             |
-|            |      |      |      |      | ject |      |             |
-|            |      |      |      |      | f    |      |             |
-|            |      |      |      |      | iles |      |             |
-|            |      |      |      |      | b    |      |             |
-|            |      |      |      |      | uilt |      |             |
-|            |      |      |      |      | wit  |      |             |
-|            |      |      |      |      | hout |      |             |
-|            |      |      |      |      | LVI  |      |             |
-|            |      |      |      |      | miti |      |             |
-|            |      |      |      |      | gati |      |             |
-|            |      |      |      |      | ons. |      |             |
-|            |      |      |      |      | The  |      |             |
-|            |      |      |      |      | dis  |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | will |      |             |
-|            |      |      |      |      | have |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | same |      |             |
-|            |      |      |      |      | ins  |      |             |
-|            |      |      |      |      | truc |      |             |
-|            |      |      |      |      | tion |      |             |
-|            |      |      |      |      | b    |      |             |
-|            |      |      |      |      | ytes |      |             |
-|            |      |      |      |      | for  |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | cons |      |             |
-|            |      |      |      |      | tant |      |             |
-|            |      |      |      |      | -enc |      |             |
-|            |      |      |      |      | oded |      |             |
-|            |      |      |      |      | inst |      |             |
-|            |      |      |      |      | ruct |      |             |
-|            |      |      |      |      | ions |      |             |
-|            |      |      |      |      | as   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | orig |      |             |
-|            |      |      |      |      | inal |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | so   |      |             |
-|            |      |      |      |      | you  |      |             |
-|            |      |      |      |      | can  |      |             |
-|            |      |      |      |      | se   |      |             |
-|            |      |      |      |      | arch |      |             |
-|            |      |      |      |      | for  |      |             |
-|            |      |      |      |      | them |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | orig |      |             |
-|            |      |      |      |      | inal |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | fi   |      |             |
-|            |      |      |      |      | les. |      |             |
-|            |      |      |      |      | (    |      |             |
-|            |      |      |      |      | This |      |             |
-|            |      |      |      |      | may  |      |             |
-|            |      |      |      |      | req  |      |             |
-|            |      |      |      |      | uire |      |             |
-|            |      |      |      |      | hex  |      |             |
-|            |      |      |      |      | to   |      |             |
-|            |      |      |      |      | dec  |      |             |
-|            |      |      |      |      | conv |      |             |
-|            |      |      |      |      | ersi |      |             |
-|            |      |      |      |      | on.) |      |             |
-|            |      |      |      |      | T    |      |             |
-|            |      |      |      |      | hen, |      |             |
-|            |      |      |      |      | you  |      |             |
-|            |      |      |      |      | can  |      |             |
-|            |      |      |      |      | know |      |             |
-|            |      |      |      |      | w    |      |             |
-|            |      |      |      |      | here |      |             |
-|            |      |      |      |      | to   |      |             |
-|            |      |      |      |      | add  |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | mit  |      |             |
-|            |      |      |      |      | igat |      |             |
-|            |      |      |      |      | ions |      |             |
-|            |      |      |      |      | to   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | orig |      |             |
-|            |      |      |      |      | inal |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | fi   |      |             |
-|            |      |      |      |      | les. |      |             |
-|            |      |      |      |      | The  |      |             |
-|            |      |      |      |      | ins  |      |             |
-|            |      |      |      |      | truc |      |             |
-|            |      |      |      |      | tion |      |             |
-|            |      |      |      |      | b    |      |             |
-|            |      |      |      |      | ytes |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | D    |      |             |
-|            |      |      |      |      | isas |      |             |
-|            |      |      |      |      | semb |      |             |
-|            |      |      |      |      | le-2 |      |             |
-|            |      |      |      |      | ou   |      |             |
-|            |      |      |      |      | tput |      |             |
-|            |      |      |      |      | may  |      |             |
-|            |      |      |      |      | be   |      |             |
-|            |      |      |      |      | (and |      |             |
-|            |      |      |      |      | o    |      |             |
-|            |      |      |      |      | ften |      |             |
-|            |      |      |      |      | are) |      |             |
-|            |      |      |      |      | d    |      |             |
-|            |      |      |      |      | iffe |      |             |
-|            |      |      |      |      | rent |      |             |
-|            |      |      |      |      | than |      |             |
-|            |      |      |      |      | t    |      |             |
-|            |      |      |      |      | hose |      |             |
-|            |      |      |      |      | s    |      |             |
-|            |      |      |      |      | peci |      |             |
-|            |      |      |      |      | fied |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | the  |      |             |
-|            |      |      |      |      | orig |      |             |
-|            |      |      |      |      | inal |      |             |
-|            |      |      |      |      | asse |      |             |
-|            |      |      |      |      | mbly |      |             |
-|            |      |      |      |      | f    |      |             |
-|            |      |      |      |      | ile, |      |             |
-|            |      |      |      |      | due  |      |             |
-|            |      |      |      |      | to   |      |             |
-|            |      |      |      |      | I    |      |             |
-|            |      |      |      |      | ntel |      |             |
-|            |      |      |      |      | mnem |      |             |
-|            |      |      |      |      | onic |      |             |
-|            |      |      |      |      | a    |      |             |
-|            |      |      |      |      | mbig |      |             |
-|            |      |      |      |      | uity |      |             |
-|            |      |      |      |      | (    |      |             |
-|            |      |      |      |      | same |      |             |
-|            |      |      |      |      | mnem |      |             |
-|            |      |      |      |      | onic |      |             |
-|            |      |      |      |      | can  |      |             |
-|            |      |      |      |      | be   |      |             |
-|            |      |      |      |      | enc  |      |             |
-|            |      |      |      |      | oded |      |             |
-|            |      |      |      |      | in   |      |             |
-|            |      |      |      |      | mult |      |             |
-|            |      |      |      |      | iple |      |             |
-|            |      |      |      |      | wa   |      |             |
-|            |      |      |      |      | ys). |      |             |
-+------------+------+------+------+------+------+------+-------------+
-
-##### Problems with this approach
+###### Problems with this approach
 
 Manually distinguishing the constant directives, that is, the Manual
 Analysis step is painful.
 
 What happens if mistakes are made during Manual Analysis?
 
-###### **Case 1**: Mistakenly conclude data is being specified when it's really code  {#case-1-mistakenly-conclude-data-is-being-specified-when-its-really-code .unnumbered}
+------------------------------------------------------------------------------------
+### **Case 1**: Mistakenly conclude data is being specified when it's really code 
 
 The idea is to delete the data and keep the code, so with this type of
 mistake, we might "process" less than we should and miss some LFENCEs.
 
-[Possibility of feedback/detection]{.underline}
+###### Possibility of feedback/detection
 
 There's no inherent "feedback" with this type of mistake.
 
-###### **Case 2**: Mistakenly conclude code is being specified when it's really data {#case-2-mistakenly-conclude-code-is-being-specified-when-its-really-data .unnumbered}
+-------------------------------------------------------------------------------------
+### **Case 2**: Mistakenly conclude code is being specified when it's really data 
 
 This is bad because, in general, it will cause the rest of the assembly
 file (in Assemble-1 step) to be out of sync.
 
-[Possibility of feedback/detection]{.underline}
+###### Possibility of feedback/detection
 
 There's a good chance of feedback, either the assembly files in
 Assemble-1 step may fail to assemble or the results of the Disassemble-2
@@ -432,24 +128,27 @@ step (which have to analyzed anyway) may be obviously wrong upon (human)
 inspection. The likelihood of the latter would seem to increase the
 earlier in a file the first mistake of this type is made.
 
-###### Case 3: Wrong treatment of constant-encoded prefixes (and similar) {#case-3-wrong-treatment-of-constant-encoded-prefixes-and-similar .unnumbered}
+-------------------------------------------------------------------------
+### Case 3: Wrong treatment of constant-encoded prefixes (and similar) 
 
 The following is from an OpenSSL assembly file
 (crypto\\bn\\asm\\x86_64-mont5.s):
 ```
-    movdqa %xmm1,%xmm4
+ movdqa %xmm1,%xmm4
  .byte 0x67
-    movdqa %xmm1,%xmm2
+ movdqa %xmm1,%xmm2
  .byte 0x67
-    paddd %xmm0,%xmm1
+ paddd %xmm0,%xmm1
 ```
 With such code and with this approach, we would end with the following
 in the temp assembly file:
 ```
-<nops and constant directives specifying code earlier in the original (generated) assembly file (not shown above)\>
+ <nops and constant directives specifying code earlier in the original
+ (generated) assembly file (not shown above)\>
  .byte 0x67
  .byte 0x67
- \<nops and constant directives specifying code later in the original (generated) assembly file (not shown above)\>
+ <nops and constant directives specifying code later in the original
+ (generated) assembly file (not shown above)\>
 ```
 Would this cause a problem? I don't know. It's tempting to say that if
 it does cause a problem, then the situation is hopeless since it would
@@ -459,7 +158,7 @@ specific question: could what are clearly intended to be treated as
 prefixes (0x67) be treated incorrectly if they get separated from their
 instructions (as above)?
 
-[Possibility of feedback/detection]{.underline}
+###### Possibility of feedback/detection
 
 No if we delete such "prefixes" (or comment them out) before the
 Assemble-1 step, that is, during Manual Analysis.
@@ -472,7 +171,9 @@ constant-encoded instruction prefixes unless not doing anything causes
 Assemble-1 step to fail. In this case, go back and comment out the
 offending prefix.
 
-###### Case 4: Using RET or NOP RET Instead of .byte 0xf3,0xc3 {#case-4-using-ret-or-nop-ret-instead-of-.byte-0xf30xc3 .unnumbered}
+--------------------------------------------------------------
+### Case 4: Using RET or NOP RET Instead of .byte 0xf3,0xc3 
+
 
 As stated above,
 
@@ -494,8 +195,8 @@ The Prepare Process has several options here:
 |change the perl scripts to generate NOP REP RET|Don’t have to manually add the corresponding mitigations to the assembly files, that is, allows assembler to mitigate the case where OpenSSL would normally generate a constant directive immediately followed by .byte 0xf3,0xc3. The assembler won’t mitigate .byte 0xf3,0xc3 Since the assembler needs mnemonics. The assembler won’t mitigate <constant directive> REP RET Since the assembler doesn’t know if the constant directive applies to the RET. The assembler will mitigate <constant directive> NOP REP RET But, if the constant directive really is associated with the REP RET, then the assembler-added mitigation as well as the NOP may break the code.|Could break code in cases where OpenSSL would normally generate a constant directive immediately followed by .byte 0xf3,0xc3 AND the constant directive is somehow associated with the .byte 0xf3,0xc3, that is: <constant directive> .byte 0xf3,0xc3 And what if the two directives together were intended to encode a different instruction or different instructions? In this case, you can’t change either directive or insert anything between the two directives, which is exactly what this option does. This pattern is not known to exist. If in doubt, the disassembly of the object code corresponding to untouched perl/assembly files will show whether this exceedingly rare pattern existed.|
 |change the perl scripts to generate NOP RET|Analogous to directly above|Same as directly above|
 
-##### Manual Addition of LFENCEs
-
+### Manual Addition of LFENCEs
+---------------------------------
 How do you know where to add the LFENCEs in the output of the
 Disassemble-2 step to the original (generated) assembly files?
 
@@ -506,21 +207,26 @@ So how do you know where to put the LFENCEs? One way is to convey the
 line number of the line with the constant directive so that it
 survives/is preserved across assembly and subsequent disassembly.
 
-[Original]{.underline}
+###### Original
+
 ```
 340: .byte 243,15,30,250
 341: movq %rsp,%rax
 ```
-[Option 1:]{.underline} convey the line number in an immediate operand
+###### Option 1
+
+convey the line number in an immediate operand
 (after something identifiable)
 ```
 n: .byte 243,15,30,250
 n+1: mov \$511233000**340**, %r9
 ```
 The scripts don't currently process any files line by line so [this
-option is on hold]{.mark}.
+option is on hold]
 
-[Option 2:]{.underline} add nops to keep the line number of the line
+###### Option 2:
+
+add nops to keep the line number of the line
 with the mnemonic corresponding to the directive close to the line
 number of the line with the directive in the original assembly file.
 ```
@@ -530,7 +236,7 @@ number of the line with the directive in the original assembly file.
 ~339: nop
 ~340: \<mnemonic for some constant-encoded instruction\>
 ```
-As of this writing, [this is what we do]{.mark}. The line numbers of the
+As of this writing, [this is what we do]. The line numbers of the
 mnemonics won't exactly match the line numbers of the original constant
 directives but they should be close.
 
@@ -556,100 +262,21 @@ and before a function named \_x86_64_AES_encrypt_compact (the scripts
 add "prepare\_"). This is in addition to the line numbers being close as
 described above.
 
-#### Approach 2: Do Not Distinguish Constant Directives
+Approach 2: Do Not Distinguish Constant Directives
+--------------------------------------------------
 
 Approach 2 becomes an exercise in figuring out how to assemble
 disassembly output -- Assemble-2 step below. This is challenging beyond
 the ambiguity of Intel instruction mnemonics. As of this writing (August
 23, 2023), this approach is not being pursued.
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  Time
-  \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--à
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|Manual analysis |Construction|Assemble-1| Disassemble-1 |Assemble-2 | Disassemble-2 Manual addition of LFENCEs to the original (generated) assembly files |
+| ------------ | ------------ | ------------ | ------------ |------------ |------------ |
+| ~~Analyze assembly filles to distinguish constant directives that are encoding code/instructions from those that are specifying data. Basically, mark the directives specifying data.~~ | ~~Use script to construct temp assembly files consisting of the constant-encoded instructions from the original assembly files.This step is done when all constant-encoded instructions are in their own assembly files, that is, all the constant-encoded instructions in foo.s go into foo_const_enc_instrs.s.~~ | Basically to generate something that can be disassembled. It’s best NOT to have the build tools add LVI mitigations in this step. | This helps effect a conversion from the original constant-encoded instructions to mnemonics, which the LVI mitigation-aware tools need. | For reasons that I won’t go into here, you effectively want two sub-steps here, one where you apply CF level mitigations and one where you apply full mitigations. Then, add both sets of LFENCEs to the original (generated) assembly files. | Some of the LFENCEs in the result of Disassemble-2 need to be manually added to the original (generated) assembly files. Suggestion: put original assembly file and the output of disassemble-2 step side-by-side. If should be fairly easy to determine which LFENCEs need to be added and where.|
 
-+---------------+--------+--------+--------+--------+--------+--------+
-| ~~Manual      | ~~co   | Asse   | D      | Asse   | D      | Manual |
-| analysis~~    | nstruc | mble-1 | isasse | mble-2 | isasse | ad     |
-|               | tion~~ |        | mble-1 |        | mble-2 | dition |
-|               |        |        |        |        |        | of     |
-|               |        |        |        |        |        | L      |
-|               |        |        |        |        |        | FENCEs |
-|               |        |        |        |        |        | to the |
-|               |        |        |        |        |        | or     |
-|               |        |        |        |        |        | iginal |
-|               |        |        |        |        |        | (gene  |
-|               |        |        |        |        |        | rated) |
-|               |        |        |        |        |        | as     |
-|               |        |        |        |        |        | sembly |
-|               |        |        |        |        |        | files  |
-+===============+========+========+========+========+========+========+
-| ~~Analyze     | ~~Use  | Bas    | This   | For    | Some   |        |
-| assembly      | script | ically | helps  | r      | of the |        |
-| filles to     | to     | to     | effect | easons | L      |        |
-| distinguish   | con    | ge     | a      | that I | FENCEs |        |
-| constant      | struct | nerate | conv   | won't  | in the |        |
-| directives    | temp   | som    | ersion | go     | result |        |
-| that are      | as     | ething | from   | into   | of     |        |
-| encoding      | sembly | that   | the    | here,  | D      |        |
-| code          | files  | can be | or     | you    | isasse |        |
-| /instructions | cons   | d      | iginal | effec  | mble-2 |        |
-| from those    | isting | isasse | cons   | tively | need   |        |
-| that are      | of the | mbled. | tant-e | want   | to be  |        |
-| specifying    | cons   | It's   | ncoded | two    | ma     |        |
-| data.         | tant-e | best   | instru | sub    | nually |        |
-| Basically,    | ncoded | NOT to | ctions | -steps | added  |        |
-| mark the      | instru | have   | to     | here,  | to the |        |
-| directives    | ctions | the    | mnem   | one    | or     |        |
-| specifying    | from   | build  | onics, | where  | iginal |        |
-| data.~~       | the    | tools  | which  | you    | (gene  |        |
-|               | or     | add    | the    | apply  | rated) |        |
-|               | iginal | LVI    | LVI    | CF     | as     |        |
-|               | as     | mitig  | miti   | level  | sembly |        |
-|               | sembly | ations | gation | mitig  | files. |        |
-|               | fi     | in     | -aware | ations |        |        |
-|               | les.~~ | this   | tools  | and    | Sugge  |        |
-|               |        | step.  | need.  | one    | stion: |        |
-|               | ~~This |        |        | where  | put    |        |
-|               | step   |        |        | you    | or     |        |
-|               | is     |        |        | apply  | iginal |        |
-|               | done   |        |        | full   | as     |        |
-|               | when   |        |        | mitiga | sembly |        |
-|               | all    |        |        | tions. | file   |        |
-|               | cons   |        |        | Then,  | and    |        |
-|               | tant-e |        |        | add    | the    |        |
-|               | ncoded |        |        | both   | output |        |
-|               | instru |        |        | sets   | of     |        |
-|               | ctions |        |        | of     | d      |        |
-|               | are in |        |        | L      | isasse |        |
-|               | their  |        |        | FENCEs | mble-2 |        |
-|               | own    |        |        | to the | step   |        |
-|               | as     |        |        | or     | s      |        |
-|               | sembly |        |        | iginal | ide-by |        |
-|               | files, |        |        | (gene  | -side. |        |
-|               | that   |        |        | rated) | If     |        |
-|               | is,    |        |        | as     | should |        |
-|               | all    |        |        | sembly | be     |        |
-|               | the    |        |        | files. | fairly |        |
-|               | cons   |        |        |        | easy   |        |
-|               | tant-e |        |        |        | to     |        |
-|               | ncoded |        |        |        | det    |        |
-|               | instru |        |        |        | ermine |        |
-|               | ctions |        |        |        | which  |        |
-|               | in     |        |        |        | L      |        |
-|               | foo.s  |        |        |        | FENCEs |        |
-|               | go     |        |        |        | need   |        |
-|               | into   |        |        |        | to be  |        |
-|               | f      |        |        |        | added  |        |
-|               | oo_con |        |        |        | and    |        |
-|               | st_enc |        |        |        | where. |        |
-|               | _instr |        |        |        |        |        |
-|               | s.s.~~ |        |        |        |        |        |
-+---------------+--------+--------+--------+--------+--------+--------+
+### Manual Addition of LFENCEs
 
-##### Manual Addition of LFENCEs
 
 Suggestion: put original assembly file and the output of disassemble-2
 step side-by-side. If should be fairly easy to determine which LFENCEs
@@ -680,15 +307,16 @@ crypto\\perlasm\\x86_64-xlate.pl, which we treat separately), then
 proceed to diff the assembly files. Regardless, once the diff is done,
 it's also a judgment call whether to resort to Starting from Scratch.
 
-# Appendix: Assembly Files
+Appendix: Assembly Files
+------------------------
 
-These are the assembly files that SGX SSL uses from OpenSSL release
-3.0.10 ([openssl-3.0.10
-](https://github.com/openssl/openssl/tree/openssl-3.0.10))
+This the assembly files list that SGX SSL uses from OpenSSL release
+3.0.10 ([openssl/openssl at openssl-3.0.10
+(github.com)](https://github.com/openssl/openssl/tree/openssl-3.0.10))
 along with some information that was helpful during the Prepare Process
 for 3.0.10-based SGX SSL.
 
-||Common, OE and SGX SSL | Unexplained diffs in OE files?|
+|    | Common, OE and SGX SSL | Unexplained diffs in OE files?|
 | ------------ | ------------ | ------------ |
 |crypto\aes\aesni-mb-x86_64.s | y | n |
 |crypto\aes\aesni-sha1-x86_64.s | y | n |
@@ -718,169 +346,3 @@ for 3.0.10-based SGX SSL.
 |crypto\chacha\chacha-x86_64.s | N | n.a. |
 |crypto\poly1305\poly1305-x86_64.s | N | n.a. |
 |crypto\whrlpool\wp-x86_64.s | N | n.a. |
-
-
-# Appendix: Status August 20, 2023
-
-I had just gone through all the OE files and wanted to avoid doing it
-again. This mostly goes to the OpenSSL commit that OE used vs the one we
-want to use for SGX SSL. SGX SSL is using the 3.0.10 tag. I did my best
-to determine the common assembly files and diffed them. I think I
-compared 3.0.10 untouched to OE with LVI mitigations and made sure all
-the changes were LVI mitigations. Doing it this way means that the set
-of files that I've prepared for SGX SSL have LVI mitigations added in
-two different ways:
-
-1.  The OE assembly files were generated by untouched perl scripts so
-    the assembly files have instances of .byte 0xf3,0xc3 and mitigations
-    had to be added manually to them.
-
-2.  The SGX SSL assembly files that aren't also OE files were generated
-    by modified perl scripts so the assembly files have instances of NOP
-    RET instead of .byte 0xf3,0xc3 and LVI mitigations don't have to be
-    added manually.
-
-Here are the resulting assembly files:
-
-Of the 28 SGX SSL assembly files, 22 have manually added mitigations.
-
-For reference, here are the files after the manual analysis step.
-
-  -----------------------------------------------------------------------
-  SGX SSL                            
-  ---------------------------------- ------------------------------------
-  OE used for SGX SSL                
-
-  -----------------------------------------------------------------------
-
-There are cases where the same assembly file is in both zip files. These
-are common files but I treated them like they weren't common. We use the
-ones in the SGX SSL zip file.
-
-# Appendix: Do You Need Both load Level and CF Level LVI Mitigations?
-
-load level for the GNU assembler is -mlfence-after-load=yes
--mlfence-before-ret=shl.
-
-CF level is -mlfence-before-indirect-branch=all -mlfence-before-ret=shl
-
-From this you can see that RETs get treated the same for both levels.
-Also, other than assembler warnings, -mlfence-after-load=yes
--mlfence-before-indirect-branch=all is the same as
--mlfence-after-load=yes.
-
-## Case 1
-
- \<constant directive\>
-
- mnemonic for indirect jump/call through register
-
-Apply load level: an LFENCE would be added for the load, wherever it is.
-
-Apply CF level: nothing. The Manual Analysis step wouldn't care about
-the indirect jump/call since it's a mnemonic. Then, the assembler
-wouldn't add an LFENCE when assembling the original file since the
-indirect jump/call is preceded by a constant directive.
-
-For best security, need to apply load level or pay attention to
-assembler constant directive warnings and manually add LFENCEs. With
-binutils 2.38, the relevant warnings are \`constant directive\` skips
--mlfence-before-indirect-branch on \`jmp\` and \`constant directive\`
-skips -mlfence-before-indirect-branch on \`call\`. Note that the need to
-pay attention to these warnings is independent of constant-encoded
-instructions, they should always be paid attention to.
-
-## Case 2
-
- mnemonic
-
- \<constant directive for indirect jump/call through register\>
-
-Apply load level: an LFENCE would be added for the load, wherever it is.
-
-Apply CF level: an LFENCE would be added before the indirect.
-
-## Case 3
-```
- \<constant directive\>
- ret
-```
-Either level: nothing. Manual Analysis would ignore the RET mnemonic and
-then the constant directive would prevent the assembler from mitigating
-the original assembly file.
-
-Need to pay attention to assembler constant directive warnings and
-manually add LFENCEs. With binutils 2.38, the relevant warning is
-\`constant directive\` skips -mlfence-before-ret on \`ret\`. Note that
-the need to pay attention to this warning is independent of
-constant-encoded instructions, it should always be paid attention to.
-
-## Case 4
-```
- mnemonic
- .byte 0xc3 ; ret
-```
-Either level: would be mitigated.
-
-## Conclusion
-
-Either pay attention to assembler \`constant directive\` skips
--mlfence-before-indirect-branch on \`jmp\` and \`constant directive\`
-skips -mlfence-before-indirect-branch on \`call\` warnings and only use
-CF level mitigations or ignore the warnings and use load level. You
-don't need to use both load level and CF level mitigations. Always pay
-attention to \`constant directive\` skips -mlfence-before-ret on \`ret\`
-warnings. Paying attention basically means adding a NOP between the
-constant directive referenced in the warning and the JMP or RET
-instruction.
-
-# Appendix: Possible Content for Release Notes
-
-What we've been doing for CF from the start (since 2020) could have been
-better from perf-standpoint but what Jing is ready to merge is worse.
-Note that Jing basically submitted the PR on my behalf. Jing isn't
-advocating huring CF performance. 😊 We do have to make changes -- we
-can't use the same assembly files to overwrite that we've been using --
-but there are different approaches with different tradeoffs. To some
-extent and given Q3 release schedule, I'm suggesting that we trade some
-CF performance for lower risk. I'm also thinking that we can address the
-CF performance in a future release, ideally when we have to change the
-base OpenSSL 3.x release.
-
-The approach that corresponds to the PR is a little weird since I wanted
-to leverage the manual effort what I invested for OE, which I did before
-SGX SSL. OE doesn't change any perl files so leveraging my OE effort
-ultimately means that the PR corresponds to a mix of approaches for
-mitigating the .byte 0xf3,0xc3 (f3 c3 is REP RET) instances. For the
-OE - SGX SSL common files, the mitigation has been added manually and
-you'll see
-```
- Shl \$0,(%rsp)
- Lfence
- .byte 0xf3,0xc3
-```
-In the "final" assembly files.
-
-For the SGX SSL only files, we change the one "xlate" perl script to not
-generate .byte 0xf3,0xc3 and you'll see
-```
- Nop
-
- Rep ret
-```
-In the final assembly files. Note that we've always had SGX SSL change
-the one "xlate" perl script to not generate .byte 0xf3,0xc3 but before,
-I think we changed it to simply generate RET. If the perl script doesn't
-add the NOP, then it has to be added manually in several cases. (In
-fact, I think this is the only reason that we've been overwriting any
-assembly files for CF.) Changing the xlate perl script to also generate
-the REP now is just to closer to "normal OpenSSL".
-
-Note that the modified xlate perl script must be used during the Build
-Process. While it's the case that most of the files will be overwritten,
-the ones that aren't need to not have .byte 0xf3,0xc3.
-
-Note that 0xf3,0xc3 is REP RET. 0xc3 alone is RET. The two are
-    architecturally equivalent. My understanding is that REP RET
-    corresponds to a workaround needed on some AMD processors. The
-    assembler treats REP RET the same as RET wrt LVI mitigations.
