@@ -112,17 +112,9 @@ goto end_copying
 
 :extra_copying_load
 
-xcopy /Y /Q /S  Windows\crypto %OPENSSL_VERSION%\crypto
-goto end_copying
+rem xcopy /Y /Q /S  Windows\crypto %OPENSSL_VERSION%\crypto
 
 :extra_copying_cf
-
-call powershell -Command "if (Test-Path 'crypto') { Remove-Item -Path 'crypto' -Recurse }"
-mkdir crypto
-xcopy /Y /Q /S  Windows\crypto crypto
-call powershell -Command "Get-ChildItem -Path 'crypto' -Recurse -File  | ForEach-Object { (Get-Content $_.FullName) | Where-Object { $_ -notmatch 'load_only' } | Set-Content $_.FullName }
-xcopy /Y /Q /S  crypto %OPENSSL_VERSION%\crypto
-call powershell -Command "if (Test-Path 'crypto') { Remove-Item -Path 'crypto' -Recurse }"
 
 :end_copying
 
