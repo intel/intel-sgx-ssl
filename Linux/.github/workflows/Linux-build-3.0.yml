@@ -1,0 +1,25 @@
+name: 3.0 C/C++ CI
+
+on:
+  push:
+    branches: [ "support_openssl_3.0-dev" ]
+  pull_request:
+    branches: [ "support_openssl_3.0-dev" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: download SDK
+      run: wget https://download.01.org/intel-sgx/sgx-linux/2.20/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.20.100.4.bin
+    - name: install SDK
+      run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
+    - name: download OpenSSL code
+      run: wget https://www.openssl.org/source/openssl-3.0.10.tar.gz; mv openssl-3.0.10.tar.gz openssl_source/
+    - name: build SGXSSL
+      run: source sgxsdk/environment; cd Linux; make all
+    - name: run unit test
+      run: source sgxsdk/environment; cd Linux; make -C sgx/test_app/ clean; SGX_MODE=SIM make test
