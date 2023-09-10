@@ -398,7 +398,7 @@ rsaz_1024_sqr_avx2:
 	vpaddq	%ymm11,%ymm4,%ymm4
 	vpmuludq	%ymm13,%ymm10,%ymm10
 .byte	0xc4,0x41,0x7e,0x6f,0x9d,0x58,0x00,0x00,0x00
-	lfence
+	lfence # mgadd load_only
 	andl	$0x1fffffff,%eax
 	vpaddq	%ymm10,%ymm5,%ymm5
 	vpmuludq	%ymm13,%ymm14,%ymm14
@@ -424,7 +424,7 @@ rsaz_1024_sqr_avx2:
 	vpmuludq	%ymm0,%ymm13,%ymm13
 	vpmuludq	%ymm12,%ymm11,%ymm11
 .byte	0xc4,0x41,0x7e,0x6f,0xb5,0xf0,0xff,0xff,0xff
-	lfence
+	lfence	# mgadd load_only
 	vpaddq	%ymm1,%ymm13,%ymm13
 	vpaddq	%ymm11,%ymm2,%ymm2
 	vpmuludq	%ymm12,%ymm10,%ymm10
@@ -652,7 +652,9 @@ rsaz_1024_sqr_avx2:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lsqr_1024_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_sqr_avx2,.-rsaz_1024_sqr_avx2
 .globl	rsaz_1024_mul_avx2
@@ -1207,7 +1209,9 @@ rsaz_1024_mul_avx2:
 	leaq	(%rax),%rsp
 .cfi_def_cfa_register	%rsp
 .Lmul_1024_epilogue:
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_mul_avx2,.-rsaz_1024_mul_avx2
 .globl	rsaz_1024_red2norm_avx2
@@ -1405,7 +1409,9 @@ rsaz_1024_red2norm_avx2:
 	adcq	$0,%r11
 	movq	%rax,120(%rdi)
 	movq	%r11,%rax
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_red2norm_avx2,.-rsaz_1024_red2norm_avx2
 
@@ -1565,7 +1571,9 @@ rsaz_1024_norm2red_avx2:
 	movq	%r8,168(%rdi)
 	movq	%r8,176(%rdi)
 	movq	%r8,184(%rdi)
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_norm2red_avx2,.-rsaz_1024_norm2red_avx2
 .globl	rsaz_1024_scatter5_avx2
@@ -1591,7 +1599,9 @@ rsaz_1024_scatter5_avx2:
 	jnz	.Loop_scatter_1024
 
 	vzeroupper
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	rsaz_1024_scatter5_avx2,.-rsaz_1024_scatter5_avx2
 
@@ -1712,7 +1722,9 @@ rsaz_1024_gather5_avx2:
 	vzeroupper
 	leaq	(%r11),%rsp
 .cfi_def_cfa_register	%rsp
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .cfi_endproc	
 .LSEH_end_rsaz_1024_gather5:
 .size	rsaz_1024_gather5_avx2,.-rsaz_1024_gather5_avx2
@@ -1729,7 +1741,9 @@ rsaz_avx2_eligible:
 	cmovel	%edx,%eax
 	andl	$32,%eax
 	shrl	$5,%eax
-	ret
+	shlq	$0,(%rsp)
+	lfence	# mgadd
+	.byte	0xf3,0xc3
 .size	rsaz_avx2_eligible,.-rsaz_avx2_eligible
 
 .align	64

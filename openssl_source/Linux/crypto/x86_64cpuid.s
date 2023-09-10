@@ -1,3 +1,4 @@
+# mgadd - no LVI changes
 
 .hidden	OPENSSL_cpuid_setup
 .section	.init
@@ -22,7 +23,7 @@ OPENSSL_atomic_add:
 	movl	%r8d,%eax
 .byte	0x48,0x98
 	nop
-	ret
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_atomic_add,.-OPENSSL_atomic_add
 
@@ -35,7 +36,8 @@ OPENSSL_rdtsc:
 	rdtsc
 	shlq	$32,%rdx
 	orq	%rdx,%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_rdtsc,.-OPENSSL_rdtsc
 
@@ -205,7 +207,8 @@ OPENSSL_ia32_cpuid:
 	movq	%r8,%rbx
 .cfi_restore	%rbx
 	orq	%r9,%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_ia32_cpuid,.-OPENSSL_ia32_cpuid
 
@@ -226,7 +229,8 @@ OPENSSL_cleanse:
 	leaq	1(%rdi),%rdi
 	jnz	.Little
 .Lret:
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .align	16
 .Lot:
 	testq	$7,%rdi
@@ -243,7 +247,8 @@ OPENSSL_cleanse:
 	jnz	.Laligned
 	cmpq	$0,%rsi
 	jne	.Little
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_cleanse,.-OPENSSL_cleanse
 
@@ -266,7 +271,8 @@ CRYPTO_memcmp:
 	xorq	8(%rsi),%r11
 	orq	%r11,%r10
 	cmovnzq	%rdx,%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 
 .align	16
 .Loop_cmp:
@@ -280,7 +286,8 @@ CRYPTO_memcmp:
 	negq	%rax
 	shrq	$63,%rax
 .Lno_data:
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	CRYPTO_memcmp,.-CRYPTO_memcmp
 .globl	OPENSSL_wipe_cpu
@@ -314,7 +321,8 @@ OPENSSL_wipe_cpu:
 	xorq	%r10,%r10
 	xorq	%r11,%r11
 	leaq	8(%rsp),%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_wipe_cpu,.-OPENSSL_wipe_cpu
 .globl	OPENSSL_instrument_bus
@@ -348,7 +356,8 @@ OPENSSL_instrument_bus:
 	jnz	.Loop
 
 	movq	%r11,%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_instrument_bus,.-OPENSSL_instrument_bus
 
@@ -399,7 +408,8 @@ OPENSSL_instrument_bus2:
 .Ldone2:
 	movq	8(%rsp),%rax
 	subq	%rcx,%rax
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_instrument_bus2,.-OPENSSL_instrument_bus2
 .globl	OPENSSL_ia32_rdrand_bytes
@@ -443,7 +453,8 @@ OPENSSL_ia32_rdrand_bytes:
 
 .Ldone_rdrand_bytes:
 	xorq	%r10,%r10
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_ia32_rdrand_bytes,.-OPENSSL_ia32_rdrand_bytes
 .globl	OPENSSL_ia32_rdseed_bytes
@@ -487,7 +498,8 @@ OPENSSL_ia32_rdseed_bytes:
 
 .Ldone_rdseed_bytes:
 	xorq	%r10,%r10
-	ret
+	nop
+	rep ret ; .byte	0xf3,0xc3
 .cfi_endproc	
 .size	OPENSSL_ia32_rdseed_bytes,.-OPENSSL_ia32_rdseed_bytes
 	.section ".note.gnu.property", "a"

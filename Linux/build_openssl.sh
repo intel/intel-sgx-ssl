@@ -148,20 +148,15 @@ make build_generated || exit 1
 
 if [[ "$MITIGATION_OPT" == "LOAD" ]]
 then
-    cp $SGXSSL_ROOT/../openssl_source/Linux/aesni-x86_64.s      ./crypto/aes/aesni-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/keccak1600-x86_64.s ./crypto/sha/keccak1600-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/rsaz-avx2.s         ./crypto/bn/rsaz-avx2.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/rsaz-x86_64.s       ./crypto/bn/rsaz-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64-mont.s       ./crypto/bn/x86_64-mont.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64-mont5.s      ./crypto/bn/x86_64-mont5.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/vpaes-x86_64.s      ./crypto/aes/vpaes-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64cpuid.s       ./crypto/x86_64cpuid.s
+    cp -rf $SGXSSL_ROOT/../openssl_source/Linux/crypto .
 fi
 if [[ "$MITIGATION_OPT" == "CF" ]]
 then
-    cp $SGXSSL_ROOT/../openssl_source/Linux/aesni-x86_64.s      ./crypto/aes/aesni-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/vpaes-x86_64.s      ./crypto/aes/vpaes-x86_64.s
-    cp $SGXSSL_ROOT/../openssl_source/Linux/x86_64cpuid.s       ./crypto/x86_64cpuid.s
+    rm -rf ../crypto
+    cp -rf $SGXSSL_ROOT/../openssl_source/Linux/crypto ..
+    find ../crypto -type f | xargs sed -i '/load_only/ d'
+    cp -rf ../crypto .
+    rm -rf ../crypto
 fi
 
 make libcrypto.a || exit 1
