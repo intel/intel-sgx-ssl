@@ -457,7 +457,6 @@ $L$copy:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul_mont_gather5:
@@ -577,7 +576,6 @@ $L$mul4x_body:
 $L$mul4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul4x_mont_gather5:
@@ -1254,7 +1252,6 @@ DB	102,72,15,126,226
 $L$power5_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_power5:
@@ -2221,7 +2218,6 @@ $L$mulx4x_body:
 $L$mulx4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mulx4x_mont_gather5:
@@ -2795,7 +2791,6 @@ DB	102,72,15,126,226
 $L$powerx5_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_powerx5:

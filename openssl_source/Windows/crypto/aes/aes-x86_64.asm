@@ -430,7 +430,6 @@ $L$enc_prologue:
 $L$enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_encrypt:
@@ -916,7 +915,6 @@ $L$dec_prologue:
 $L$dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_decrypt:
@@ -962,7 +960,6 @@ $L$enc_key_prologue:
 $L$enc_key_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_set_encrypt_key:
@@ -1421,7 +1418,6 @@ $L$abort:
 $L$dec_key_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_set_decrypt_key:
@@ -1924,7 +1920,6 @@ $L$cbc_popfq:
 $L$cbc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_cbc_encrypt:

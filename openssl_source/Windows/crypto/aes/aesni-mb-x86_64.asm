@@ -326,7 +326,6 @@ $L$enc4x_done:
 $L$enc4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_multi_cbc_encrypt:
@@ -640,7 +639,6 @@ $L$dec4x_done:
 $L$dec4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_multi_cbc_decrypt:
@@ -1159,7 +1157,6 @@ $L$enc8x_done:
 $L$enc8x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_multi_cbc_encrypt_avx:
@@ -1719,7 +1716,6 @@ $L$dec8x_done:
 $L$dec8x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_multi_cbc_decrypt_avx:

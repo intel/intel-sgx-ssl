@@ -693,7 +693,6 @@ $L$sqr_1024_in_tail:
 $L$sqr_1024_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_1024_sqr_avx2:
@@ -1286,7 +1285,6 @@ $L$mul_1024_in_tail:
 $L$mul_1024_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_1024_mul_avx2:

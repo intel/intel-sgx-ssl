@@ -454,7 +454,6 @@ $L$gcm_dec_abort:
 	mov	rax,r10
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_gcm_decrypt:
@@ -851,7 +850,6 @@ $L$gcm_enc_abort:
 	mov	rax,r10
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_gcm_encrypt:

@@ -1739,7 +1739,6 @@ $L$rounds_16_xx:
 $L$epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha512_block_data_order:
@@ -2955,7 +2954,6 @@ DB	143,72,120,195,203,42
 $L$epilogue_xop:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha512_block_data_order_xop:
@@ -4144,7 +4142,6 @@ $L$avx_00_47:
 $L$epilogue_avx:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha512_block_data_order_avx:
@@ -5528,7 +5525,6 @@ $L$done_avx2:
 $L$epilogue_avx2:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_sha512_block_data_order_avx2:

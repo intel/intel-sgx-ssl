@@ -119,7 +119,6 @@ $L$break1:
 $L$gmult_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_gcm_gmult_4bit:
@@ -716,7 +715,6 @@ $L$outer_loop:
 $L$ghash_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_gcm_ghash_4bit:

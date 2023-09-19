@@ -2464,7 +2464,6 @@ $L$mul_by_2_body:
 $L$mul_by_2_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_mul_by_2:
@@ -2545,7 +2544,6 @@ $L$div_by_2_body:
 $L$div_by_2_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_div_by_2:
@@ -2632,7 +2630,6 @@ $L$mul_by_3_body:
 $L$mul_by_3_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_mul_by_3:
@@ -2700,7 +2697,6 @@ $L$add_body:
 $L$add_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_add:
@@ -2768,7 +2764,6 @@ $L$sub_body:
 $L$sub_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_sub:
@@ -2835,7 +2830,6 @@ $L$neg_body:
 $L$neg_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_neg:
@@ -3172,7 +3166,6 @@ $L$ord_mul_body:
 $L$ord_mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_ord_mul_mont:
@@ -3480,7 +3473,6 @@ DB	102,72,15,126,216
 $L$ord_sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_ord_sqr_mont:
@@ -3728,7 +3720,6 @@ $L$ord_mulx_body:
 $L$ord_mulx_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_ord_mul_montx:
@@ -3948,7 +3939,6 @@ DB	102,72,15,126,218
 $L$ord_sqrx_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_ord_sqr_montx:
@@ -4053,7 +4043,6 @@ $L$mul_mont_done:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_mul_mont:
@@ -4349,7 +4338,6 @@ $L$sqr_mont_done:
 $L$sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_sqr_mont:
@@ -4931,7 +4919,6 @@ $L$from_body:
 $L$from_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_from_mont:
@@ -5713,7 +5700,6 @@ DB	102,72,15,126,207
 $L$point_doubleq_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_double:
@@ -6137,7 +6123,6 @@ $L$add_doneq:
 $L$point_addq_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_add:
@@ -6475,7 +6460,6 @@ DB	102,72,15,126,199
 $L$add_affineq_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_add_affine:
@@ -6847,7 +6831,6 @@ DB	102,72,15,126,207
 $L$point_doublex_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_doublex:
@@ -7267,7 +7250,6 @@ $L$add_donex:
 $L$point_addx_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_addx:
@@ -7601,7 +7583,6 @@ DB	102,72,15,126,199
 $L$add_affinex_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_ecp_nistz256_point_add_affinex:

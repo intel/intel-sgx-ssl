@@ -351,7 +351,6 @@ $L$reduce51:
 $L$fe51_sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe51_sqr:
@@ -662,7 +661,6 @@ $L$reduce64:
 $L$fe64_sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe64_sqr:
@@ -710,7 +708,6 @@ $L$fe64_mul121666_body:
 $L$fe64_mul121666_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe64_mul121666:
@@ -759,7 +756,6 @@ $L$fe64_add_body:
 $L$fe64_add_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe64_add:
@@ -808,7 +804,6 @@ $L$fe64_sub_body:
 $L$fe64_sub_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe64_sub:
@@ -863,7 +858,6 @@ $L$fe64_to_body:
 $L$fe64_to_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_x25519_fe64_tobytes:

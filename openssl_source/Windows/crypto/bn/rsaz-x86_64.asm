@@ -724,7 +724,6 @@ $L$sqr_tail:
 $L$sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_sqr:
@@ -838,7 +837,6 @@ $L$mul_tail:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul:
@@ -1304,7 +1302,6 @@ $L$mul_gather_tail:
 $L$mul_gather4_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_gather4:
@@ -1433,7 +1430,6 @@ DB	102,72,15,126,214
 $L$mul_scatter4_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_scatter4:
@@ -1527,7 +1523,6 @@ $L$by_one_tail:
 $L$mul_by_one_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	lfence
 	DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_by_one:
