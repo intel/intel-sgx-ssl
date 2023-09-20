@@ -271,7 +271,8 @@ $L$copy:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul_mont:
 
@@ -719,7 +720,8 @@ $L$copy4x:
 $L$mul4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul4x_mont:
 EXTERN	bn_sqrx8x_internal
@@ -923,7 +925,8 @@ $L$sqr8x_cond_copy:
 $L$sqr8x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_sqr8x_mont:
 
@@ -1038,7 +1041,7 @@ $L$mulx4x_body:
 	adcx	r10,rax
 	adox	r11,r12
 DB	0xc4,0x62,0xfb,0xf6,0xa1,0x10,0x00,0x00,0x00
-	lfence		;load_only
+	lfence          ;load_only
 	mov	rdi,QWORD[48+rsp]
 	mov	QWORD[((-32))+rbx],r10
 	adcx	r11,rax
@@ -1294,7 +1297,8 @@ $L$mulx4x_cond_copy:
 $L$mulx4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mulx4x_mont:
 DB	77,111,110,116,103,111,109,101,114,121,32,77,117,108,116,105
@@ -1432,7 +1436,8 @@ $L$common_seh_tail:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4

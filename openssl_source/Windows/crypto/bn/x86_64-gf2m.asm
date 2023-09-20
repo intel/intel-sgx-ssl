@@ -201,8 +201,8 @@ DB	102,72,15,126,199
 
 	add	rsp,128+8
 
-	lfence
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$end_mul_1x1:
 
 
@@ -237,8 +237,8 @@ DB	102,15,58,68,229,0
 	pxor	xmm0,xmm5
 	movdqu	XMMWORD[rcx],xmm2
 	movdqu	XMMWORD[16+rcx],xmm0
-	lfence
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$vanilla_mul_2x2:
@@ -315,8 +315,8 @@ $L$body_mul_2x2:
 	lea	rsp,[136+rsp]
 
 $L$epilogue_mul_2x2:
-	lfence
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$end_mul_2x2:
 
 
@@ -406,7 +406,8 @@ $L$in_prologue:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4

@@ -156,7 +156,6 @@ $L$enc_loop:
 	xor	ebx,r11d
 	xor	ecx,r12d
 	xor	edx,r8d
-	lfence
 DB	0xf3,0xc3
 
 
@@ -332,7 +331,6 @@ $L$enc_compact_done:
 	xor	ebx,DWORD[4+r15]
 	xor	ecx,DWORD[8+r15]
 	xor	edx,DWORD[12+r15]
-	lfence
 DB	0xf3,0xc3
 
 
@@ -430,7 +428,8 @@ $L$enc_prologue:
 $L$enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_encrypt:
 
@@ -587,7 +586,6 @@ $L$dec_loop:
 	xor	ebx,r11d
 	xor	ecx,r12d
 	xor	edx,r8d
-	lfence
 DB	0xf3,0xc3
 
 
@@ -815,7 +813,6 @@ $L$dec_compact_done:
 	xor	ebx,DWORD[4+r15]
 	xor	ecx,DWORD[8+r15]
 	xor	edx,DWORD[12+r15]
-	lfence
 DB	0xf3,0xc3
 
 
@@ -915,7 +912,8 @@ $L$dec_prologue:
 $L$dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_decrypt:
 global	AES_set_encrypt_key
@@ -960,7 +958,8 @@ $L$enc_key_prologue:
 $L$enc_key_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_set_encrypt_key:
 
@@ -1202,7 +1201,6 @@ $L$14break:
 $L$badpointer:
 	mov	rax,-1
 $L$exit:
-	lfence
 DB	0xf3,0xc3
 
 
@@ -1418,7 +1416,8 @@ $L$abort:
 $L$dec_key_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_set_decrypt_key:
 global	AES_cbc_encrypt
@@ -1539,7 +1538,7 @@ $L$cbc_do_ecopy:
 	lea	r15,[80+rsp]
 	mov	ecx,240/8
 	DD	0x90A548F3
-	lfence		;load_only
+	lfence          ;load_only
 	mov	DWORD[rdi],eax
 $L$cbc_skip_ecopy:
 	mov	QWORD[rsp],r15
@@ -1805,7 +1804,7 @@ $L$cbc_slow_enc_tail:
 	mov	rsi,r8
 	mov	rdi,r9
 	DD	0x9066A4F3
-	lfence		;load_only
+	lfence          ;load_only
 	mov	rcx,16
 	sub	rcx,r10
 	xor	rax,rax
@@ -1891,7 +1890,7 @@ $L$cbc_slow_dec_partial:
 	lea	rsi,[64+rsp]
 	lea	rcx,[16+r10]
 	DD	0x9066A4F3
-	lfence		;load_only
+	lfence          ;load_only
 	jmp	NEAR $L$cbc_exit
 
 ALIGN	16
@@ -1920,7 +1919,8 @@ $L$cbc_popfq:
 $L$cbc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_AES_cbc_encrypt:
 ALIGN	64
@@ -2929,7 +2929,8 @@ $L$common_seh_exit:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4

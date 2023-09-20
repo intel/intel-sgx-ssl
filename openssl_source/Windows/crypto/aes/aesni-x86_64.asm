@@ -28,7 +28,8 @@ DB	102,15,56,221,209
 	pxor	xmm1,xmm1
 	movups	XMMWORD[rdx],xmm2
 	pxor	xmm2,xmm2
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -55,7 +56,8 @@ DB	102,15,56,223,209
 	pxor	xmm1,xmm1
 	movups	XMMWORD[rdx],xmm2
 	pxor	xmm2,xmm2
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -86,7 +88,8 @@ DB	102,15,56,220,209
 DB	102,15,56,220,217
 DB	102,15,56,221,208
 DB	102,15,56,221,216
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -117,7 +120,8 @@ DB	102,15,56,222,209
 DB	102,15,56,222,217
 DB	102,15,56,223,208
 DB	102,15,56,223,216
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -153,7 +157,8 @@ DB	102,15,56,220,225
 DB	102,15,56,221,208
 DB	102,15,56,221,216
 DB	102,15,56,221,224
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -189,7 +194,8 @@ DB	102,15,56,222,225
 DB	102,15,56,223,208
 DB	102,15,56,223,216
 DB	102,15,56,223,224
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -231,7 +237,8 @@ DB	102,15,56,221,208
 DB	102,15,56,221,216
 DB	102,15,56,221,224
 DB	102,15,56,221,232
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -273,7 +280,8 @@ DB	102,15,56,223,208
 DB	102,15,56,223,216
 DB	102,15,56,223,224
 DB	102,15,56,223,232
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -329,7 +337,8 @@ DB	102,15,56,221,224
 DB	102,15,56,221,232
 DB	102,15,56,221,240
 DB	102,15,56,221,248
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -385,7 +394,8 @@ DB	102,15,56,223,224
 DB	102,15,56,223,232
 DB	102,15,56,223,240
 DB	102,15,56,223,248
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -451,7 +461,8 @@ DB	102,15,56,221,240
 DB	102,15,56,221,248
 DB	102,68,15,56,221,192
 DB	102,68,15,56,221,200
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -517,7 +528,8 @@ DB	102,15,56,223,240
 DB	102,15,56,223,248
 DB	102,68,15,56,223,192
 DB	102,68,15,56,223,200
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	aesni_ecb_encrypt
@@ -891,7 +903,8 @@ $L$ecb_ret:
 $L$ecb_enc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ecb_encrypt:
 global	aesni_ccm64_encrypt_blocks
@@ -987,7 +1000,8 @@ DB	102,15,56,0,215
 $L$ccm64_enc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ccm64_encrypt_blocks:
 global	aesni_ccm64_decrypt_blocks
@@ -1117,7 +1131,8 @@ DB	102,15,56,221,217
 $L$ccm64_dec_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ccm64_decrypt_blocks:
 global	aesni_ctr32_encrypt_blocks
@@ -1730,7 +1745,8 @@ $L$ctr32_done:
 $L$ctr32_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ctr32_encrypt_blocks:
 global	aesni_xts_encrypt
@@ -1997,21 +2013,21 @@ DB	102,15,56,220,249
 
 	pxor	xmm14,xmm15
 DB	102,15,56,221,84,36,0
-	lfence		;load_only
+	lfence          ;load_only
 	psrad	xmm9,31
 	paddq	xmm15,xmm15
 DB	102,15,56,221,92,36,16
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,221,100,36,32
-	lfence		;load_only
+	lfence          ;load_only
 	pand	xmm9,xmm8
 	mov	rax,r10
 DB	102,15,56,221,108,36,48
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,221,116,36,64
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,221,124,36,80
-	lfence		;load_only
+	lfence          ;load_only
 	pxor	xmm15,xmm9
 
 	lea	rsi,[96+rsi]
@@ -2242,7 +2258,8 @@ $L$xts_enc_ret:
 $L$xts_enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_xts_encrypt:
 global	aesni_xts_decrypt
@@ -2515,21 +2532,21 @@ DB	102,15,56,222,249
 
 	pxor	xmm14,xmm15
 DB	102,15,56,223,84,36,0
-	lfence		;load_only
+	lfence          ;load_only
 	psrad	xmm9,31
 	paddq	xmm15,xmm15
 DB	102,15,56,223,92,36,16
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,223,100,36,32
-	lfence		;load_only
+	lfence          ;load_only
 	pand	xmm9,xmm8
 	mov	rax,r10
 DB	102,15,56,223,108,36,48
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,223,116,36,64
-	lfence		;load_only
+	lfence          ;load_only
 DB	102,15,56,223,124,36,80
-	lfence		;load_only
+	lfence          ;load_only
 	pxor	xmm15,xmm9
 
 	lea	rsi,[96+rsi]
@@ -2791,7 +2808,8 @@ $L$xts_dec_ret:
 $L$xts_dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_xts_decrypt:
 global	aesni_ocb_encrypt
@@ -3037,7 +3055,8 @@ $L$ocb_enc_pop:
 $L$ocb_enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ocb_encrypt:
 
@@ -3141,7 +3160,8 @@ DB	102,65,15,56,221,228
 DB	102,65,15,56,221,237
 DB	102,65,15,56,221,246
 DB	102,65,15,56,221,255
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3212,7 +3232,8 @@ DB	102,65,15,56,221,210
 DB	102,65,15,56,221,219
 DB	102,65,15,56,221,228
 DB	102,65,15,56,221,237
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3249,7 +3270,8 @@ DB	102,15,56,220,209
 	mov	rax,r10
 
 DB	102,15,56,221,215
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3518,7 +3540,8 @@ $L$ocb_dec_pop:
 $L$ocb_dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ocb_decrypt:
 
@@ -3616,7 +3639,8 @@ DB	102,65,15,56,223,228
 DB	102,65,15,56,223,237
 DB	102,65,15,56,223,246
 DB	102,65,15,56,223,255
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3683,7 +3707,8 @@ DB	102,65,15,56,223,210
 DB	102,65,15,56,223,219
 DB	102,65,15,56,223,228
 DB	102,65,15,56,223,237
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3719,7 +3744,8 @@ DB	102,15,56,222,209
 	mov	rax,r10
 
 DB	102,15,56,223,215
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	aesni_cbc_encrypt
@@ -3790,7 +3816,7 @@ $L$cbc_enc_tail:
 	mov	rcx,rdx
 	xchg	rsi,rdi
 	DD	0x9066A4F3
-	lfence		;load_only
+	lfence          ;load_only
 	mov	ecx,16
 	sub	rcx,rdx
 	xor	eax,eax
@@ -4321,7 +4347,7 @@ $L$cbc_dec_tail_partial:
 	sub	rcx,rdx
 	lea	rsi,[rsp]
 	DD	0x9066A4F3
-	lfence		;load_only
+	lfence          ;load_only
 	movdqa	XMMWORD[rsp],xmm2
 
 $L$cbc_dec_ret:
@@ -4354,7 +4380,8 @@ $L$cbc_dec_ret:
 $L$cbc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_encrypt:
 global	aesni_set_decrypt_key
@@ -4397,7 +4424,8 @@ DB	102,15,56,219,192
 $L$dec_key_ret:
 	add	rsp,8
 
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_set_decrypt_key:
 
@@ -4702,7 +4730,8 @@ $L$enc_key_ret:
 	pxor	xmm5,xmm5
 	add	rsp,8
 
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$SEH_end_set_encrypt_key:
 
 ALIGN	16
@@ -4716,7 +4745,8 @@ $L$key_expansion_128_cold:
 	xorps	xmm0,xmm4
 	shufps	xmm1,xmm1,255
 	xorps	xmm0,xmm1
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_192a:
@@ -4736,7 +4766,8 @@ $L$key_expansion_192b_warm:
 	pxor	xmm0,xmm1
 	pshufd	xmm3,xmm0,255
 	pxor	xmm2,xmm3
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_192b:
@@ -4759,7 +4790,8 @@ $L$key_expansion_256a_cold:
 	xorps	xmm0,xmm4
 	shufps	xmm1,xmm1,255
 	xorps	xmm0,xmm1
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_256b:
@@ -4772,7 +4804,8 @@ $L$key_expansion_256b:
 	xorps	xmm2,xmm4
 	shufps	xmm1,xmm1,170
 	xorps	xmm2,xmm1
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -5025,7 +5058,8 @@ $L$common_seh_tail:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4
