@@ -1538,7 +1538,7 @@ $L$cbc_do_ecopy:
 	lea	r15,[80+rsp]
 	mov	ecx,240/8
 	DD	0x90A548F3
-	lfence          ;load_only
+	lfence
 	mov	DWORD[rdi],eax
 $L$cbc_skip_ecopy:
 	mov	QWORD[rsp],r15
@@ -1804,7 +1804,7 @@ $L$cbc_slow_enc_tail:
 	mov	rsi,r8
 	mov	rdi,r9
 	DD	0x9066A4F3
-	lfence          ;load_only
+	lfence
 	mov	rcx,16
 	sub	rcx,r10
 	xor	rax,rax
@@ -1890,7 +1890,7 @@ $L$cbc_slow_dec_partial:
 	lea	rsi,[64+rsp]
 	lea	rcx,[16+r10]
 	DD	0x9066A4F3
-	lfence          ;load_only
+	lfence
 	jmp	NEAR $L$cbc_exit
 
 ALIGN	16
