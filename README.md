@@ -75,3 +75,12 @@ make all test
 sudo make install
 ```
 
+Note for Version 3.0
+--------------------
+To use the trusted cryptography library with SGX SSL/OpenSSL 3.0, it possibly needs to increase the value in the enclave signing configuration XML file:
+```
+...
+<HeapMaxSize>...</HeapMaxSize>
+...
+```
+, especially for the enclave with multithreads. 
