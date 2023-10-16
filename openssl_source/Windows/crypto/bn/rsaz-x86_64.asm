@@ -486,7 +486,7 @@ DB	0xc4,0xe2,0xfb,0xf6,0x9e,0x30,0x00,0x00,0x00
 
 DB	0xc4,0x62,0xc3,0xf6,0x86,0x38,0x00,0x00,0x00
 	lfence
-  	adox	r15,rdi
+	adox	r15,rdi
 	adcx	r8,rbp
 	mulx	rdi,rax,rdx
 	adox	r8,rbp
@@ -724,7 +724,8 @@ $L$sqr_tail:
 $L$sqr_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_sqr:
 global	rsaz_512_mul
@@ -837,7 +838,8 @@ $L$mul_tail:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul:
 global	rsaz_512_mul_gather4
@@ -1302,7 +1304,8 @@ $L$mul_gather_tail:
 $L$mul_gather4_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_gather4:
 global	rsaz_512_mul_scatter4
@@ -1430,7 +1433,8 @@ DB	102,72,15,126,214
 $L$mul_scatter4_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_scatter4:
 global	rsaz_512_mul_by_one
@@ -1523,7 +1527,8 @@ $L$by_one_tail:
 $L$mul_by_one_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_rsaz_512_mul_by_one:
 
@@ -1608,7 +1613,8 @@ $L$reduction_loop:
 	dec	ecx
 	jne	NEAR $L$reduction_loop
 
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -1668,7 +1674,8 @@ DB	0xc4,0x62,0xfb,0xf6,0xb5,0x30,0x00,0x00,0x00
 	dec	ecx
 	jne	NEAR $L$reduction_loopx
 
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -1727,7 +1734,8 @@ __rsaz_512_subtract:
 	mov	QWORD[48+rdi],r14
 	mov	QWORD[56+rdi],r15
 
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -1871,7 +1879,8 @@ $L$oop_mul:
 	mov	QWORD[48+rdi],r14
 	mov	QWORD[56+rdi],r15
 
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -1998,7 +2007,8 @@ DB	0xc4,0x62,0xfb,0xf6,0xbe,0x38,0x00,0x00,0x00
 	mov	QWORD[((8+64+48))+rsp],r14
 	mov	QWORD[((8+64+56))+rsp],r15
 
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	rsaz_512_scatter4
@@ -2017,7 +2027,8 @@ $L$oop_scatter:
 	lea	rcx,[128+rcx]
 	dec	r9d
 	jnz	NEAR $L$oop_scatter
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -2110,7 +2121,8 @@ $L$oop_gather:
 	movaps	xmm14,XMMWORD[128+rsp]
 	movaps	xmm15,XMMWORD[144+rsp]
 	add	rsp,0xa8
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$SEH_end_rsaz_512_gather4:
 
 
@@ -2216,7 +2228,8 @@ $L$common_seh_tail:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	ret ; DB	0F3h,0C3h		;repret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4

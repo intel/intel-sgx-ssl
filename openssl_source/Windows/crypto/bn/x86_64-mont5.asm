@@ -457,7 +457,8 @@ $L$copy:
 $L$mul_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul_mont_gather5:
 
@@ -576,7 +577,8 @@ $L$mul4x_body:
 $L$mul4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mul4x_mont_gather5:
 
@@ -1252,7 +1254,8 @@ DB	102,72,15,126,226
 $L$power5_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_power5:
 
@@ -2036,7 +2039,8 @@ DB	102,73,15,126,217
 
 	cmp	rdi,rdx
 	jb	NEAR $L$8x_reduction_loop
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -2092,7 +2096,8 @@ $L$sqr4x_sub_entry:
 
 	mov	r10,r9
 	neg	r9
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -2216,7 +2221,8 @@ $L$mulx4x_body:
 $L$mulx4x_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_mulx4x_mont_gather5:
 
@@ -2789,7 +2795,8 @@ DB	102,72,15,126,226
 $L$powerx5_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_bn_powerx5:
 
@@ -3162,7 +3169,6 @@ $L$sqrx4x_shift_n_add:
 DB	0x48,0x8b,0x94,0x0e,0x08,0x00,0x00,0x00
 	lfence
 DB	0x4c,0x8b,0x97,0x20,0x00,0x00,0x00
-	lfence
 	adox	r13,r13
 	adcx	rbx,r11
 	mov	r11,QWORD[40+rdi]
@@ -3424,7 +3430,8 @@ DB	102,72,15,126,213
 	lea	rdi,[64+rcx*1+rdi]
 	cmp	r8,QWORD[((8+8))+rsp]
 	jb	NEAR $L$sqrx8x_reduction_loop
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 ALIGN	32
@@ -3476,7 +3483,8 @@ $L$sqrx4x_sub_entry:
 
 	neg	r9
 
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	bn_get_bits5
@@ -3496,7 +3504,8 @@ bn_get_bits5:
 	movzx	eax,WORD[rdx*2+r10]
 	shr	eax,cl
 	and	eax,31
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3516,7 +3525,8 @@ $L$scatter:
 	sub	edx,1
 	jnz	NEAR $L$scatter
 $L$scatter_epilogue:
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3529,6 +3539,7 @@ $L$SEH_begin_bn_gather5:
 
 DB	0x4c,0x8d,0x14,0x24
 DB	0x48,0x81,0xec,0x08,0x01,0x00,0x00
+	lfence
 	lea	rax,[$L$inc]
 	and	rsp,-16
 
@@ -3681,7 +3692,8 @@ $L$gather:
 	jnz	NEAR $L$gather
 
 	lea	rsp,[r10]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$SEH_end_bn_gather5:
 
 
@@ -3795,7 +3807,8 @@ $L$common_seh_tail:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4

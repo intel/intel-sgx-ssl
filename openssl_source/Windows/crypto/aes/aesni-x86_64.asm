@@ -28,7 +28,8 @@ DB	102,15,56,221,209
 	pxor	xmm1,xmm1
 	movups	XMMWORD[rdx],xmm2
 	pxor	xmm2,xmm2
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -55,7 +56,8 @@ DB	102,15,56,223,209
 	pxor	xmm1,xmm1
 	movups	XMMWORD[rdx],xmm2
 	pxor	xmm2,xmm2
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -87,7 +89,7 @@ DB	102,15,56,220,217
 DB	102,15,56,221,208
 DB	102,15,56,221,216
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -119,7 +121,7 @@ DB	102,15,56,222,217
 DB	102,15,56,223,208
 DB	102,15,56,223,216
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -156,7 +158,7 @@ DB	102,15,56,221,208
 DB	102,15,56,221,216
 DB	102,15,56,221,224
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -193,7 +195,7 @@ DB	102,15,56,223,208
 DB	102,15,56,223,216
 DB	102,15,56,223,224
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -236,7 +238,7 @@ DB	102,15,56,221,216
 DB	102,15,56,221,224
 DB	102,15,56,221,232
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -279,7 +281,7 @@ DB	102,15,56,223,216
 DB	102,15,56,223,224
 DB	102,15,56,223,232
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -336,7 +338,7 @@ DB	102,15,56,221,232
 DB	102,15,56,221,240
 DB	102,15,56,221,248
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -393,7 +395,7 @@ DB	102,15,56,223,232
 DB	102,15,56,223,240
 DB	102,15,56,223,248
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -460,7 +462,7 @@ DB	102,15,56,221,248
 DB	102,68,15,56,221,192
 DB	102,68,15,56,221,200
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -527,7 +529,7 @@ DB	102,15,56,223,248
 DB	102,68,15,56,223,192
 DB	102,68,15,56,223,200
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	aesni_ecb_encrypt
@@ -901,7 +903,8 @@ $L$ecb_ret:
 $L$ecb_enc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ecb_encrypt:
 global	aesni_ccm64_encrypt_blocks
@@ -997,7 +1000,8 @@ DB	102,15,56,0,215
 $L$ccm64_enc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ccm64_encrypt_blocks:
 global	aesni_ccm64_decrypt_blocks
@@ -1127,7 +1131,8 @@ DB	102,15,56,221,217
 $L$ccm64_dec_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ccm64_decrypt_blocks:
 global	aesni_ctr32_encrypt_blocks
@@ -1740,7 +1745,8 @@ $L$ctr32_done:
 $L$ctr32_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ctr32_encrypt_blocks:
 global	aesni_xts_encrypt
@@ -2252,7 +2258,8 @@ $L$xts_enc_ret:
 $L$xts_enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_xts_encrypt:
 global	aesni_xts_decrypt
@@ -2801,7 +2808,8 @@ $L$xts_dec_ret:
 $L$xts_dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_xts_decrypt:
 global	aesni_ocb_encrypt
@@ -3047,7 +3055,8 @@ $L$ocb_enc_pop:
 $L$ocb_enc_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ocb_encrypt:
 
@@ -3152,7 +3161,7 @@ DB	102,65,15,56,221,237
 DB	102,65,15,56,221,246
 DB	102,65,15,56,221,255
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3224,7 +3233,7 @@ DB	102,65,15,56,221,219
 DB	102,65,15,56,221,228
 DB	102,65,15,56,221,237
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3262,7 +3271,7 @@ DB	102,15,56,220,209
 
 DB	102,15,56,221,215
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3531,7 +3540,8 @@ $L$ocb_dec_pop:
 $L$ocb_dec_epilogue:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_ocb_decrypt:
 
@@ -3630,7 +3640,7 @@ DB	102,65,15,56,223,237
 DB	102,65,15,56,223,246
 DB	102,65,15,56,223,255
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3698,7 +3708,7 @@ DB	102,65,15,56,223,219
 DB	102,65,15,56,223,228
 DB	102,65,15,56,223,237
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -3735,7 +3745,7 @@ DB	102,15,56,222,209
 
 DB	102,15,56,223,215
 	nop
-	ret
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	aesni_cbc_encrypt
@@ -3811,7 +3821,6 @@ $L$cbc_enc_tail:
 	sub	rcx,rdx
 	xor	eax,eax
 	DD	0x9066AAF3
-	lfence
 	lea	rdi,[((-16))+rdi]
 	mov	eax,r10d
 	mov	rsi,rdi
@@ -4371,7 +4380,8 @@ $L$cbc_dec_ret:
 $L$cbc_ret:
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_aesni_cbc_encrypt:
 global	aesni_set_decrypt_key
@@ -4414,7 +4424,8 @@ DB	102,15,56,219,192
 $L$dec_key_ret:
 	add	rsp,8
 
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_set_decrypt_key:
 
@@ -4719,7 +4730,8 @@ $L$enc_key_ret:
 	pxor	xmm5,xmm5
 	add	rsp,8
 
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 $L$SEH_end_set_encrypt_key:
 
 ALIGN	16
@@ -4733,7 +4745,8 @@ $L$key_expansion_128_cold:
 	xorps	xmm0,xmm4
 	shufps	xmm1,xmm1,255
 	xorps	xmm0,xmm1
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_192a:
@@ -4753,7 +4766,8 @@ $L$key_expansion_192b_warm:
 	pxor	xmm0,xmm1
 	pshufd	xmm3,xmm0,255
 	pxor	xmm2,xmm3
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_192b:
@@ -4776,7 +4790,8 @@ $L$key_expansion_256a_cold:
 	xorps	xmm0,xmm4
 	shufps	xmm1,xmm1,255
 	xorps	xmm0,xmm1
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 ALIGN	16
 $L$key_expansion_256b:
@@ -4789,7 +4804,8 @@ $L$key_expansion_256b:
 	xorps	xmm2,xmm4
 	shufps	xmm1,xmm1,170
 	xorps	xmm2,xmm1
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -5042,7 +5058,8 @@ $L$common_seh_tail:
 	pop	rbx
 	pop	rdi
 	pop	rsi
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 section	.pdata rdata align=4
