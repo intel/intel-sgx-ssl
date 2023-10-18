@@ -260,7 +260,8 @@ $L$oop:
 	jnz	NEAR $L$oop
 
 	lea	r15,[((-192))+r15]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 
@@ -320,7 +321,8 @@ KeccakF1600:
 
 	pop	rbx
 
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 
 global	SHA3_absorb
@@ -421,7 +423,8 @@ $L$done_absorb:
 
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_SHA3_absorb:
 global	SHA3_squeeze
@@ -489,7 +492,8 @@ $L$done_squeeze:
 
 	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
 	mov	rsi,QWORD[16+rsp]
-	ret
+	nop
+	rep ret ; DB	0F3h,0C3h		;repret
 
 $L$SEH_end_SHA3_squeeze:
 ALIGN	256
