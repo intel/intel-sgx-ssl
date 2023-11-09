@@ -51,7 +51,7 @@ else
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
 	else
-		ifneq ($(wildcard $(SGX_SDK)),)
+		ifneq ($(SGX_SDK),)
 			SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 			SGX_SDK_INC := $(SGX_SDK)/include
 			LIBCXX_INC := $(SGX_SDK)/include/libcxx
@@ -84,7 +84,7 @@ endif
 endif
 endif
 
-SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
+SGX_EDL_FILE := sgx_tsgxssl.edl
 
 Sgx_tssl_Cpp_Files := $(sort $(wildcard *.cpp))
 Sgx_tssl_C_Files := $(sort $(wildcard *.c))

@@ -49,7 +49,7 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 	else
-		ifneq ($(wildcard $(SGX_SDK)),)
+		ifneq ($(SGX_SDK),)
 			SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 			SGX_SDK_INC := $(SGX_SDK)/include
 		else
@@ -71,7 +71,7 @@ else
 	SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
 endif
 
-SGX_EDL_FILE := $(PACKAGE_INCLUDE)/sgx_tsgxssl.edl
+SGX_EDL_FILE := sgx_tsgxssl.edl
 
 ######## App Settings ########
 
