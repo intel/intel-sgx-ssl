@@ -51,9 +51,15 @@ else
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
 	else
-		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
-		SGX_SDK_INC := $(SGX_SDK)/include
-		LIBCXX_INC := $(SGX_SDK)/include/libcxx
+		ifneq ($(wildcard $(SGX_SDK)),)
+			SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+			SGX_SDK_INC := $(SGX_SDK)/include
+			LIBCXX_INC := $(SGX_SDK)/include/libcxx
+		else
+			SGX_EDGER8R := /usr/bin/sgx_edger8r
+			SGX_SDK_INC := /usr/include/sgxsdk
+			LIBCXX_INC := /usr/include/sgxsdk/libcxx
+		endif
 	endif
 endif
 
