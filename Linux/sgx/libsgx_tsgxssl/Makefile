@@ -84,7 +84,7 @@ endif
 endif
 endif
 
-SGX_EDL_FILE := sgx_tsgxssl.edl
+SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
 Sgx_tssl_Cpp_Files := $(sort $(wildcard *.cpp))
 Sgx_tssl_C_Files := $(sort $(wildcard *.c))
