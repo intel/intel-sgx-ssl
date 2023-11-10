@@ -58,14 +58,19 @@ else
                 SGX_EDGER8R := $(TD_MIGRATION_STD_LIB_PATH)/sgx_edger8r
                 SGX_SDK_INC := $(TD_MIGRATION_STD_INC_PATH)
                 LIBCXX_INC := $(TD_MIGRATION_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
-	else
-		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+	else ifneq ($(SGX_SDK),)
+		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64/$(MITIGATION_LIB_PATH)
 		SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
-		LIBCXX_INC := $(SGX_SDK)/include/libcxx
+		LIBCXX_INC := $(SGX_SDK_INC)/libcxx
+	else
+		SGX_LIBRARY_PATH := /usr/lib/sgxsdk
+		SGX_ENCLAVE_SIGNER := /usr/bin/sgx_sign
+		SGX_EDGER8R := /usr/bin/sgx_edger8r
+		SGX_SDK_INC := /usr/include/sgxsdk
+		LIBCXX_INC := $(SGX_SDK_INC)/libcxx
 	endif
-
 endif
 
 ifeq ($(DEBUG), 1)

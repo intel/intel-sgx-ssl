@@ -52,10 +52,14 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		SGX_SHARED_LIB_FLAG := -Wl,-rpath,${SGX_LIBRARY_PATH}
-	else
+	else ifneq ($(SGX_SDK),)
 		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
+	else
+		SGX_LIBRARY_PATH := /usr/lib/sgxsdk
+		SGX_EDGER8R := /usr/bin/sgx_edger8r
+		SGX_SDK_INC := /usr/include/sgxsdk
 	endif
 endif
 

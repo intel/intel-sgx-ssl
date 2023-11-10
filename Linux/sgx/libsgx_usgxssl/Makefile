@@ -71,7 +71,7 @@ else
 	SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
 endif
 
-SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
+#SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
 ######## App Settings ########
 
@@ -99,9 +99,9 @@ all: $(UNTRUSTED_LIB)
 #	@mkdir -p $(UNTRUSTED_DIR) && cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --header-only --untrusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC)
 #	@echo "GEN  =>  $@"
 
-sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c
-	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
+#sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c
+#	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
+#	@echo "CC   <=  $<"
 
 $(OBJDIR)/%.o : %.cpp
 	$(VCC) $(Sgx_ussl_Cpp_Flags) -c $< -o $@
