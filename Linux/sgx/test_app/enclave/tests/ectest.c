@@ -2689,7 +2689,7 @@ static int custom_generator_test(int id)
 
     return ret;
 }
-#if 0
+//#if 0
 /*
  * check creation of curves from explicit params through the public API
  */
@@ -2966,7 +2966,7 @@ static int custom_params_test(int id)
 
     return ret;
 }
-#endif
+//#endif
 static int ec_d2i_publickey_test(void)
 {
    unsigned char buf[1000];
@@ -3034,7 +3034,7 @@ int ec_test(void)
     ADD_ALL_TESTS(check_named_curve_from_ecparameters, crv_len);
     ADD_ALL_TESTS(ec_point_hex2point_test, crv_len);
     ADD_ALL_TESTS(custom_generator_test, crv_len);
-//    ADD_ALL_TESTS(custom_params_test, crv_len);
+    ADD_ALL_TESTS(custom_params_test, crv_len);
     ADD_TEST(ec_d2i_publickey_test);
     return 0;
 }

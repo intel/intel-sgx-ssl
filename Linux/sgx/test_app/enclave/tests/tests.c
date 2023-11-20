@@ -70,6 +70,19 @@ void test_note(const char *fmt, ...)
     printf("\n");
 }
 
+int test_skip(const char *file, int line, const char *desc, ...)
+{
+    char buf[BUFSIZ] = {'\0'};
+    va_list ap;
+
+    va_start(ap, desc);
+    printf("SKIP: ");
+    vsnprintf(buf, BUFSIZ, desc, ap);
+    va_end(ap);
+    uprint(buf);
+    printf("\n");
+    return 1;//TEST_SKIP_CODE;
+}
 
 /*
  * Define some comparisons between pairs of various types.
