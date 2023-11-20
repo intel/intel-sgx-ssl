@@ -50,6 +50,7 @@ void test_error(const char *file, int line, const char *desc, ...)
 void test_info(const char *file, int line, const char *desc, ...)
 {
 }
+#include <stdio.h>
 void test_perror(const char *s)
 {
     /*
@@ -58,6 +59,17 @@ void test_perror(const char *s)
      */
     TEST_error("%s: %s", s, strerror(errno));
 }
+void test_note(const char *fmt, ...)
+{
+    char buf[BUFSIZ] = {'\0'};
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFSIZ, fmt, ap);
+    va_end(ap);
+    uprint(buf);
+    printf("\n");
+}
+
 
 /*
  * Define some comparisons between pairs of various types.

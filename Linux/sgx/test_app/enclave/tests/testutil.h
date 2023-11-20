@@ -233,6 +233,7 @@ void test_perror(const char *s);
 #  define TEST_info(...)     test_info(__FILE__, __LINE__, __VA_ARGS__)
 #  define TEST_skip(...)     test_skip(__FILE__, __LINE__, __VA_ARGS__)
 # endif
+# define TEST_note           test_note
 
 /* Fake non-secure random number generator */
 typedef int fake_random_generate_cb(unsigned char *out, size_t outlen,
