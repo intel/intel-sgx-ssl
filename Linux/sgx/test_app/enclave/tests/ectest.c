@@ -34,7 +34,7 @@
 
 static size_t crv_len = 0;
 static EC_builtin_curve *curves = NULL;
-#if 0
+
 /* test multiplication with group order, long and negative scalars */
 static int group_order_tests(EC_GROUP *group)
 {
@@ -155,7 +155,7 @@ err:
     BN_CTX_free(ctx);
     return r;
 }
-#if 0
+
 static int prime_field_tests(void)
 {
     BN_CTX *ctx = NULL;
@@ -603,8 +603,7 @@ err:
     BN_free(scalar3);
     return r;
 }
-#endif
-#endif
+
 #ifndef OPENSSL_NO_EC2M
 
 static struct c2_curve_test {
@@ -776,7 +775,7 @@ static struct c2_curve_test {
         "2", 571
     }
 };
-#if 0
+
 static int char2_curve_test(int n)
 {
     int r = 0;
@@ -931,7 +930,7 @@ err:
     EC_GROUP_free(group);
     return r;
 }
-#endif
+
 static int char2_field_tests(void)
 {
     BN_CTX *ctx = NULL;
@@ -1153,7 +1152,7 @@ static int internal_curve_test(int n)
     EC_GROUP_free(group);
     return 1;
 }
-#if 0
+
 static int internal_curve_test_method(int n)
 {
     int r, nid = curves[n].nid;
@@ -1167,7 +1166,7 @@ static int internal_curve_test_method(int n)
     EC_GROUP_free(group);
     return r;
 }
-#endif
+
 static int group_field_test(void)
 {
     int r = 1;
@@ -2122,7 +2121,7 @@ static const unsigned char params_cf_fail[] = {
  * h <= 2**(t/8) where t is the security level of the curve, for which the lib
  * will always succeed in computing the cofactor. Neither of these curves
  * conform to that -- this is just robustness testing.
- 
+ */
 static int cofactor_range_test(void)
 {
     EC_GROUP *group = NULL;
@@ -2144,7 +2143,7 @@ static int cofactor_range_test(void)
     EC_GROUP_free(group);
     return ret;
 }
-*/
+
 /*-
  * For named curves, test that:
  * - the lib correctly computes the cofactor if passed a NULL or zero cofactor
@@ -2689,7 +2688,7 @@ static int custom_generator_test(int id)
 
     return ret;
 }
-//#if 0
+
 /*
  * check creation of curves from explicit params through the public API
  */
@@ -2966,7 +2965,7 @@ static int custom_params_test(int id)
 
     return ret;
 }
-//#endif
+
 static int ec_d2i_publickey_test(void)
 {
    unsigned char buf[1000];
@@ -3016,9 +3015,9 @@ int ec_test(void)
         return 1;
 
     ADD_TEST(parameter_test);
-    //ADD_TEST(cofactor_range_test);
+    ADD_TEST(cofactor_range_test);
     ADD_ALL_TESTS(cardinality_test, crv_len);
-//    ADD_TEST(prime_field_tests);
+    ADD_TEST(prime_field_tests);
 #ifndef OPENSSL_NO_EC2M
     ADD_TEST(hybrid_point_encoding_test);
     ADD_TEST(char2_field_tests);
@@ -3026,7 +3025,7 @@ int ec_test(void)
 #endif
     ADD_ALL_TESTS(nistp_single_test, OSSL_NELEM(nistp_tests_params));
     ADD_ALL_TESTS(internal_curve_test, crv_len);
-//    ADD_ALL_TESTS(internal_curve_test_method, crv_len);
+    ADD_ALL_TESTS(internal_curve_test_method, crv_len);
     ADD_TEST(group_field_test);
     ADD_ALL_TESTS(check_named_curve_test, crv_len);
     ADD_ALL_TESTS(check_named_curve_lookup_test, crv_len);

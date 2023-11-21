@@ -239,6 +239,49 @@ void test_perror(const char *s);
 typedef int fake_random_generate_cb(unsigned char *out, size_t outlen,
                                     const char *name, EVP_RAND_CTX *ctx);
 
+
+/*
+ * Comparisons between BIGNUMs.
+ * BIGNUMS can be compared against other BIGNUMs or zero.
+ * Some additional equality tests against 1 & specific values are provided.
+ * Tests for parity are included as well.
+ */
+DECLARE_COMPARISONS(BIGNUM *, BN)
+int test_BN_eq_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_ne_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_lt_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_le_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_gt_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_ge_zero(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_eq_one(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_odd(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_even(const char *file, int line, const char *s, const BIGNUM *a);
+int test_BN_eq_word(const char *file, int line, const char *bns, const char *ws,
+                    const BIGNUM *a, BN_ULONG w);
+int test_BN_abs_eq_word(const char *file, int line, const char *bns,
+                        const char *ws, const BIGNUM *a, BN_ULONG w);
+
+# define TEST_BN_eq(a, b)     test_BN_eq(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_ne(a, b)     test_BN_ne(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_lt(a, b)     test_BN_lt(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_gt(a, b)     test_BN_gt(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_le(a, b)     test_BN_le(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_ge(a, b)     test_BN_ge(__FILE__, __LINE__, #a, #b, a, b)
+# define TEST_BN_eq_zero(a)   test_BN_eq_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_ne_zero(a)   test_BN_ne_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_lt_zero(a)   test_BN_lt_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_gt_zero(a)   test_BN_gt_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_le_zero(a)   test_BN_le_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_ge_zero(a)   test_BN_ge_zero(__FILE__, __LINE__, #a, a)
+# define TEST_BN_eq_one(a)    test_BN_eq_one(__FILE__, __LINE__, #a, a)
+# define TEST_BN_eq_word(a, w) test_BN_eq_word(__FILE__, __LINE__, #a, #w, a, w)
+# define TEST_BN_abs_eq_word(a, w) test_BN_abs_eq_word(__FILE__, __LINE__, #a, #w, a, w)
+# define TEST_BN_odd(a)       test_BN_odd(__FILE__, __LINE__, #a, a)
+# define TEST_BN_even(a)      test_BN_even(__FILE__, __LINE__, #a, a)
+
+# define test_output_bignum(a,b) ((void)0)
+# define test_output_memory(a,b,c) ((void)0)
+
 #define ADD_TEST(fn) \
         if ( 1 != fn()) return 1;
 

@@ -251,3 +251,16 @@ int test_mem_ne(const char *file, int line, const char *st1, const char *st2,
 
 DEFINE_BN_COMPARISONS(eq, ==, BN_is_zero(a))
 
+int test_BN_odd(const char *file, int line, const char *s, const BIGNUM *a)
+{
+    if (a != NULL && BN_is_odd(a))
+        return 1;
+    return 0;
+}
+
+int test_BN_even(const char *file, int line, const char *s, const BIGNUM *a)
+{
+    if (a != NULL && !BN_is_odd(a))
+        return 1;
+    return 0;
+}
