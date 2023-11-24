@@ -66,6 +66,9 @@
     <ClCompile Include="tests\destest.c">
       <Filter>Source Files\tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\tests.c">
+      <Filter>Source Files\tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestEnclave_t.h">
