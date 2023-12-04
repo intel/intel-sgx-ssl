@@ -17,5 +17,9 @@ jobs:
       run: wget https://download.01.org/intel-sgx/sgx-linux/2.22/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.22.100.3.bin
     - name: install SDK
       run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
+    - name: download OpenSSL code
+      run: wget https://www.openssl.org/source/openssl-3.0.12.tar.gz; mv openssl-3.*.gz openssl_source/
+    - name: build SGXSSL
+      run: source sgxsdk/environment; cd Linux; make all
     - name: run Sample test in SIM
-      run: source sgxsdk/environment; cd sgxsdk/SampleCode/SampleEnclave; SGX_MODE=SIM make run
+      run: source sgxsdk/environment; cd Linux; make -C sgx/test_app/ clean; SGX_MODE=SIM make test
