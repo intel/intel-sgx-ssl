@@ -169,6 +169,8 @@
 #define _gmtime64_s    sgxssl__gmtime64_s
 #define _localtime64   sgxssl__localtime64
 #define _getsystime    sgxssl_getsystime
+#define _mktime64      sgxssl__mktime64
+#define __timezone     sgxssl__timezone
 
 /*windows.h*/
 #define Sleep sgxssl_sleep

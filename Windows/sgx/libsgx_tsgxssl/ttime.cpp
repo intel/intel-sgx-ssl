@@ -184,4 +184,12 @@ void sgxssl_sleep(int seconds)
 	return;
 }
 
+time_t sgxssl__mktime64(struct tm* timestamp_tm)
+{
+	(void)timestamp_tm;
+	return 0;
+}
+
+time_t sgxssl__timezone = 0;
+
 }
