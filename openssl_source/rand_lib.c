@@ -216,6 +216,7 @@ const RAND_METHOD *RAND_get_rand_method(void)
     return default_RAND_meth;
 }
 
+
 #  if !defined(OPENSSL_NO_ENGINE)
 int RAND_set_rand_engine(ENGINE *engine)
 {
@@ -248,8 +249,8 @@ int RAND_set_rand_engine(ENGINE *engine)
 
 void RAND_seed(const void *buf, int num)
 {
-   #pragma message("Warning: calling RAND_seed is not necessary, since SGXSSL will always use RDRAND engine")
-   return; // it seems to trigger SIGILL when called	
+    #pragma message("Warning: calling RAND_seed is not necessary, since SGXSSL will always use RDRAND engine")
+    return; // it seems to trigger SIGILL when called
     EVP_RAND_CTX *drbg;
 # ifndef OPENSSL_NO_DEPRECATED_3_0
     const RAND_METHOD *meth = RAND_get_rand_method();
@@ -268,7 +269,7 @@ void RAND_seed(const void *buf, int num)
 void RAND_add(const void *buf, int num, double randomness)
 {
     #pragma message("Warning: calling RAND_add is not necessary, since SGXSSL will always use RDRAND engine")
-    return; // it seems to trigger SIGILL when called	
+    return; // it seems to trigger SIGILL when called
     EVP_RAND_CTX *drbg;
 # ifndef OPENSSL_NO_DEPRECATED_3_0
     const RAND_METHOD *meth = RAND_get_rand_method();
@@ -328,8 +329,6 @@ const RAND_METHOD *RAND_get_rand_method(void)
 int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
                        unsigned int strength)
 {
-       //use RDRAND for SGX Enclave insteadly
-    return get_sgx_rand_bytes(buf, num);
     EVP_RAND_CTX *rand;
 #if !defined(OPENSSL_NO_DEPRECATED_3_0) && !defined(FIPS_MODULE)
     const RAND_METHOD *meth = RAND_get_rand_method();
@@ -341,6 +340,8 @@ int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
+    //use RDRAND for SGX Enclave insteadly
+    return get_sgx_rand_bytes(buf, num);
 
     rand = RAND_get0_private(ctx);
     if (rand != NULL)
@@ -351,8 +352,6 @@ int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
 
 int RAND_priv_bytes(unsigned char *buf, int num)
 {
-    //use RDRAND for SGX Enclave insteadly
-    return get_sgx_rand_bytes(buf, num);
     if (num < 0)
         return 0;
     return RAND_priv_bytes_ex(NULL, buf, (size_t)num, 0);
@@ -372,6 +371,8 @@ int RAND_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
+    //use RDRAND for SGX Enclave insteadly
+    return get_sgx_rand_bytes(buf, num);
 
     rand = RAND_get0_public(ctx);
     if (rand != NULL)
@@ -859,8 +860,9 @@ static int random_set_string(char **p, const char *s)
 
     if (s != NULL) {
         d = OPENSSL_strdup(s);
-        if (d == NULL)
+        if (d == NULL) {
             return 0;
+        }
     }
     OPENSSL_free(*p);
     *p = d;
