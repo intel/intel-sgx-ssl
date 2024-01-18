@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   build:
 
@@ -14,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: download SDK
-      run: wget https://download.01.org/intel-sgx/sgx-linux/2.22/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.22.100.3.bin
+      run: wget https://download.01.org/intel-sgx/sgx-linux/2.23/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.23.100.2.bin
     - name: install SDK
       run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
     - name: download OpenSSL code
