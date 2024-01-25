@@ -94,9 +94,12 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
+call powershell -Command "(Get-Content -Path %OPENSSL_VERSION%\providers\implementations\rands\seeding\rand_win.c -Raw) -replace '(?s)(# ifdef USE_BCRYPTGENRANDOM).*?(# endif)', '' | Set-Content -Path temp.c"
+call powershell -Command "(Get-Content -Path temp.c -Raw) -replace '(?s)(# ifndef USE_BCRYPTGENRANDOM).*?(# endif)', '' | Set-Content -Path %OPENSSL_VERSION%\providers\implementations\rands\seeding\rand_win.c"
+
 copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
-copy /y x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
+copy /y  x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
 copy /y  threads_win.c %OPENSSL_VERSION%\crypto\
 
 
@@ -142,7 +145,7 @@ set ADDITIONAL_CONF=
 if "%OSSL3ONLY%"=="1" (
 	set ADDITIONAL_CONF=--api=3.0 no-deprecated
 )
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio no-dgram no-thread-pool no-ts -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC 
 call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .

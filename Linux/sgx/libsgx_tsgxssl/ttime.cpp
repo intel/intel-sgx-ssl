@@ -123,4 +123,19 @@ void sgxssl_usleep(int micro_seconds)
 {
 	(void)micro_seconds;
 }
+
+unsigned int sgxssl_sleep(unsigned int seconds)
+{
+	(void)seconds;
+	return 0;
+}
+
+time_t sgxssl_mktime(struct tm *timestamp_tm)
+{
+	(void)timestamp_tm;
+	return 0;
+}
+
+time_t sgxssl_timezone = 0;
+
 }
