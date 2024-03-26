@@ -13,11 +13,11 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "support_openssl_3.1*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "support_openssl_3.1*" ]
   schedule:
-    - cron: '15 21 * * 1'
+    - cron: '14 21 * * 1'
 
 permissions:
   contents: read
@@ -69,7 +69,7 @@ jobs:
          echo "Run, Build Application using script"
          wget https://download.01.org/intel-sgx/sgx-linux/2.24/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.24.100.3.bin;
          chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin;  
-         wget https://www.openssl.org/source/openssl-3.0.14.tar.gz --directory-prefix=openssl_source/;
+         wget https://www.openssl.org/source/openssl-3.1.5.tar.gz --directory-prefix=openssl_source/; 
          source sgxsdk/environment; cd Linux; make sgxssl_no_mitigation
 
     - name: Perform CodeQL Analysis

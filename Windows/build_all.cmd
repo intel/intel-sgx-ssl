@@ -1,6 +1,6 @@
 @echo off
 Rem 
-Rem Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+Rem Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 Rem 
 Rem Redistribution and use in source and binary forms, with or without
 Rem modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@ Rem
 @echo off
 
 
-set SGXSSL_VERSION=3.0.0.%errorlevel%
+set SGXSSL_VERSION=3.1.0.%errorlevel%
 
 REM Check if Prerequisites apps available
 echo "Validating Prerequisites (perl, nasm)"
@@ -51,7 +51,7 @@ if %errorlevel% neq 0 (
 
 REM This variable must be set to the openssl file name (version) located in the openssl_source folder
 if "%1"=="" (
-	set OPENSSL_VERSION=openssl-3.0.0
+	set OPENSSL_VERSION=openssl-3.1.0
 ) else (
 	set OPENSSL_VERSION=%1
 )
