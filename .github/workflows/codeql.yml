@@ -13,9 +13,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main", "support_openssl_3*" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "support_openssl_3*" ]
+    branches: [ "main" ]
   schedule:
     - cron: '15 21 * * 1'
 
