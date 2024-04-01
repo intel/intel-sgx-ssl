@@ -24,14 +24,14 @@ EXECUTABLE := $(BIN)
 all: $(EXECUTABLE)
 
 # Link the executable
-$(EXECUTABLE): $(OBJECTS) missing_symbols.o
+$(EXECUTABLE): $(OBJECTS) sgxssl_fuzz_common.o
 	$(LD) $(LDFLAGS) -o $@ $^ -L../Linux/package/lib64/ -Wl,--no-whole-archive -Wl,--start-group  -lsgx_tsgxssl_crypto -lsgx_tsgxssl -Wl,--end-group  -ldl -pthread -L/usr/lib/gcc/x86_64-linux-gnu/11/ -lstdc++ -Wl,--defsym,__errno=0
 
 # Compile source files into object files
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d.tmp -MT $@ -c -o $@ $<
 
-missing_symbols.o: missing_symbols.cpp
+sgxssl_fuzz_common.o: sgxssl_fuzz_common.cpp
 	$(CXX) $(CPPFLAGS) -MMD -MF $*.d.tmp -MT $@ -c -o $@ $<
 
 # Include dependency files
@@ -39,9 +39,9 @@ missing_symbols.o: missing_symbols.cpp
 
 # Clean target
 clean:
-	 rm -f *.o *.d *.tmp $(EXECUTABLE)
+	 rm -f *.o *.d *.tmp $(EXECUTABLE) *_fuzz
 
-run: all
-	afl-fuzz -i fuzz/corpora/$(BIN) -o fuzz/corpora/$(BIN)/out fuzz/$(BIN)
+#run: all
+#	afl-fuzz -i fuzz/corpora/$(BIN) -o fuzz/corpora/$(BIN)/out fuzz/$(BIN)
 
-.PHONY: all clean run
+.PHONY: all clean #run
