@@ -14,7 +14,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/sha.h>
-#include "bypass_for_sgxssl.h"
 #include "fuzzer.h"
 
 int FuzzerInitialize(int *argc, char ***argv)

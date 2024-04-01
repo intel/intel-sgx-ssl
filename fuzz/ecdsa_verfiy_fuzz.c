@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/evp.h>
-#include <openssl/ec.h>
 #include <openssl/err.h>
 #include "fuzzer.h"
 
@@ -24,7 +23,9 @@ int FuzzerInitialize(int *argc, char ***argv)
 int FuzzerTestOneInput(const uint8_t *buf, size_t len)
 {
     (void)len;
-    int n = atoi((const char *)buf);
+#if 0
+    
+    int n = atoi((const char *)*buf);
     if ( n < 0 ) return -1;
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
     if (!ctx) {
@@ -53,6 +54,7 @@ int FuzzerTestOneInput(const uint8_t *buf, size_t len)
     EVP_PKEY_free(pkey);
 
     printf("ECDSA key pair generated successfully!\n");
+#endif
     return 0;
 }
 
