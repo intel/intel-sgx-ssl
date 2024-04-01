@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <pthread.h>
-//#include <linux/spinlock.h>
+#include <emmintrin.h>
 #ifndef UINT32_MAX
 #define UINT32_MAX 0xFFFFFFFFU
 #endif
