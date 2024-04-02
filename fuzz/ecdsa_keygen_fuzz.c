@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/evp.h>
+#include <openssl/ec.h>
 #include <openssl/err.h>
 #include "bypass_for_sgxssl.h"
 #include "fuzzer.h"

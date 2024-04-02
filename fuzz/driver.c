@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 #include <openssl/opensslconf.h>
 #include <fcntl.h>
 #include "fuzzer.h"
