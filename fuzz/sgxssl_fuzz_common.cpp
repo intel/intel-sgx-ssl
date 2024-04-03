@@ -11,12 +11,12 @@ namespace std {
         class bad_alloc
         {
         public:
-		bad_alloc();
+//		bad_alloc();
 		bad_alloc(const bad_alloc&) throw();
-		~bad_alloc();
+//		~bad_alloc();
 	};
-	bad_alloc::bad_alloc() {}
-	bad_alloc::~bad_alloc() {}
+//	bad_alloc::bad_alloc() {}
+//	bad_alloc::~bad_alloc() {}
 	bad_alloc::bad_alloc(const bad_alloc&) throw() {}
 
 }
@@ -86,25 +86,5 @@ unsigned long sgx_spin_unlock(sgx_spinlock_t *lock)
 }
 
 #if defined(__cplusplus)
-}
-#endif
-
-
-
-#if 0
-namespace std {
-	class bad_alloc
-        {
-        public:
-                bad_alloc() throw();
-                bad_alloc(const bad_alloc&) throw();
-                bad_alloc& operator=(const bad_alloc&) throw();
-                ~bad_alloc();
-                virtual const char* what() const throw();
-        };
-
-	//bad_alloc::bad_alloc(const bad_alloc&) throw() {}
-	//bad_alloc::bad_alloc(std::bad_alloc const&){}
-
 }
 #endif
