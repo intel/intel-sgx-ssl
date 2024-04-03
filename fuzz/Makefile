@@ -41,7 +41,4 @@ sgxssl_fuzz_common.o: sgxssl_fuzz_common.cpp
 clean:
 	 rm -f *.o *.d *.tmp $(EXECUTABLE) *_fuzz
 
-#run: all
-#	afl-fuzz -i fuzz/corpora/$(BIN) -o fuzz/corpora/$(BIN)/out fuzz/$(BIN)
-
-.PHONY: all clean #run
+.PHONY: all clean

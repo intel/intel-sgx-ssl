@@ -11,17 +11,19 @@ namespace std {
         class bad_alloc
         {
         public:
-//		bad_alloc();
 		bad_alloc(const bad_alloc&) throw();
-//		~bad_alloc();
 	};
-//	bad_alloc::bad_alloc() {}
-//	bad_alloc::~bad_alloc() {}
 	bad_alloc::bad_alloc(const bad_alloc&) throw() {}
 
 }
 
-extern "C" int sgx_read_rand(unsigned int *buf,  unsigned long size)
+typedef volatile unsigned long sgx_spinlock_t;
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+int sgx_read_rand(unsigned int *buf,  unsigned long size)
 {
     if(buf == NULL || size == 0 || size> UINT32_MAX )
     {
@@ -34,13 +36,6 @@ extern "C" int sgx_read_rand(unsigned int *buf,  unsigned long size)
     }
     return 0;
 }
-
-
-typedef volatile unsigned long sgx_spinlock_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static inline int _InterlockedExchange(int volatile * dst, int val)
 {
