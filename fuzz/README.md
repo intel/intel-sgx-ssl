@@ -1,15 +1,20 @@
 Fuzzing Intel SGX SSL
 =====================
 
-OpenSSL can use AFL to do fuzzing.
+Do fuzzing with AFL in Linux
 
 AFL
 ---
 
-Build SGX SSL in Linux folder first, and go to the `fuzz/`:
+Install AFL
 
 ```
 sudo apt-get install afl-clang
+```
+
+Build SGX SSL in Linux first, and go to the `fuzz/`:
+
+```
 make clean
 for i in $(ls *_fuzz.c); do make FUZZER=`echo $i | awk '{print substr($0, 1, length($0)-2)}'`; done
 ```
