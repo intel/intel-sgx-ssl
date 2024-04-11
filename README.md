@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intel/intel-sgx-ssl/badge)](https://securityscorecards.dev/viewer/?uri=github.com/intel/intel-sgx-ssl)
+
 Intel® Software Guard Extensions SSL
 ================================================
 
