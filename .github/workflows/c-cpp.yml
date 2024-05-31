@@ -6,20 +6,27 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
     - name: download SDK
-      run: wget https://download.01.org/intel-sgx/sgx-linux/2.22/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.22.100.3.bin
+      run: wget https://download.01.org/intel-sgx/sgx-linux/2.24/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.24.100.3.bin
     - name: install SDK
       run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
     - name: download OpenSSL code
-      run: wget https://www.openssl.org/source/openssl-3.2.0.tar.gz; mv openssl-3.*.gz openssl_source/
+      run: wget https://www.openssl.org/source/openssl-3.2.1.tar.gz --directory-prefix=openssl_source/
     - name: build SGXSSL
       run: source sgxsdk/environment; cd Linux; make all; DEBUG=1 make all
     - name: run unit test in SIM
-      run: source sgxsdk/environment; cd Linux; make -C sgx/test_app/ clean; SKIP_INTELCPU_CHECK=TRUE SGX_MODE=SIM make test      
+      run: source sgxsdk/environment; cd Linux; make -C sgx/test_app/ clean; SKIP_INTELCPU_CHECK=TRUE SGX_MODE=SIM make test
