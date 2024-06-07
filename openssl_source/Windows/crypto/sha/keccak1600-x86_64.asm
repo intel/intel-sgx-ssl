@@ -450,7 +450,7 @@ $L$SEH_begin_SHA3_squeeze:
 
 
 	shr	rcx,3
-	mov	r8,rdi
+	mov	r9,rdi
 	mov	r12,rsi
 	mov	r13,rdx
 	mov	r14,rcx
@@ -461,8 +461,8 @@ $L$oop_squeeze:
 	cmp	r13,8
 	jb	NEAR $L$tail_squeeze
 
-	mov	rax,QWORD[r8]
-	lea	r8,[8+r8]
+	mov	rax,QWORD[r9]
+	lea	r9,[8+r9]
 	mov	QWORD[r12],rax
 	lea	r12,[8+r12]
 	sub	r13,8
@@ -472,12 +472,12 @@ $L$oop_squeeze:
 	jnz	NEAR $L$oop_squeeze
 
 	call	KeccakF1600
-	mov	r8,rdi
+	mov	r9,rdi
 	mov	rcx,r14
 	jmp	NEAR $L$oop_squeeze
 
 $L$tail_squeeze:
-	mov	rsi,r8
+	mov	rsi,r9
 	mov	rdi,r12
 	mov	rcx,r13
 DB	0xf3,0xa4
