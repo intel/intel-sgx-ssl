@@ -51,7 +51,7 @@ if %errorlevel% neq 0 (
 
 REM This variable must be set to the openssl file name (version) located in the openssl_source folder
 if "%1"=="" (
-	set OPENSSL_VERSION=openssl-3.2.0
+	set OPENSSL_VERSION=openssl-3.3.0
 ) else (
 	set OPENSSL_VERSION=%1
 )
