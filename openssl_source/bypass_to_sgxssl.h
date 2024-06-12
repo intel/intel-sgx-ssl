@@ -250,6 +250,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define gmtime sgxssl_gmtime
 #define gettimeofday sgxssl_gettimeofday
 #define usleep sgxssl_usleep
+#define sleep sgxssl_sleep
 
 //openssl 1.1.1 new APIs
 //
