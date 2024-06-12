@@ -353,14 +353,6 @@ void t_sgxssl_call_apis()
 	}
 	printf("test sha1_test completed\n");
 
-	//ret = threads_test();
-	if (ret != 0)
-	{
-		printf("test threads_test returned error %d\n", ret);
-		exit(ret);
-	}
-	printf("test threads_test completed\n");
-
 }
 
 
