@@ -578,16 +578,6 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
     case BIO_CTRL_SET_CLOSE:
         b->shutdown = (int)num;
         break;
-    case BIO_CTRL_FLUSH:
-        st = b->flags & BIO_FLAGS_UPLINK_INTERNAL
-                ? UP_fflush(b->ptr) : fflush((FILE *)b->ptr);
-        if (st == EOF) {
-            ERR_raise_data(ERR_LIB_SYS, get_last_sys_error(),
-                           "calling fflush()");
-            ERR_raise(ERR_LIB_BIO, ERR_R_SYS_LIB);
-            ret = 0;
-        }
-        break;
     case BIO_CTRL_DUP:
         ret = 1;
         break;
