@@ -64,7 +64,12 @@ ifneq ($(CRYPTO_ONLY), 1)
 
 ifeq ($(LINUX_SGX_BUILD), 0)
 ifneq ($(NO_THREADS), 1)
+# Don't build the test app by default in FIPS mode since it depends on
+# the FIPS provider.
+# Execute the install target first.
+ifneq ($(FIPS), 1)
 	$(MAKE) -C $(TEST_DIR) all
+endif
 endif
 endif
 endif
