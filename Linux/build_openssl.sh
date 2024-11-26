@@ -1,7 +1,6 @@
 #!/bin/bash
-
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -78,6 +77,13 @@ fi
 
 if [[ "$*" == *"only3x"* ]] ; then
 	ADDITIONAL_CONF+="--api=3.0 no-deprecated "
+fi
+
+if [[ "$*" == *"fips"* ]] ; then
+    ADDITIONAL_CONF+="-DSGXSSL_FIPS "
+    cp bss_file.c $OPENSSL_VERSION/crypto/bio/ || exit 1
+    cp conf_mod.c $OPENSSL_VERSION/crypto/conf/ || exit 1
+    cp o_fopen.c $OPENSSL_VERSION/crypto/ || exit 1
 fi
 
 # Mitigation flags

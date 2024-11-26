@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,8 +34,13 @@ LINUX_SGX_BUILD ?= 0
 EMPTY_SRC = check_lvi_toolset
 .PHONY: sgxssl sgxssl_no_mitigation clean install uninstall
 
+ifeq ($(FIPS), 1)
+BUILD_TARGET = sgxssl_no_mitigation
+else
+BUILD_TARGET = sgxssl
+endif
 
-all: sgxssl
+all: $(BUILD_TARGET)
 
 sgxssl:
 	@rm -rf $(EMPTY_SRC).* && touch $(EMPTY_SRC).cpp
@@ -50,7 +55,7 @@ sgxssl:
 	$(MAKE) -C sgx/ 
 
 sgxssl_no_mitigation:
-	$(MAKE) -C sgx/ all
+	$(MAKE) -C sgx/ all FIPS=$(FIPS)
 
 clean:
 	$(MAKE) -C sgx/ clean

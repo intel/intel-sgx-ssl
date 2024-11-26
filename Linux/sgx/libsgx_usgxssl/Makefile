@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -80,7 +80,11 @@ Sgx_ussl_Include_Paths := -I. -I$(SGX_SDK_INC)
 Sgx_ussl_C_Flags := $(SGX_COMMON_CFLAGS) -fpie -fpic -fstack-protector -Wformat -Wformat-security -Wno-attributes $(Sgx_ussl_Include_Paths)
 Sgx_ussl_Cpp_Flags := $(Sgx_ussl_C_Flags) -std=c++11
 
+ifeq ($(FIPS), 1)
 Sgx_ussl_Cpp_Files := $(wildcard *.cpp)
+else
+Sgx_ussl_Cpp_Files := $(filter-out ufile.cpp, $(sort $(wildcard *.cpp)))
+endif
 Sgx_ussl_C_Files := $(wildcard *.c)
 
 Sgx_ussl_Cpp_Objects := $(addprefix $(OBJDIR)/, $(Sgx_ussl_Cpp_Files:.cpp=.o))

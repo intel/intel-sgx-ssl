@@ -29,29 +29,41 @@
  *
  */
 
-/* TestEnclave.edl - Top EDL file. */
+#include <stdio.h>
+#include "tcommon.h"
+#include "sgx_tsgxssl_t.h"
+#include "tSgxSSL_api.h"
 
-enclave {
+extern PRINT_TO_STDOUT_STDERR_CB s_print_cb;
 
-    from "sgx_tsgxssl.edl" import *;
-    from "sgx_pthread.edl" import *;
-    from "sgxssl_file.edl" import *;
+extern "C" {
+	uint64_t* sgxssl_fopen(const char *filename, const char *mode)
+{
+	uint64_t* retval;
+	u_sgxssl_fopen(&retval, filename, mode);
+	return retval;
+}
+char* sgxssl_fgets(char* Buffer, int MaxCount, uint64_t* Stream)
+{
+	char *retval;
+	u_sgxssl_fgets(&retval, Buffer, MaxCount, Stream);
+	return retval;
+}
+void sgxssl_fclose(uint64_t* Stream)
+{
+        u_sgxssl_fclose(Stream);
+}
 
-    /* 
-     * uprint - invokes OCALL to display string buffer inside the enclave.
-     *  [in]: copy the string buffer to App outside.
-     *  [string]: specifies 'str' is a NULL terminated buffer.
-     */
-    untrusted {
-        void uprint([in, string] const char *str);
-        void usgx_exit(int reason);
-        int ucreate_thread();
-    };
-
-
-    trusted {
-        public void t_sgxssl_call_apis();
-        public void new_thread_func();
- 
-    };
-};
+uint32_t sgxssl_fread(void* ptr, uint32_t size, uint32_t nmemb, uint64_t* stream)
+{
+	uint32_t retval;
+	u_sgxssl_fread(&retval, ptr, size, nmemb, stream);
+	return retval;
+}
+int sgxssl_ferror(uint64_t* stream)
+{
+	int retval;
+	u_sgxssl_ferror(&retval, stream);
+	return retval;
+}
+}

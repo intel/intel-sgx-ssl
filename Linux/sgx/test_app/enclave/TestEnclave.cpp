@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,6 +36,7 @@
 #include "TestEnclave.h"
 #include "TestEnclave_t.h"  /* print_string */
 #include "tSgxSSL_api.h"
+#include "sgx_trts.h"
 
 #include <openssl/ec.h>
 #include <openssl/bn.h>
@@ -43,6 +44,7 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <openssl/provider.h>
 
 #define ADD_ENTROPY_SIZE	32
 
@@ -295,12 +297,66 @@ void t_sgxssl_call_apis()
     printf("Start tests\n");
     
     SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
+    OSSL_PROVIDER *prov;
+#ifndef SGXSSL_FIPS
+    OSSL_PROVIDER_load(NULL, "default");
+#else
+    void *entry = get_ossl_fips_sym("OSSL_provider_init");
 
+    if (!entry )
+    {
+        printf("provider init func address not found\n");
+        exit(ret);
+    }
+
+    // OSSL_PROVIDER_add_builtin
+    ret = OSSL_PROVIDER_add_builtin(NULL, "fips", (OSSL_provider_init_fn *)entry);
+    if (ret != 1)
+    {
+        printf("FIPS provider add fail\n");
+        exit(ret);
+    } else {
+        printf("OSSL_PROVIDER_add_builtin added FIPS entry\n");
+    }
+    if (OSSL_PROVIDER_available(NULL, "fips") == 1)
+    {
+        printf("Loading FIPS provider...\n");
+    } else {
+        printf("FIPS provider not available, quitting...\n");
+        return;
+    }
+    
+    prov = OSSL_PROVIDER_load(NULL, "fips");
+    if (prov == NULL) {
+        printf("Failed to load FIPS provider\n");
+        exit(EXIT_FAILURE);
+    } else {
+        printf("Loaded FIPS provider\n");
+    }
+
+    if (OSSL_PROVIDER_self_test(prov) == 1)
+    {
+        printf("OSSL_PROVIDER_self_test: %s\n", OSSL_PROVIDER_get0_name(prov));
+        const char *build = NULL;
+        OSSL_PARAM request[] = {
+            { "buildinfo", OSSL_PARAM_UTF8_PTR, &build, 0, 0 },
+            { NULL, 0, NULL, 0, 0 }
+        };
+
+        OSSL_PROVIDER_get_params(prov, request);
+        printf("Provider buildinfo: %s\n", build);
+     } else {
+	printf("OSSL_PROVIDER_self_test: failed\n");
+        OSSL_PROVIDER_unload(prov);
+        return;
+     }	
+
+#endif
     //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
 
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
-
+#ifndef SGXSSL_FIPS
     ret = rsa_key_gen();
     if (ret != 0)
     {
@@ -316,7 +372,7 @@ void t_sgxssl_call_apis()
         exit(ret);
     }
 	printf("test ec_key_gen completed\n");
-
+#endif
     ret = rsa_test();
     if (ret != 0)
     {
@@ -324,7 +380,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test rsa_test completed\n");
-
+#ifndef SGXSSL_FIPS
 	ret = ec_test();
 	if (ret != 0)
     {
@@ -332,7 +388,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test ec_test completed\n");
-
+#endif
 	ret = ecdh_test();
 	if (ret != 0)
     {
@@ -356,7 +412,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test bn_test completed\n");
-
+#ifndef SGXSSL_FIPS
 	ret = dhtest();
 	if (ret != 0)
     {
@@ -364,7 +420,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test dhtest completed\n");
-
+#endif
 	ret = aesccm_test();
 	if (ret != 0)
 	{
@@ -372,7 +428,7 @@ void t_sgxssl_call_apis()
 		exit(ret);
 	}
 	printf("test aesccm_test completed\n");
-
+#ifndef SGXSSL_FIPS
 	ret = aesgcm_test();
 	if (ret != 0)
 	{
@@ -380,8 +436,8 @@ void t_sgxssl_call_apis()
 		exit(ret);
 	}
 	printf("test aesgcm_test completed\n");
-
-	ret = sha256_test();
+#endif
+       ret = sha256_test();
 	if (ret != 0)
     {
     	printf("test sha256_test returned error %d\n", ret);
@@ -412,7 +468,7 @@ void t_sgxssl_call_apis()
     	exit(ret);
     }
 	printf("test threads_test completed\n");
-
+#ifndef SGXSSL_FIPS
     //GM SM2 - sign and verify
     ret = ecall_sm2_sign_verify();
     if (ret != 0)
@@ -457,5 +513,8 @@ void t_sgxssl_call_apis()
         exit(ret);
     }
     printf("test evp_sm4_ctr completed\n");
-
+#endif
+#ifdef SGXSSL_FIPS
+    OSSL_PROVIDER_unload(prov);
+#endif
 }

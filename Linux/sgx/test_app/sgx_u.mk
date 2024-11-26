@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -109,9 +109,14 @@ test: all
 	@echo "RUN  =>  TestApp [$(SGX_MODE)|$(SGX_ARCH), OK]"
 
 ######## App Objects ########
+ifeq ($(FIPS), 1)
+SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
+else
+SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
+endif
 
 $(UNTRUSTED_DIR)/TestEnclave_u.c: $(SGX_EDGER8R) enclave/TestEnclave.edl
-	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC)
+	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDTIONAL_EDL_PATH)
 	@echo "GEN  =>  $@"
 
 $(UNTRUSTED_DIR)/TestEnclave_u.o: $(UNTRUSTED_DIR)/TestEnclave_u.c

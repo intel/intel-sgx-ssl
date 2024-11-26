@@ -29,29 +29,8 @@
  *
  */
 
-/* TestEnclave.edl - Top EDL file. */
+/* sgxssl_file.edl - with empty declarations. */
 
 enclave {
 
-    from "sgx_tsgxssl.edl" import *;
-    from "sgx_pthread.edl" import *;
-    from "sgxssl_file.edl" import *;
-
-    /* 
-     * uprint - invokes OCALL to display string buffer inside the enclave.
-     *  [in]: copy the string buffer to App outside.
-     *  [string]: specifies 'str' is a NULL terminated buffer.
-     */
-    untrusted {
-        void uprint([in, string] const char *str);
-        void usgx_exit(int reason);
-        int ucreate_thread();
-    };
-
-
-    trusted {
-        public void t_sgxssl_call_apis();
-        public void new_thread_func();
- 
-    };
 };

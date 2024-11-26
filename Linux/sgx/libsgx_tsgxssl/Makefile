@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -83,9 +83,19 @@ endif
 endif
 endif
 
+ifeq ($(FIPS), 1)
+SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
+else
+SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
+endif
+
 SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
+ifeq ($(FIPS), 1)
 Sgx_tssl_Cpp_Files := $(sort $(wildcard *.cpp))
+else
+Sgx_tssl_Cpp_Files := $(filter-out tfile.cpp, $(sort $(wildcard *.cpp)))
+endif
 Sgx_tssl_C_Files := $(sort $(wildcard *.c))
 Sgx_tssl_S_Files := $(sort $(wildcard *.S))
 
@@ -110,7 +120,7 @@ all: $(TRUSTED_LIB)
 
 ######## sgx_tsgxssl Objects ########
 sgx_tsgxssl_t.c: $(SGX_EDGER8R) $(SGX_EDL_FILE)
-	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC)
+	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDTIONAL_EDL_PATH)
 	@echo "GEN  =>  $@"
 
 sgx_tsgxssl_t.o: sgx_tsgxssl_t.c
