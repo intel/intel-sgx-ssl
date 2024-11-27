@@ -329,7 +329,7 @@ void t_sgxssl_call_apis()
     } else {
         printf("Loaded FIPS provider\n");
     }
-
+#endif
     if (OSSL_PROVIDER_self_test(prov) == 1)
     {
         printf("OSSL_PROVIDER_self_test: %s\n", OSSL_PROVIDER_get0_name(prov));
@@ -347,7 +347,6 @@ void t_sgxssl_call_apis()
         return;
      }	
 
-#endif
     //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
 
     // Initialize SGXSSL crypto
