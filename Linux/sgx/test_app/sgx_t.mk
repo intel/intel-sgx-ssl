@@ -120,7 +120,7 @@ TestEnclave_Include_Paths := -I. -I$(ENCLAVE_DIR) -I$(SGX_SDK_INC) -I$(SGX_SDK_I
 
 Common_C_Cpp_Flags := -DOS_ID=$(OS_ID) $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpic -fpie -fstack-protector -fno-builtin-printf -Wformat -Wformat-security $(TestEnclave_Include_Paths) -include "tsgxsslio.h"
 ifeq ($(FIPS), 1)
-Common_C_Cpp_Flags += -DSGXSSL_FIPS -DOPENSSL_NO_SM2
+Common_C_Cpp_Flags += -DSGXSSL_FIPS -DOPENSSL_NO_SM2 -DFIPS_MODULE
 endif
 TestEnclave_C_Flags := $(Common_C_Cpp_Flags) -Wno-implicit-function-declaration -std=c11
 TestEnclave_Cpp_Flags :=  $(Common_C_Cpp_Flags) -std=c++11 -nostdinc++
