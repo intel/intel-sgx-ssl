@@ -120,8 +120,12 @@ FILE *openssl_fopen(const char *filename, const char *mode)
 
 void *openssl_fopen(const char *filename, const char *mode)
 {
+#ifdef SGXSSL_FIPS
     unsigned long* ret = sgxssl_fopen(filename, mode);
     return ret;
+#else
+    return NULL;
+#endif
 }
 
 #endif

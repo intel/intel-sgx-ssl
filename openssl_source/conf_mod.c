@@ -186,7 +186,22 @@ int CONF_modules_load_file_ex(OSSL_LIB_CTX *libctx, const char *filename,
 
     ERR_set_mark();
 
+#ifdef SGXSSL_FIPS
     file = strdup("./openssl.cnf");
+#else
+    if (filename == NULL) {
+        file = CONF_get1_default_config_file();
+        if (file == NULL)
+            goto err;
+        if (*file == '\0') {
+            /* Do not try to load an empty file name but do not error out */
+            ret = 1;
+            goto err;
+        }
+    } else {
+        file = (char *)filename;
+    }
+#endif
 
     conf = NCONF_new_ex(libctx, NULL);
     if (conf == NULL)

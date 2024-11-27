@@ -379,6 +379,7 @@ static int file_write(BIO *b, const char *in, int inl)
 }
 static int file_read(BIO *b, char *out, int outl)
 {
+#ifdef SGXSSL_FIPS
     int ret = 0;
 
     if (b->init && (out != NULL)) {
@@ -396,6 +397,9 @@ static int file_read(BIO *b, char *out, int outl)
         }
     }
     return ret;
+#else
+    return -1;
+#endif
 }
 static int file_puts(BIO *bp, const char *str)
 {
@@ -403,6 +407,7 @@ static int file_puts(BIO *bp, const char *str)
 }
 static int file_gets(BIO *bp, char *buf, int size)
 {
+#ifdef SGXSSL_FIPS
     int ret = 0;
 
     buf[0] = '\0';
@@ -417,10 +422,14 @@ static int file_gets(BIO *bp, char *buf, int size)
         ret = strlen(buf);
  err:
     return ret;
+#else
+    return 0;
+#endif
 }
 static int file_free(BIO *a);
 static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
 {
+#ifdef SGXSSL_FIPS
     long ret = 1;
     unsigned long *fp = (unsigned long *)b->ptr;
     unsigned long **fpp;
@@ -592,17 +601,25 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
         break;
     }
     return ret;
+#else
+    return 0;
+#endif
 }
 static int file_new(BIO *bi)
 {
+#ifdef SGXSSL_FIPS
     bi->init = 0;
     bi->num = 0;
     bi->ptr = NULL;
     bi->flags = BIO_FLAGS_UPLINK_INTERNAL; /* default to UPLINK */
     return 1;
+#else
+    return 0;
+#endif
 }
 static int file_free(BIO *a)
 {
+#ifdef SGXSSL_FIPS
     if (a == NULL)
         return 0;
     if (a->shutdown) {
@@ -617,6 +634,9 @@ static int file_free(BIO *a)
         a->init = 0;
     }
     return 1;
+#else
+    return 0;
+#endif
 }
 
 static const BIO_METHOD methods_filep = {
@@ -641,6 +661,7 @@ const BIO_METHOD *BIO_s_file(void)
 extern int u_sgxssl_fopen(unsigned long * file, const char *filename, const char *mode);
 BIO *BIO_new_file(const char *filename, const char *mode)
 {
+#ifdef SGXSSL_FIPS
     BIO  *ret;
     unsigned long *file = NULL;
     u_sgxssl_fopen(&file, filename, mode);
@@ -673,6 +694,9 @@ BIO *BIO_new_file(const char *filename, const char *mode)
     BIO_clear_flags(ret, BIO_FLAGS_UPLINK_INTERNAL);
     BIO_set_fp(ret, file, fp_flags);
     return ret;
+#else
+    return NULL;
+#endif
 }
 
 #endif                         /* OPENSSL_NO_STDIO */
