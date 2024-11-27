@@ -554,7 +554,7 @@ static EVP_RAND_CTX *rand_new_seed(OSSL_LIB_CTX *libctx)
         } else {
             pl1 = ossl_parse_query(libctx, propq, 1);
             if (pl1 == NULL) {
-                ERR_raise(ERR_LIB_RAND, RAND_R_INVALID_PROPERTY_QUERY);
+                ERR_raise(ERR_LIB_RAND, RAND_R_INTERNAL_ERROR); 
                 return NULL;
             }
             pl2 = ossl_parse_query(libctx, "-fips", 1);
