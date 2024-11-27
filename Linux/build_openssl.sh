@@ -52,7 +52,7 @@ mkdir -p $SGXSSL_ROOT/package/lib64/
 # build openssl modules, clean previous openssl dir if it exist
 cd $SGXSSL_ROOT/../openssl_source || exit 1
 rm -rf $OPENSSL_VERSION
-tar xvf $OPENSSL_VERSION.tar.gz || exit 1
+tar xvf $OPENSSL_VERSION.tar.gz > /dev/null || exit 1
 
 # Remove AESBS to support only AESNI and VPAES
 sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
