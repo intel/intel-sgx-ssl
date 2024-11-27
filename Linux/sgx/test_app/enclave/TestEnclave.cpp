@@ -413,7 +413,7 @@ void t_sgxssl_call_apis()
         goto end;
     }
         printf("test bn_test completed\n");
-#ifndef SGXSSL_FIPS
+
         ret = dhtest();
         if (ret != 0)
     {
@@ -421,7 +421,7 @@ void t_sgxssl_call_apis()
         goto end;
     }
         printf("test dhtest completed\n");
-#endif
+
 	ret = aesccm_test();
 	if (ret != 0)
     {
@@ -429,7 +429,7 @@ void t_sgxssl_call_apis()
          goto end;
     }
 	printf("test aesccm_test completed\n");
-#ifndef SGXSSL_FIPS
+
 	ret = aesgcm_test();
 	if (ret != 0)
 	{
@@ -437,7 +437,7 @@ void t_sgxssl_call_apis()
 		goto end;
 	}
 	printf("test aesgcm_test completed\n");
-#endif
+
        ret = sha256_test();
 	if (ret != 0)
     {
