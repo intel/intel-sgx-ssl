@@ -2460,8 +2460,13 @@ static int do_test_custom_explicit_fromdata(EC_GROUP *group, BN_CTX *ctx,
                                              EC_GROUP_get0_order(group))))
         goto err;
 
+    OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();//added for keygen test with FIPS provider
+    if (libctx == NULL) {
+        goto err;
+    }
+
     if (!TEST_ptr(params = OSSL_PARAM_BLD_to_param(bld))
-        || !TEST_ptr(pctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL))
+        || !TEST_ptr(pctx = EVP_PKEY_CTX_new_from_name(libctx, "EC", NULL))
         || !TEST_int_gt(EVP_PKEY_fromdata_init(pctx), 0)
         || !TEST_int_gt(EVP_PKEY_fromdata(pctx, &pkeyparam,
                                           EVP_PKEY_KEY_PARAMETERS, params), 0))
@@ -2606,6 +2611,7 @@ err:
     OSSL_PARAM_BLD_free(bld);
     EVP_PKEY_free(pkeyparam);
     EVP_PKEY_CTX_free(pctx);
+    OSSL_LIB_CTX_free(libctx);
     return ret;
 }
 
@@ -2874,15 +2880,20 @@ static int custom_params_test(int id)
         goto err;
     eckey2 = NULL; /* ownership passed to pkey2 */
 
+    OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();//added for keygen test with FIPS provider
+    if (libctx == NULL) {
+        goto err;
+    }
+
     /* Compute keyexchange in both directions */
-    if (!TEST_ptr(pctx1 = EVP_PKEY_CTX_new(pkey1, NULL))
+    if (!TEST_ptr(pctx1 = EVP_PKEY_CTX_new_from_pkey(libctx, pkey1, NULL))
             || !TEST_int_eq(EVP_PKEY_derive_init(pctx1), 1)
             || !TEST_int_eq(EVP_PKEY_derive_set_peer(pctx1, pkey2), 1)
             || !TEST_int_eq(EVP_PKEY_derive(pctx1, NULL, &sslen), 1)
             || !TEST_int_gt(bsize, sslen)
             || !TEST_int_eq(EVP_PKEY_derive(pctx1, buf1, &sslen), 1))
         goto err;
-    if (!TEST_ptr(pctx2 = EVP_PKEY_CTX_new(pkey2, NULL))
+    if (!TEST_ptr(pctx2 = EVP_PKEY_CTX_new_from_pkey(libctx, pkey2, NULL))
             || !TEST_int_eq(EVP_PKEY_derive_init(pctx2), 1)
             || !TEST_int_eq(EVP_PKEY_derive_set_peer(pctx2, pkey1), 1)
             || !TEST_int_eq(EVP_PKEY_derive(pctx2, NULL, &t), 1)
@@ -2922,7 +2933,7 @@ static int custom_params_test(int id)
 
     /* create two new provider-native `EVP_PKEY`s */
     EVP_PKEY_CTX_free(pctx2);
-    if (!TEST_ptr(pctx2 = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL))
+    if (!TEST_ptr(pctx2 = EVP_PKEY_CTX_new_from_name(libctx, "EC", NULL))
             || !TEST_int_eq(EVP_PKEY_fromdata_init(pctx2), 1)
             || !TEST_int_eq(EVP_PKEY_fromdata(pctx2, &pkey1, EVP_PKEY_KEYPAIR,
                                               params1), 1)
@@ -2932,7 +2943,7 @@ static int custom_params_test(int id)
 
     /* compute keyexchange once more using the provider keys */
     EVP_PKEY_CTX_free(pctx1);
-    if (!TEST_ptr(pctx1 = EVP_PKEY_CTX_new(pkey1, NULL))
+    if (!TEST_ptr(pctx1 = EVP_PKEY_CTX_new_from_pkey(libctx, pkey1, NULL))
             || !TEST_int_eq(EVP_PKEY_derive_init(pctx1), 1)
             || !TEST_int_eq(EVP_PKEY_derive_set_peer(pctx1, pkey2), 1)
             || !TEST_int_eq(EVP_PKEY_derive(pctx1, NULL, &t), 1)
@@ -2966,6 +2977,7 @@ static int custom_params_test(int id)
     EVP_PKEY_free(pkey2);
     EVP_PKEY_CTX_free(pctx1);
     EVP_PKEY_CTX_free(pctx2);
+    OSSL_LIB_CTX_free(libctx);
 
     return ret;
 }
@@ -3041,8 +3053,8 @@ int ec_test(void)
     ADD_ALL_TESTS(check_ec_key_field_public_range_test, crv_len);
     ADD_ALL_TESTS(check_named_curve_from_ecparameters, crv_len);
     ADD_ALL_TESTS(ec_point_hex2point_test, crv_len);
-//    ADD_ALL_TESTS(custom_generator_test, crv_len);
-//    ADD_ALL_TESTS(custom_params_test, crv_len);
+    ADD_ALL_TESTS(custom_generator_test, crv_len);
+    ADD_ALL_TESTS(custom_params_test, crv_len);
     ADD_TEST(ec_d2i_publickey_test);
     return 0;
 }

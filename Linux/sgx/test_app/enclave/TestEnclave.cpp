@@ -377,24 +377,24 @@ void t_sgxssl_call_apis()
     ret = rsa_test();
     if (ret != 0)
     {
-    	printf("test rsa_test returned error %d\n", ret);
-    	goto end;
+        printf("test rsa_test returned error %d\n", ret);
+       	goto end;
     }
-	printf("test rsa_test completed\n");
-#ifndef SGXSSL_FIPS
-	ret = ec_test();
-	if (ret != 0)
+        printf("test rsa_test completed\n");
+
+    ret = ec_test();
+    if (ret != 0)
     {
     	printf("test ec_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
 	printf("test ec_test completed\n");
-#endif
+
 	ret = ecdh_test();
 	if (ret != 0)
     {
     	printf("test ecdh_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
 	printf("test ecdh_test completed\n"); 
 
@@ -402,7 +402,7 @@ void t_sgxssl_call_apis()
 	if (ret != 0)
     {
         printf("test ecdsa_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
 	printf("test ecdsa_test completed\n");
 
@@ -410,24 +410,24 @@ void t_sgxssl_call_apis()
 	if (ret != 0)
     {
     	printf("test bn_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
-	printf("test bn_test completed\n");
+        printf("test bn_test completed\n");
 #ifndef SGXSSL_FIPS
-	ret = dhtest();
-	if (ret != 0)
+        ret = dhtest();
+        if (ret != 0)
     {
-    	printf("test dhtest returned error %d\n", ret);
-    	goto end;
+       	printf("test dhtest returned error %d\n", ret);
+        goto end;
     }
-	printf("test dhtest completed\n");
+        printf("test dhtest completed\n");
 #endif
 	ret = aesccm_test();
 	if (ret != 0)
-	{
-		printf("test aesccm_test returned error %d\n", ret);
-		goto end;
-	}
+    {
+         printf("test aesccm_test returned error %d\n", ret);
+         goto end;
+    }
 	printf("test aesccm_test completed\n");
 #ifndef SGXSSL_FIPS
 	ret = aesgcm_test();
@@ -442,15 +442,15 @@ void t_sgxssl_call_apis()
 	if (ret != 0)
     {
     	printf("test sha256_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
 	printf("test sha256_test completed\n");
 	
 	ret = sha1_test();
 	if (ret != 0)
     {
-    	printf("test sha1_test returned error %d\n", ret);
-    	goto end;
+        printf("test sha1_test returned error %d\n", ret);
+        goto end;
     }
 	printf("test sha1_test completed\n");
 
@@ -466,7 +466,7 @@ void t_sgxssl_call_apis()
 	if (ret != 0)
     {
     	printf("test threads_test returned error %d\n", ret);
-    	goto end;
+        goto end;
     }
 	printf("test threads_test completed\n");
 #ifndef SGXSSL_FIPS
