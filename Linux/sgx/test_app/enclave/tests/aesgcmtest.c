@@ -41,15 +41,13 @@ static int do_encrypt(unsigned char *iv_gen, unsigned char *ct, int *ct_len,
     int ret = 0;
     EVP_CIPHER_CTX *ctx = NULL;
     OSSL_LIB_CTX *libctx = NULL;
-    EVP_CIPHER *cipher = NULL;
     int outlen;
     unsigned char outbuf[64];
 
     *tag_len = 16;
     ret = TEST_ptr(ctx = EVP_CIPHER_CTX_new())
           && TEST_ptr(libctx = OSSL_LIB_CTX_new())
-          && TEST_ptr(cipher = EVP_CIPHER_fetch(libctx, "AES-256-GCM", NULL))
-          && TEST_true(EVP_EncryptInit_ex(ctx, cipher, NULL, NULL,
+          && TEST_true(EVP_EncryptInit_ex(ctx, EVP_CIPHER_fetch(libctx, "AES-256-GCM", NULL), NULL, NULL,
                                           NULL) > 0)
           && TEST_true(EVP_EncryptInit_ex(ctx, NULL, NULL, gcm_key,
                                           iv_gen != NULL ? NULL : gcm_iv) > 0)
@@ -65,7 +63,6 @@ static int do_encrypt(unsigned char *iv_gen, unsigned char *ct, int *ct_len,
                   || EVP_CIPHER_CTX_get_original_iv(ctx, iv_gen, 12));
     EVP_CIPHER_CTX_free(ctx);
     OSSL_LIB_CTX_free(libctx);
-    EVP_CIPHER_free(cipher);
     return ret;
 }
 
