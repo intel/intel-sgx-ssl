@@ -39,6 +39,7 @@ enclave {
         void u_sgxssl_fclose([user_check]uint64_t* stream);
         uint32_t u_sgxssl_fread([out, size=size, count=nmemb] void *ptr, uint32_t size, uint32_t nmemb, [user_check] uint64_t* stream);
         int u_sgxssl_ferror([user_check]uint64_t* stream);
+        int u_sgxssl_getpid(void);
     };
 
 };

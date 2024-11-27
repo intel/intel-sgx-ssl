@@ -193,8 +193,8 @@ endif
 	@echo "SIGN =>  $@"
 ifeq ($(FIPS), 1)
 	@$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.fips.config.xml
-	cp $(SGX_LIBRARY_PATH)/fips.so .
 	cp $(SGX_LIBRARY_PATH)/openssl.cnf .
+	cp $(SGX_LIBRARY_PATH)/fips.so .
 else
 	@$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.config.xml
 endif

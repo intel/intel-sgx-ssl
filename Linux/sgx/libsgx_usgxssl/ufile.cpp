@@ -32,6 +32,7 @@
 #include <stdio.h>
 
 #include "ucommon.h"
+#include "unistd.h"
 
 
 extern "C" {
@@ -61,6 +62,11 @@ uint32_t u_sgxssl_fread(void* ptr, uint32_t size, uint32_t nmemb, uint64_t* stre
 int u_sgxssl_ferror(uint64_t* Stream)
 {
         return ferror((FILE*)Stream);
+}
+
+int u_sgxssl_getpid(void)
+{
+	return getpid();
 }
 
 }

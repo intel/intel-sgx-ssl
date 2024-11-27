@@ -254,11 +254,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 
 //openssl 1.1.1 new APIs
 //
-#ifdef SGXSSL_FIPS
-#define getpid rdrand_for_fips
-#else
 #define getpid sgxssl_getpid
-#endif
 #define stat sgxssl_stat
 #define syscall sgxssl_syscall
 #define pthread_atfork sgxssl_pthread_atfork
