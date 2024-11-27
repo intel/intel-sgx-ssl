@@ -56,12 +56,14 @@ sgxssl:
 
 sgxssl_no_mitigation:
 	$(MAKE) -C sgx/ all FIPS=$(FIPS)
+	$(MAKE) -C ../openssl_source/ all
 
 clean:
 	$(MAKE) -C sgx/ clean
 	rm -rf $(PACKAGE_LIB)/$(OPENSSL_LIB) $(PACKAGE_INC)/openssl/
 	rm -rf $(PACKAGE_LIB)/cve_2020_0551_load
 	rm -rf $(PACKAGE_LIB)/cve_2020_0551_cf
+	$(MAKE) -C ../openssl_source/ clean
 
 test:
 	$(MAKE) -C sgx/ test
@@ -74,6 +76,8 @@ endif
 	mkdir -p $(DESTDIR)/include/
 	cp -prf $(PACKAGE_LIB)/*  $(DESTDIR)/lib64/
 	cp -prf $(PACKAGE_INC)/* $(DESTDIR)/include/
+	$(MAKE) -C ../openssl_source/ install
 
 uninstall:
 	rm -rf $(DESTDIR)/
+	$(MAKE) -C ../openssl_source/ uninstall
