@@ -187,6 +187,10 @@ int CONF_modules_load_file_ex(OSSL_LIB_CTX *libctx, const char *filename,
     ERR_set_mark();
 
 #ifdef SGXSSL_FIPS
+    /*
+     * Limitation: the configuration file (openssl.cnf) must be located in the
+     * same directory as the application.
+     */
     file = strdup("./openssl.cnf");
 #else
     if (filename == NULL) {
