@@ -145,7 +145,7 @@ cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
 
 sed -i 's/ENGINE_set_default_RAND/dummy_ENGINE_set_default_RAND/' crypto/engine/tb_rand.c || exit 1
 sed -i 's/return RUN_ONCE(&locale_base, ossl_init_locale_base);/return 1;/' crypto/ctype.c || exit 1
