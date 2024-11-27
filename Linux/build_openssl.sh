@@ -172,4 +172,6 @@ cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 grep OPENSSL_VERSION_STR include/openssl/opensslv.h > $SGXSSL_ROOT/sgx/osslverstr.h || exit 1
 cp -r include/crypto $SGXSSL_ROOT/sgx/test_app/enclave/ || exit 1
 cp -r include/internal $SGXSSL_ROOT/sgx/test_app/enclave/ || exit 1
+cp -r include/crypto $SGXSSL_ROOT/sgx/fips_test/trusted/ || exit 1
+cp -r include/internal $SGXSSL_ROOT/sgx/fips_test/trusted/ || exit 1
 exit 0

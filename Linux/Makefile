@@ -68,6 +68,9 @@ clean:
 test:
 	$(MAKE) -C sgx/ test
 
+fips_test:
+	$(MAKE) -C sgx/ fips_test
+
 install: $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB) $(PACKAGE_LIB)/$(OPENSSL_LIB)
 ifeq ($(DEBUG), 1)
 	@echo "WARNING: Installing Debug libraries."
