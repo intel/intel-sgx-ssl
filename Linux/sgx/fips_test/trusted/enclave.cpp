@@ -69,6 +69,23 @@ int vprintf_cb(Stream_t stream, const char * fmt, va_list arg)
 	return res;
 }
 
+/*
+ * Print to console all OSSL errors.
+ * Removes errors from the error queue and generates a humman-readable string
+ * for each error code.
+ */
+void print_OSSL_errors(void)
+{
+    unsigned long err;
+    char err_string[256];
+
+    while (0 != (err = ERR_get_error()))
+    {
+        ERR_error_string_n(err, err_string, sizeof(err_string));
+        printf("%s\n", err_string); /* OCALL */
+    }
+}
+
 /* Enclave ECALL */
 int enclave_fips_test()
 {
@@ -95,6 +112,7 @@ int enclave_fips_test()
     if (0 == ret)
     {
         PRINT_ERROR("FIPS provider couldn't be added to the OSSL_PROVIDER store\n");
+        print_OSSL_errors();
         goto end;
     }
     else
@@ -110,6 +128,7 @@ int enclave_fips_test()
     else 
     {
         PRINT_ERROR("FIPS provider is not available\n");
+        print_OSSL_errors();
     }
     
     /* Load the FIPS provider */
@@ -117,6 +136,7 @@ int enclave_fips_test()
     if (NULL == prov)
     {
         PRINT_ERROR("FIPS provider failed to load\n");
+        print_OSSL_errors();
         exit(EXIT_FAILURE);
     }
     else
@@ -129,6 +149,7 @@ int enclave_fips_test()
     if (NULL == prov)
     {
         printf("Default provider failed to load\n");
+        print_OSSL_errors();
         exit(EXIT_FAILURE);
     }
     else
@@ -152,6 +173,7 @@ int enclave_fips_test()
     else
     {
         printf("OSSL_PROVIDER_self_test failed\n");
+        print_OSSL_errors();
         goto end;
     }	
 
@@ -185,5 +207,8 @@ int enclave_fips_test()
 
 end:
     OSSL_PROVIDER_unload(prov);
+
+    printf(ANSI_COLOR_YELLOW "%s completed\n" ANSI_COLOR_RESET, __FUNCTION__);
+
     return 0;
 }
