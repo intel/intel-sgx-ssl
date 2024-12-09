@@ -13,11 +13,11 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "support_openssl_3.1*" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "support_openssl_3.1*" ]
+    branches: [ "main" ]
   schedule:
-    - cron: '14 21 * * 1'
+    - cron: '15 21 * * 1'
 
 permissions:
   contents: read
