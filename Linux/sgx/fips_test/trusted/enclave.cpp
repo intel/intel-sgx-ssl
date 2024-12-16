@@ -99,7 +99,7 @@ int enclave_fips_test()
 
 #ifdef SGXSSL_FIPS
     /* Call tRTS API to get address of the FIPS provider init function */
-    entry = get_ossl_fips_sym("OSSL_provider_init");
+    entry = sgx_get_ossl_fips_sym("OSSL_provider_init");
     if (NULL == entry)
     {
         PRINT_ERROR("FIPS provider init function (OSSL_provider_init) address not found\n");

@@ -297,7 +297,7 @@ void t_sgxssl_call_apis()
 #ifndef SGXSSL_FIPS
     prov = OSSL_PROVIDER_load(NULL, "default");
 #else
-    void *entry = get_ossl_fips_sym("OSSL_provider_init");
+    void *entry = sgx_get_ossl_fips_sym("OSSL_provider_init");
 
     if (!entry )
     {
