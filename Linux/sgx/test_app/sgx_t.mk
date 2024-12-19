@@ -74,7 +74,7 @@ $(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
 endif
 endif
 
-# Added to build with SgxSSL libraries
+# Added to build with the SGX-SSL library
 TSETJMP_LIB := -lsgx_tsetjmp
 OPENSSL_LIBRARY_PATH := $(PACKAGE_LIB)/
 
@@ -130,6 +130,7 @@ SgxSSL_Link_Libraries := -L$(OPENSSL_LIBRARY_PATH) -Wl,--whole-archive -l$(SGXSS
 Security_Link_Flags := -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -pie
 
 ifeq ($(FIPS), 1)
+# tRTS library that provides the symbol sgx_get_fips_sym_addr()
 SGXSSL_FIPS_TLIB = -lsgx_ossl_fips
 endif
 
@@ -144,6 +145,11 @@ TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nod
 	-Wl,--version-script=$(ENCLAVE_DIR)/TestEnclave.lds
 
 Enclave_Test_Key := $(ENCLAVE_DIR)/TestEnclave_private_test.pem
+
+# OpenSSL configuration file
+OPENSSLCONF:=openssl.cnf
+FIPSMODULECONF:=fipsmodule.cnf
+LIBDIR := lib64
 
 .PHONY: all test
 
@@ -193,8 +199,8 @@ endif
 	@echo "SIGN =>  $@"
 ifeq ($(FIPS), 1)
 	@$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.fips.config.xml
-	cp $(SGX_LIBRARY_PATH)/openssl.cnf .
-	cp $(SGX_LIBRARY_PATH)/fips.so .
+	@cp -f $(OPENSSLCONF).tmpl $(OPENSSLCONF)
+	echo ".include $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)" >> $(OPENSSLCONF)
 else
 	@$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave TestEnclave.so -out $@ -config $(ENCLAVE_DIR)/TestEnclave.config.xml
 endif

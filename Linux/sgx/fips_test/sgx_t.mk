@@ -63,7 +63,7 @@ ifeq ($(DEBUG), 1)
     endif
 endif
 
-# Added to build with SgxSSL library
+# Added to build with the SGX-SSL library
 OPENSSL_LIBRARY_PATH := $(PACKAGE_LIB)/
 TSETJMP_LIB := -lsgx_tsetjmp
 
@@ -88,7 +88,8 @@ else
     Trts_Library_Name := sgx_trts
     Service_Library_Name := sgx_tservice
 endif
-# tRTS library that provides the symbol get_fips_sym_addr()
+
+# tRTS library that provides the symbol sgx_get_fips_sym_addr()
 SGXSSL_FIPS_TLIB = sgx_ossl_fips
 
 ifeq ($(SGX_MODE), HW)
@@ -130,7 +131,12 @@ Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefau
 
 Enclave_Test_Key := $(ENCLAVE_DIR)/enclave_private.pem
 
-.PHONY: all clean
+# OpenSSL configuration file
+OPENSSLCONF:=openssl.cnf
+FIPSMODULECONF:=fipsmodule.cnf
+LIBDIR := lib64
+
+.PHONY: all clean install_conf
 
 all: enclave.signed.so
 
@@ -161,7 +167,7 @@ enclave.so: $(ENCLAVE_DIR)/enclave_t.o $(Enclave_Cpp_Objects) $(Enclave_C_Object
 	$(VCXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
-enclave.signed.so: enclave.so
+enclave.signed.so: enclave.so install_conf
 ifeq ($(wildcard $(Enclave_Test_Key)),)
 	@echo "There is no enclave test key <enclave_private.pem>."
 	@echo "The project will generate a key <enclave_private.pem> for testing."
@@ -169,7 +175,12 @@ ifeq ($(wildcard $(Enclave_Test_Key)),)
 endif
 	@echo "SIGN =>  $@"
 	$(SGX_ENCLAVE_SIGNER) sign -key $(Enclave_Test_Key) -enclave enclave.so -out $@ -config $(ENCLAVE_DIR)/enclave.config.xml
-	@cp $(SGX_LIBRARY_PATH)/openssl.cnf .
+
+install_conf:
+	@echo "*** Installing OpenSSL configuration"
+	@echo "install $(OPENSSLCONF) -> $(SGX_SDK)/$(LIBDIR)/$(OPENSSLCONF)"
+	@cp -f $(OPENSSLCONF).tmpl $(OPENSSLCONF)
+	echo ".include $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)" >> $(OPENSSLCONF)
 
 clean:
 	@rm -f enclave.* $(ENCLAVE_DIR)/enclave_t.* $(Enclave_Cpp_Objects) $(Enclave_C_Objects) $(Enclave_Test_Key)
