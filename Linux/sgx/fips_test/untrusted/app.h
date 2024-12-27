@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,72 +29,37 @@
  *
  */
 
-#include <string.h>
+#ifndef _APP_H_
+#define _APP_H_
 
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
+#include "sgx_error.h"       /* sgx_status_t */
+#include "sgx_eid.h"     /* sgx_enclave_id_t */
 
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
+#ifndef TRUE
+# define TRUE 1
 #endif
 
-#define PATH_DEV_NULL				"/dev/null"
+#ifndef FALSE
+# define FALSE 0
+#endif
 
+
+# define TOKEN_FILENAME   "enclave.token"
+# define TESTENCLAVE_FILENAME "enclave.signed.so"
+
+extern sgx_enclave_id_t global_eid;    /* global enclave id */
+
+#if defined(__cplusplus)
 extern "C" {
+#endif
 
-char *sgxssl_getenv(const char *name)
-{
-	FSTART;
-
-	if (name == NULL ) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF" )) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
-                FEND;
-                return NULL;
-        }
-
-	if (!strcmp(name, "OPENSSL_ENGINES" )) {
-		FEND;
-		return (char *) PATH_DEV_NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_ALLOW_PROXY_CERTS" )) {
-		FEND;
-		return NULL;
-	}
-	
-	if (!strcmp(name, "OPENSSL_ia32cap" )) {
-		FEND;
-		return NULL;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-	FEND;
-	return NULL;
+#if defined(__cplusplus)
 }
+#endif
 
-}
+#endif /* !_APP_H_ */

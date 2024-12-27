@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,72 +29,26 @@
  *
  */
 
-#include <string.h>
+/* enclave.edl - Top EDL file. */
 
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
+enclave {
+    
+    from "sgx_tsgxssl.edl" import *;
+    from "sgx_pthread.edl" import *;
+
+    /* 
+     * uprint - invokes OCALL to display string buffer inside the enclave.
+     *  [in]: copy the string buffer to App outside.
+     *  [string]: specifies 'str' is a NULL terminated buffer.
+     */
+    untrusted {
+        void uprint([in, string] const char *str);
+        void usgx_exit(int reason);
+    };
 
 
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
-
-extern "C" {
-
-char *sgxssl_getenv(const char *name)
-{
-	FSTART;
-
-	if (name == NULL ) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF" )) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
-                FEND;
-                return NULL;
-        }
-
-	if (!strcmp(name, "OPENSSL_ENGINES" )) {
-		FEND;
-		return (char *) PATH_DEV_NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_ALLOW_PROXY_CERTS" )) {
-		FEND;
-		return NULL;
-	}
-	
-	if (!strcmp(name, "OPENSSL_ia32cap" )) {
-		FEND;
-		return NULL;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-	FEND;
-	return NULL;
-}
-
-}
+    trusted {
+        public int enclave_fips_test();
+ 
+    };
+};

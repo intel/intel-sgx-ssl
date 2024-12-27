@@ -146,6 +146,14 @@ int sgxssl_getpid() {
     return 0;
 }
 
+#ifdef SGXSSL_FIPS
+int getpid() {
+    int pid = 0;
+    if ( u_sgxssl_getpid(&pid) != 0 ) SGX_UNREACHABLE_CODE(SET_ERRNO);
+    return pid;
+}
+#endif
+
 //Don't use system calls inside enclave.
 //
 int sgxssl_OPENSSL_issetugid()

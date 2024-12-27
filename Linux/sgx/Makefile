@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -53,6 +53,10 @@ ifeq ($(OSSL3ONLY), 1)
 	OPENSSL_CONFIG += only3x
 endif
 
+ifeq ($(FIPS), 1)
+	OPENSSL_CONFIG += fips
+endif
+
 all: $(PACKAGE_LIB)/$(OPENSSL_LIB)
 ifneq ($(CRYPTO_ONLY), 1)
 	$(MAKE) -C $(TRUSTED_LIB_DIR) all
@@ -60,7 +64,12 @@ ifneq ($(CRYPTO_ONLY), 1)
 
 ifeq ($(LINUX_SGX_BUILD), 0)
 ifneq ($(NO_THREADS), 1)
+# Don't build the test app by default in FIPS mode since it depends on
+# the FIPS provider.
+# Execute the install target first.
+ifneq ($(FIPS), 1)
 	$(MAKE) -C $(TEST_DIR) all
+endif
 endif
 endif
 endif
@@ -82,8 +91,12 @@ clean:
 	$(MAKE) -C $(TRUSTED_LIB_DIR) clean
 	$(MAKE) -C $(UNTRUSTED_LIB_DIR) clean
 	$(MAKE) -C $(TEST_DIR) clean
+	$(MAKE) -C $(FIPS_TEST_DIR) clean
 	rm -f $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB)
 
 test: $(PACKAGE_LIB)/$(OPENSSL_LIB) all
 	$(MAKE) -C $(TEST_DIR) test 
+
+fips_test: $(PACKAGE_LIB)/$(OPENSSL_LIB) all
+	$(MAKE) -C $(FIPS_TEST_DIR) run
 

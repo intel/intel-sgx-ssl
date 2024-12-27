@@ -1,7 +1,6 @@
 #!/bin/bash
-
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,7 +36,7 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
-OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.0.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.1.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in openssl_source/ directory."
@@ -53,7 +52,7 @@ mkdir -p $SGXSSL_ROOT/package/lib64/
 # build openssl modules, clean previous openssl dir if it exist
 cd $SGXSSL_ROOT/../openssl_source || exit 1
 rm -rf $OPENSSL_VERSION
-tar xvf $OPENSSL_VERSION.tar.gz || exit 1
+tar xvf $OPENSSL_VERSION.tar.gz > /dev/null || exit 1
 
 # Remove AESBS to support only AESNI and VPAES
 sed -i '/BSAES_ASM/d' $OPENSSL_VERSION/Configure
@@ -78,6 +77,13 @@ fi
 
 if [[ "$*" == *"only3x"* ]] ; then
 	ADDITIONAL_CONF+="--api=3.0 no-deprecated "
+fi
+
+if [[ "$*" == *"fips"* ]] ; then
+    ADDITIONAL_CONF+="-DSGXSSL_FIPS "
+    cp bss_file.c $OPENSSL_VERSION/crypto/bio/ || exit 1
+    cp conf_mod.c $OPENSSL_VERSION/crypto/conf/ || exit 1
+    cp o_fopen.c $OPENSSL_VERSION/crypto/ || exit 1
 fi
 
 # Mitigation flags
@@ -139,7 +145,7 @@ cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
 
 sed -i 's/ENGINE_set_default_RAND/dummy_ENGINE_set_default_RAND/' crypto/engine/tb_rand.c || exit 1
 sed -i 's/return RUN_ONCE(&locale_base, ossl_init_locale_base);/return 1;/' crypto/ctype.c || exit 1
@@ -166,4 +172,6 @@ cp include/openssl/* $SGXSSL_ROOT/package/include/openssl/ || exit 1
 grep OPENSSL_VERSION_STR include/openssl/opensslv.h > $SGXSSL_ROOT/sgx/osslverstr.h || exit 1
 cp -r include/crypto $SGXSSL_ROOT/sgx/test_app/enclave/ || exit 1
 cp -r include/internal $SGXSSL_ROOT/sgx/test_app/enclave/ || exit 1
+cp -r include/crypto $SGXSSL_ROOT/sgx/fips_test/trusted/ || exit 1
+cp -r include/internal $SGXSSL_ROOT/sgx/fips_test/trusted/ || exit 1
 exit 0

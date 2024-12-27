@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,72 +29,32 @@
  *
  */
 
-#include <string.h>
 
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
+#include <stdio.h>
+#include <openssl/bn.h>
+#include <openssl/crypto.h>
+#include <openssl/buffer.h>
+#include <openssl/err.h>
 
-
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
-
-extern "C" {
-
-char *sgxssl_getenv(const char *name)
+extern void printf(const char *fmt, ...);
+static int print_fp(const char *str, size_t len, void *fp)
 {
-	FSTART;
-
-	if (name == NULL ) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF" )) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
-                FEND;
-                return NULL;
-        }
-
-	if (!strcmp(name, "OPENSSL_ENGINES" )) {
-		FEND;
-		return (char *) PATH_DEV_NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_ALLOW_PROXY_CERTS" )) {
-		FEND;
-		return NULL;
-	}
-	
-	if (!strcmp(name, "OPENSSL_ia32cap" )) {
-		FEND;
-		return NULL;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-	FEND;
-	return NULL;
+    printf("%s", str);
+    return 1;
 }
 
+void ERR_print_errors_fp(FILE *fp)
+{
+    ERR_print_errors_cb(print_fp, fp);
 }
+
+int BN_print_fp(FILE *fp, const BIGNUM *a)
+{
+    char* str = BN_bn2hex(a);
+    if (str == NULL)
+		return 0;
+	printf("%s", str);
+	OPENSSL_free(str);
+    return 1;
+}
+

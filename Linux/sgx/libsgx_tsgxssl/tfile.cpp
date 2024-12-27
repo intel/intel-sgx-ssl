@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,72 +29,41 @@
  *
  */
 
-#include <string.h>
-
-#include "sgx_tsgxssl_t.h"
+#include <stdio.h>
 #include "tcommon.h"
+#include "sgx_tsgxssl_t.h"
 #include "tSgxSSL_api.h"
 
-
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
-#endif
-
-#define PATH_DEV_NULL				"/dev/null"
+extern PRINT_TO_STDOUT_STDERR_CB s_print_cb;
 
 extern "C" {
-
-char *sgxssl_getenv(const char *name)
+	uint64_t* sgxssl_fopen(const char *filename, const char *mode)
 {
-	FSTART;
-
-	if (name == NULL ) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF" )) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
-                FEND;
-                return NULL;
-        }
-
-	if (!strcmp(name, "OPENSSL_ENGINES" )) {
-		FEND;
-		return (char *) PATH_DEV_NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_ALLOW_PROXY_CERTS" )) {
-		FEND;
-		return NULL;
-	}
-	
-	if (!strcmp(name, "OPENSSL_ia32cap" )) {
-		FEND;
-		return NULL;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-	FEND;
-	return NULL;
+	uint64_t* retval;
+	u_sgxssl_fopen(&retval, filename, mode);
+	return retval;
+}
+char* sgxssl_fgets(char* Buffer, int MaxCount, uint64_t* Stream)
+{
+	char *retval;
+	u_sgxssl_fgets(&retval, Buffer, MaxCount, Stream);
+	return retval;
+}
+void sgxssl_fclose(uint64_t* Stream)
+{
+        u_sgxssl_fclose(Stream);
 }
 
+uint32_t sgxssl_fread(void* ptr, uint32_t size, uint32_t nmemb, uint64_t* stream)
+{
+	uint32_t retval;
+	u_sgxssl_fread(&retval, ptr, size, nmemb, stream);
+	return retval;
+}
+int sgxssl_ferror(uint64_t* stream)
+{
+	int retval;
+	u_sgxssl_ferror(&retval, stream);
+	return retval;
+}
 }

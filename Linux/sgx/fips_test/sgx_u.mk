@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
+# Copyright (C) 2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,55 +30,46 @@
 #
 
 
-
 ######## SGX SDK Settings ########
 SGX_MODE ?= HW
 SGX_ARCH ?= x64
-UNTRUSTED_DIR=app
+UNTRUSTED_DIR=untrusted
 
 ifeq ($(shell getconf LONG_BIT), 32)
-	SGX_ARCH := x86
+    SGX_ARCH := x86
 else ifeq ($(findstring -m32, $(CXXFLAGS)), -m32)
-	SGX_ARCH := x86
+    SGX_ARCH := x86
 endif
 
 ifeq ($(SGX_ARCH), x86)
 	$(error x86 build is not supported, only x64!!)
 else
-	SGX_COMMON_CFLAGS := -m64 -Wall
-	ifeq ($(LINUX_SGX_BUILD), 1)
-		include ../../../../../buildenv.mk
-		SGX_LIBRARY_PATH := $(BUILD_DIR)
-		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
-		SGX_SDK_INC := $(COMMON_DIR)/inc
-		SGX_SHARED_LIB_FLAG := -Wl,-rpath,${SGX_LIBRARY_PATH}
-	else
-		SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
-		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
-		SGX_SDK_INC := $(SGX_SDK)/include
-	endif
+    SGX_COMMON_CFLAGS := -m64 -Wall
+    SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+    SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+    SGX_SDK_INC := $(SGX_SDK)/include
 endif
 
 ifeq ($(DEBUG), 1)
-ifeq ($(SGX_PRERELEASE), 1)
-$(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
-endif
+    ifeq ($(SGX_PRERELEASE), 1)
+        $(error Cannot set DEBUG and SGX_PRERELEASE at the same time!!)
+    endif
 endif
 
 OPENSSL_LIBRARY_PATH := $(PACKAGE_LIB)
 ifeq ($(DEBUG), 1)
-        SGX_COMMON_CFLAGS += -O0 -g
-		SgxSSL_Link_Libraries := sgx_usgxssld
+    SGX_COMMON_CFLAGS += -O0 -g
+    SgxSSL_Link_Libraries := sgx_usgxssld
 else
-        SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
-		SgxSSL_Link_Libraries := sgx_usgxssl
+    SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
+    SgxSSL_Link_Libraries := sgx_usgxssl
 endif
-
 
 ######## App Settings ########
 
+App_Name := fips_test
 
-App_Cpp_Files := $(UNTRUSTED_DIR)/TestApp.cpp
+App_Cpp_Files := $(UNTRUSTED_DIR)/app.cpp
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
 App_Include_Paths := -I$(UNTRUSTED_DIR) -I$(SGX_SDK_INC)
@@ -94,45 +85,37 @@ else
 	UaeService_Library_Name := sgx_uae_service
 endif
 
-
 Security_Link_Flags := -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -pie
 
 App_Link_Flags := $(SGX_COMMON_CFLAGS) $(Security_Link_Flags) $(SGX_SHARED_LIB_FLAG) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -l$(UaeService_Library_Name) -L$(OPENSSL_LIBRARY_PATH) -l$(SgxSSL_Link_Libraries) -lpthread 
 
 
-.PHONY: all test
+.PHONY: all clean run
 
-all: TestApp
+all: $(App_Name)
 
-test: all
-	@$(CURDIR)/TestApp
-	@echo "RUN  =>  TestApp [$(SGX_MODE)|$(SGX_ARCH), OK]"
+run: all
+	@$(CURDIR)/$(App_Name)
+	@echo "RUN  => $(App_Name) [$(SGX_MODE)|$(SGX_ARCH), OK]"
 
 ######## App Objects ########
-ifeq ($(FIPS), 1)
 SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
-else
-SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
-endif
 
-$(UNTRUSTED_DIR)/TestEnclave_u.c: $(SGX_EDGER8R) enclave/TestEnclave.edl
-	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../enclave/TestEnclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDTIONAL_EDL_PATH)
+$(UNTRUSTED_DIR)/enclave_u.c: $(SGX_EDGER8R) trusted/enclave.edl
+	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../trusted/enclave.edl --search-path $(PACKAGE_INC) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDTIONAL_EDL_PATH)
 	@echo "GEN  =>  $@"
 
-$(UNTRUSTED_DIR)/TestEnclave_u.o: $(UNTRUSTED_DIR)/TestEnclave_u.c
+$(UNTRUSTED_DIR)/enclave_u.o: $(UNTRUSTED_DIR)/enclave_u.c
 	$(VCC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp $(UNTRUSTED_DIR)/TestEnclave_u.c
+$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp $(UNTRUSTED_DIR)/enclave_u.c
 	$(VCXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-TestApp: $(UNTRUSTED_DIR)/TestEnclave_u.o $(App_Cpp_Objects)
+$(App_Name): $(UNTRUSTED_DIR)/enclave_u.o $(App_Cpp_Objects)
 	$(VCXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
-
-.PHONY: clean
-
 clean:
-	@rm -f TestApp  $(App_Cpp_Objects) $(UNTRUSTED_DIR)/TestEnclave_u.*
+	@rm -f $(App_Name) $(App_Cpp_Objects) $(UNTRUSTED_DIR)/enclave_u.*

@@ -25,7 +25,7 @@ jobs:
     - name: install SDK
       run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
     - name: download OpenSSL code
-      run: wget https://www.openssl.org/source/openssl-3.0.14.tar.gz --directory-prefix=openssl_source/
+      run: wget https://www.openssl.org/source/openssl-3.1.6.tar.gz --directory-prefix=openssl_source/
     - name: build SGXSSL
       run: source sgxsdk/environment; cd Linux; make all; DEBUG=1 make all
     - name: run unit test in SIM

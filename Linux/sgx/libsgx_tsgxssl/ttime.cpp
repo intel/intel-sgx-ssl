@@ -37,6 +37,31 @@ extern sgx_status_t SGX_CDECL u_sgxssl_ftime(void* timeptr, uint32_t timeb_len) 
 
 extern "C" {
 
+#ifdef SGXSSL_FIPS
+time_t time (time_t *timer)
+{
+        FSTART;
+
+        struct timeb timeptr;
+
+        assert(NULL != u_sgxssl_ftime && "u_sgxssl_ftime is NULL...");
+
+        sgx_status_t sgx_ret = u_sgxssl_ftime(&timeptr, sizeof(struct timeb));
+        if (sgx_ret != SGX_SUCCESS)
+        {
+                errno = EFAULT;
+                timeptr.time = (time_t)-1;
+        }
+
+        if (timer != NULL) {
+                *timer = timeptr.time;
+        }
+
+        FEND;
+        return timeptr.time;
+
+}
+#endif
 
 time_t sgxssl_time (time_t *timer)
 {

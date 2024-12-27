@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,72 +29,37 @@
  *
  */
 
-#include <string.h>
+#ifndef _TESTENCLAVE_H_
+#define _TESTENCLAVE_H_
 
-#include "sgx_tsgxssl_t.h"
-#include "tcommon.h"
-#include "tSgxSSL_api.h"
+#include <stdlib.h>
+#include <assert.h>
 
+#define TEST_CHECK(status)	\
+{	\
+	if (status != SGX_SUCCESS) {	\
+		printf("OCALL status check failed %s(%d), status = %d\n", __FUNCTION__, __LINE__, status);	\
+		abort();	\
+	}	\
+}
 
-#ifndef SE_SIM
-
-// following definition is copied from common/inc/internal/se_cdefs.h
-
-#define SGX_ACCESS_VERSION(libname, num)                    \
-    extern "C" const char *sgx_##libname##_version;          \
-    const char * __attribute__((destructor)) libname##_access_version_dummy##num()      \
-    {                                                       \
-        return sgx_##libname##_version;                     \
-    } 
-
-
-// add a version to libsgx_tsgxssl
-SGX_ACCESS_VERSION(tssl, 1);
-
+#if defined(__cplusplus)
+extern "C" {
 #endif
 
-#define PATH_DEV_NULL				"/dev/null"
+void printf(const char *fmt, ...);
 
-extern "C" {
+int puts(const char* str);
+char* getenv(char* name);
+int fflush(void* stream);
+void exit(int status);
 
-char *sgxssl_getenv(const char *name)
-{
-	FSTART;
+int aesgcm_test();
+int sha256_test();
+int hmac_tests();
 
-	if (name == NULL ) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF" )) {
-		FEND;
-		return NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
-                FEND;
-                return NULL;
-        }
-
-	if (!strcmp(name, "OPENSSL_ENGINES" )) {
-		FEND;
-		return (char *) PATH_DEV_NULL;
-	}
-
-	if (!strcmp(name, "OPENSSL_ALLOW_PROXY_CERTS" )) {
-		FEND;
-		return NULL;
-	}
-	
-	if (!strcmp(name, "OPENSSL_ia32cap" )) {
-		FEND;
-		return NULL;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-	FEND;
-	return NULL;
+#if defined(__cplusplus)
 }
+#endif
 
-}
+#endif /* !_TESTENCLAVE_H_ */
