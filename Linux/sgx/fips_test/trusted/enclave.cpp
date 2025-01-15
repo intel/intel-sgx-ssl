@@ -86,12 +86,22 @@ void print_OSSL_errors(void)
     }
 }
 
-/* Enclave ECALL */
+OSSL_PROVIDER *g_prov = NULL;
+
+/* Enclave ECALLs */
 int enclave_fips_test()
+{
+    enclave_fips_provider_load();
+    enclave_fips_provider_test();
+    enclave_fips_provider_unload();
+
+    return 0;
+}
+
+int enclave_fips_provider_load(void)
 {
     int ret = -1;
     void *entry = NULL;
-    OSSL_PROVIDER *prov = NULL;
     
     printf(ANSI_COLOR_YELLOW "%s started\n" ANSI_COLOR_RESET, __FUNCTION__);
 
@@ -120,20 +130,20 @@ int enclave_fips_test()
         PRINT_PASS("FIPS provider added to the OSSL_PROVIDER store\n");
     }
 
-    /* Check if the "fips" provider is available */
-    if (1 == OSSL_PROVIDER_available(NULL, "fips"))
-    {
-        PRINT_PASS("FIPS provider is available\n");
-    }
-    else 
+    /* Verify the "fips" provider is available before attempting to load it */
+    if (0 == OSSL_PROVIDER_available(NULL, "fips"))
     {
         PRINT_ERROR("FIPS provider is not available\n");
         print_OSSL_errors();
     }
+    else 
+    {
+        PRINT_PASS("FIPS provider is available\n");
+    }
     
     /* Load the FIPS provider */
-    prov = OSSL_PROVIDER_load(NULL, "fips");
-    if (NULL == prov)
+    g_prov = OSSL_PROVIDER_load(NULL, "fips");
+    if (NULL == g_prov)
     {
         PRINT_ERROR("FIPS provider failed to load\n");
         print_OSSL_errors();
@@ -145,8 +155,8 @@ int enclave_fips_test()
     }
 #else
     /* Load the default provider */
-    prov = OSSL_PROVIDER_load(NULL, "default");
-    if (NULL == prov)
+    g_prov = OSSL_PROVIDER_load(NULL, "default");
+    if (NULL == g_prov)
     {
         printf("Default provider failed to load\n");
         print_OSSL_errors();
@@ -157,17 +167,17 @@ int enclave_fips_test()
         printf("Default provider loaded\n");
     }
 #endif
-    if (1 == OSSL_PROVIDER_self_test(prov))
+    if (1 == OSSL_PROVIDER_self_test(g_prov))
     {
         PRINT_PASS("OSSL_PROVIDER_self_test passed\n");
-        printf("Provider name: %s\n", OSSL_PROVIDER_get0_name(prov));
+        printf("Provider name: %s\n", OSSL_PROVIDER_get0_name(g_prov));
         const char *build = NULL;
         OSSL_PARAM request[] = {
             { "buildinfo", OSSL_PARAM_UTF8_PTR, &build, 0, 0 },
             { NULL, 0, NULL, 0, 0 }
         };
 
-        OSSL_PROVIDER_get_params(prov, request);
+        OSSL_PROVIDER_get_params(g_prov, request);
         printf("Provider buildinfo: %s\n", build);
      }
     else
@@ -180,7 +190,19 @@ int enclave_fips_test()
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
 
-    /* Perform some crypto tests */
+end:
+    printf(ANSI_COLOR_YELLOW "%s completed\n" ANSI_COLOR_RESET, __FUNCTION__);
+
+    return 0;
+}
+
+/*
+ * Perform some crypto tests
+ */
+int enclave_fips_provider_test(void)
+{
+    int ret = -1;
+
     ret = aesgcm_test();
     if (0 != ret)
     {
@@ -206,7 +228,14 @@ int enclave_fips_test()
     PRINT_PASS("HMAC test completed\n");
 
 end:
-    OSSL_PROVIDER_unload(prov);
+    printf(ANSI_COLOR_YELLOW "%s completed\n" ANSI_COLOR_RESET, __FUNCTION__);
+
+    return 0;
+}
+
+int enclave_fips_provider_unload(void)
+{
+    OSSL_PROVIDER_unload(g_prov);
 
     printf(ANSI_COLOR_YELLOW "%s completed\n" ANSI_COLOR_RESET, __FUNCTION__);
 

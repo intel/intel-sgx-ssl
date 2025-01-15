@@ -49,6 +49,9 @@ enclave {
 
     trusted {
         public int enclave_fips_test();
+        public int enclave_fips_provider_load();
+        public int enclave_fips_provider_test();
+        public int enclave_fips_provider_unload();
  
     };
 };

@@ -268,10 +268,42 @@ int main(int argc, char *argv[])
         return 1; 
  
     int ret = -1;
-    sgx_status_t status = enclave_fips_test(global_eid, &ret);
-    if (status != SGX_SUCCESS || ret != 0) {
-        printf("Call to enclave_fips_test failed: 0x%08X, %d.\n", status, ret);
+    sgx_status_t sgx_ret = SGX_ERROR_UNEXPECTED;
+
+    sgx_ret = enclave_fips_test(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("First ECall to enclave_fips_test failed: 0x%08X, %d.\n", sgx_ret, ret);
         return 1;    //Test failed
+    }
+
+    sgx_ret = enclave_fips_test(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("Second ECall to enclave_fips_test failed: 0x%08X, %d.\n", sgx_ret, ret);
+        return 1;    //Test failed
+    }
+
+    sgx_ret = enclave_fips_provider_load(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("ECall to enclave_fips_provider_load failed: 0x%08X, %d.\n", sgx_ret, ret);
+        return 1;
+    }
+
+    sgx_ret = enclave_fips_provider_test(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("ECall to enclave_fips_provider_test failed: 0x%08X, %d.\n", sgx_ret, ret);
+        return 1;
+    }
+
+    sgx_ret = enclave_fips_provider_test(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("ECall to enclave_fips_provider_test failed: 0x%08X, %d.\n", sgx_ret, ret);
+        return 1;
+    }
+
+    sgx_ret = enclave_fips_provider_unload(global_eid, &ret);
+    if (sgx_ret != SGX_SUCCESS || ret != 0) {
+        printf("ECall to enclave_fips_provider_unload failed: 0x%08X, %d.\n", sgx_ret, ret);
+        return 1;
     }
 
     sgx_destroy_enclave(global_eid);
