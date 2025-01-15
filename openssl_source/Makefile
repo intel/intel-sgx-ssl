@@ -93,11 +93,10 @@ uninstall:
 	rm -rf $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
 
 clean:
-ifeq ($(OSSL_FIPS_BUILD_DIR_SET), 0)
-	$(error "Missing directory : $(OSSL_FIPS_BUILD_DIR). Have you built the FIPS module yet?")
-endif
+ifeq ($(OSSL_FIPS_BUILD_DIR_SET), 1)
 	@echo "*** Cleaning FIPS module"
 	cd $(OSSL_FIPS_BUILD_DIR) && $(MAKE) uninstall && $(MAKE) clean
+endif
 
 clean_dirs:
 	@rm -rf $(OSSL_FIPS_SOURCE_DIR)/
