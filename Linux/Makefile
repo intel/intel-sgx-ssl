@@ -31,6 +31,7 @@
 include buildenv.mk
 include sgx/buildenv.mk
 LINUX_SGX_BUILD ?= 0
+FIPS ?= 0
 EMPTY_SRC = check_lvi_toolset
 .PHONY: sgxssl sgxssl_no_mitigation clean install uninstall
 
