@@ -62,7 +62,7 @@ fips:
 	mkdir -p $(OSSL_FIPS_INSTALL_DIR)
 	mkdir -p $(OSSL_FIPS_BUILD_DIR)
 	tar xvf $(OPENSSL_VERSION).tar.gz -C $(OSSL_FIPS_SOURCE_DIR) --strip-components=1  > /dev/null
-	cd $(OSSL_FIPS_BUILD_DIR) && $(OSSL_FIPS_SOURCE_DIR)/Configure enable-fips --prefix=$(OSSL_FIPS_INSTALL_DIR) && \
+	cd $(OSSL_FIPS_BUILD_DIR) && $(OSSL_FIPS_SOURCE_DIR)/Configure enable-fips --with-rand-seed=rdcpu --prefix=$(OSSL_FIPS_INSTALL_DIR) && \
 		$(MAKE) -j$(shell getconf _NPROCESSORS_ONLN) && $(MAKE) install_fips
 
 # Install the FIPS provider and its configuration file in the SGX SDK location
