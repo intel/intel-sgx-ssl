@@ -67,9 +67,7 @@ fips:
 
 # Install the FIPS provider and its configuration file in the SGX SDK location
 install:
-ifeq ($(OSSL_FIPS_INSTALL_DIR_SET), 0)
-	$(error "Missing directory : $(OSSL_FIPS_INSTALL_DIR). Have you built the FIPS module yet?")
-endif
+ifeq ($(OSSL_FIPS_INSTALL_DIR_SET), 1)
 	@echo "*** Installing FIPS module"
 	@echo "install $(FIPSMODULE) -> $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULE)"
 	cp -f $(OSSL_FIPS_INSTALL_DIR)/$(LIBDIR)/ossl-modules/$(FIPSMODULE) $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULE).new
@@ -80,7 +78,8 @@ endif
 	@echo "install $(FIPSMODULECONF) -> $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)"
 	echo "module-filename = $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULE)" >> $(OSSL_FIPS_INSTALL_DIR)/ssl/$(FIPSMODULECONF)
 	cp -f $(OSSL_FIPS_INSTALL_DIR)/ssl/$(FIPSMODULECONF) $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
-	chmod 744 $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
+	chmod 644 $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
+endif
 
 # Remove the FIPS provider and configuration file from the SGX SDK location
 uninstall:
@@ -90,7 +89,7 @@ uninstall:
 
 	@echo "*** Uninstalling FIPS module configuration"
 	@echo "uninstall $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)"
-	rm -rf $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
+	rm -f $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
 
 clean:
 ifeq ($(OSSL_FIPS_BUILD_DIR_SET), 1)
