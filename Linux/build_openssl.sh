@@ -36,11 +36,7 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
-if [[ "$*" == *"fips"* ]] ; then
-	OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.1.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
-else
-	OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.0.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
-fi
+OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.0.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ]
 then
 	echo "In order to run this script, the OpenSSL tar.gz package must be located in the openssl_source/ directory."
