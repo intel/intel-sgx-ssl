@@ -81,7 +81,7 @@ sudo make install
 ```
 
 ## Note for Version 3.*
-----------------------
+
 To use the trusted cryptography library with SGX SSL/OpenSSL 3.*, especially for the multithreaded enclaves, you may need to increase the enclave heap size adjusting the enclave signing configuration XML file:
 ```
 ...
@@ -90,7 +90,6 @@ To use the trusted cryptography library with SGX SSL/OpenSSL 3.*, especially for
 ```
 
 ## OpenSSL FIPS Provider
-----------------------
 
 As an experimental feature, the SGX SDK supports building the SGX SSL library using the OpenSSL FIPS provider, instead of the default provider. Note: This feature is only supported on Linux and OpenSSL 3.1.6. You must download two separate OpenSSL packages: one from the OpenSSL 3.0 series and one for OpenSSL 3.1.6.
 To build and install the Intel® SGX SSL package and the OpenSSL FIPS provider run:
