@@ -87,9 +87,9 @@ endif
 endif
 
 ifeq ($(FIPS), 1)
-SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
+SGXSSL_ADDITIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
 else
-SGXSSL_ADDTIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
+SGXSSL_ADDITIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
 endif
 
 SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
@@ -122,19 +122,19 @@ $(shell mkdir -p $(OBJDIR))
 all: $(TRUSTED_LIB)
 
 ######## sgx_tsgxssl Objects ########
-sgx_tsgxssl_t.c: $(SGX_EDGER8R) $(SGX_EDL_FILE)
-	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDTIONAL_EDL_PATH)
+sgx_tsgxssl_t.h: $(SGX_EDGER8R) $(SGX_EDL_FILE)
+	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDITIONAL_EDL_PATH)
 	@echo "GEN  =>  $@"
 
 sgx_tsgxssl_t.o: sgx_tsgxssl_t.c
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-$(OBJDIR)/%.o : %.cpp sgx_tsgxssl_t.c
+$(OBJDIR)/%.o : %.cpp sgx_tsgxssl_t.h
 	$(VCXX) $(Sgx_tssl_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(OBJDIR)/%.o : %.c sgx_tsgxssl_t.c
+$(OBJDIR)/%.o : %.c sgx_tsgxssl_t.h
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
@@ -142,7 +142,7 @@ $(OBJDIR)/%.o : %.S
 	$(VCC) $(Common_C_Cpp_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
-$(TRUSTED_LIB): sgx_tsgxssl_t.c $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects)
+$(TRUSTED_LIB): sgx_tsgxssl_t.h $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects)
 	ar rcs $(TRUSTED_LIB) $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects) 
 	@echo "LINK =>  $@"
 	@cp $@ $(PACKAGE_LIB)/$(TRUSTED_LIB)

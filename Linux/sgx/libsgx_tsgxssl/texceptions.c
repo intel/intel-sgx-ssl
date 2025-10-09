@@ -33,6 +33,7 @@
 #include <sgx_trts_exception.h>
 #include <sgx_cpuid.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tcommon.h"
 
