@@ -45,6 +45,7 @@ else
     OSSL_FIPS_SOURCE_DIR := $(CURDIR)/$(OPENSSL_VERSION)-source-fips
     OSSL_FIPS_BUILD_DIR := $(CURDIR)/$(OPENSSL_VERSION)-build-fips
     OSSL_FIPS_INSTALL_DIR := $(CURDIR)/$(OPENSSL_VERSION)-install-fips
+    OSSL_FIPS_SOURCE_DIR_SET = $(shell test -d $(OSSL_FIPS_SOURCE_DIR) && echo 1 || echo 0)
     OSSL_FIPS_BUILD_DIR_SET = $(shell test -d $(OSSL_FIPS_BUILD_DIR) && echo 1 || echo 0)
     OSSL_FIPS_INSTALL_DIR_SET = $(shell test -d $(OSSL_FIPS_INSTALL_DIR) && echo 1 || echo 0)
 endif
