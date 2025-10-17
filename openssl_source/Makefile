@@ -37,13 +37,18 @@ FIPSMODULE:=fips.so
 FIPSMODULECONF:=fipsmodule.cnf
 LIBDIR := lib64
 
-OPENSSL_VERSION := $(shell ls *3.1.*.tar.gz | head -1 | grep -o '[^/]*$$' | sed -s -- 's/\.tar\.gz//')
-OSSL_FIPS_SOURCE_DIR := $(CURDIR)/$(OPENSSL_VERSION)-source-fips
-OSSL_FIPS_INSTALL_DIR := $(CURDIR)/$(OPENSSL_VERSION)-install-fips
-OSSL_FIPS_BUILD_DIR := $(CURDIR)/$(OPENSSL_VERSION)-build-fips
+OPENSSL_VERSION := $(shell ls *3.1.*.tar.gz 2>/dev/null | sort -V | tail -1 | sed -s -- 's/\.tar\.gz$$//')
+ifeq ($(OPENSSL_VERSION),)
+    $(info No matching OpenSSL 3.1 tarball found for FIPS provider support.)
+else
+    $(info Found OpenSSL version $(OPENSSL_VERSION) for FIPS provider support.)
+    OSSL_FIPS_SOURCE_DIR := $(CURDIR)/$(OPENSSL_VERSION)-source-fips
+    OSSL_FIPS_BUILD_DIR := $(CURDIR)/$(OPENSSL_VERSION)-build-fips
+    OSSL_FIPS_INSTALL_DIR := $(CURDIR)/$(OPENSSL_VERSION)-install-fips
+    OSSL_FIPS_BUILD_DIR_SET = $(shell test -d $(OSSL_FIPS_BUILD_DIR) && echo 1 || echo 0)
+    OSSL_FIPS_INSTALL_DIR_SET = $(shell test -d $(OSSL_FIPS_INSTALL_DIR) && echo 1 || echo 0)
+endif
 
-OSSL_FIPS_BUILD_DIR_SET := $(shell test -d $(OSSL_FIPS_BUILD_DIR) && echo 1 || echo 0)
-OSSL_FIPS_INSTALL_DIR_SET := $(shell test -d $(OSSL_FIPS_INSTALL_DIR) && echo 1 || echo 0)
 
 BUILD_TARGET = fips
 
@@ -55,6 +60,7 @@ fips:
 	@echo OSSL_FIPS_SOURCE_DIR is $(OSSL_FIPS_SOURCE_DIR)
 	@echo OSSL_FIPS_INSTALL_DIR is $(OSSL_FIPS_INSTALL_DIR)
 	@echo OSSL_FIPS_BUILD_DIR is $(OSSL_FIPS_BUILD_DIR)
+ifneq ($(OPENSSL_VERSION),)
 	rm -rf $(OSSL_FIPS_SOURCE_DIR)/
 	rm -rf $(OSSL_FIPS_INSTALL_DIR)/
 	rm -rf $(OSSL_FIPS_BUILD_DIR)/
@@ -64,6 +70,7 @@ fips:
 	tar xvf $(OPENSSL_VERSION).tar.gz -C $(OSSL_FIPS_SOURCE_DIR) --strip-components=1  > /dev/null
 	cd $(OSSL_FIPS_BUILD_DIR) && $(OSSL_FIPS_SOURCE_DIR)/Configure enable-fips --with-rand-seed=rdcpu --prefix=$(OSSL_FIPS_INSTALL_DIR) && \
 		$(MAKE) -j$(shell getconf _NPROCESSORS_ONLN) && $(MAKE) install_fips
+endif
 
 # Install the FIPS provider and its configuration file in the SGX SDK location
 install:
@@ -83,6 +90,7 @@ endif
 
 # Remove the FIPS provider and configuration file from the SGX SDK location
 uninstall:
+ifeq ($(OSSL_FIPS_INSTALL_DIR_SET), 1)
 	@echo "*** Uninstalling FIPS module"
 	@echo "uninstall $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULE)"
 	rm -f $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULE)
@@ -90,6 +98,7 @@ uninstall:
 	@echo "*** Uninstalling FIPS module configuration"
 	@echo "uninstall $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)"
 	rm -f $(SGX_SDK)/$(LIBDIR)/$(FIPSMODULECONF)
+endif
 
 clean:
 ifeq ($(OSSL_FIPS_BUILD_DIR_SET), 1)
@@ -98,8 +107,10 @@ ifeq ($(OSSL_FIPS_BUILD_DIR_SET), 1)
 endif
 
 clean_dirs:
+ifeq ($(OSSL_FIPS_SOURCE_DIR_SET), 1)
 	@rm -rf $(OSSL_FIPS_SOURCE_DIR)/
 	@rm -rf $(OSSL_FIPS_INSTALL_DIR)/
 	@rm -rf $(OSSL_FIPS_BUILD_DIR)/
+endif
 
 clean_all: clean clean_dirs
