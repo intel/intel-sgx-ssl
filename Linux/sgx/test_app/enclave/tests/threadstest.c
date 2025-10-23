@@ -127,20 +127,23 @@ void new_thread_func()
 static int test_lock(void)
 {
     CRYPTO_RWLOCK *lock = CRYPTO_THREAD_lock_new();
+    int ret = 0;
 
     if (!CRYPTO_THREAD_read_lock(lock)) {
         fprintf(stderr, "CRYPTO_THREAD_read_lock() failed\n");
-        return 0;
+        goto err;
     }
 
     if (!CRYPTO_THREAD_unlock(lock)) {
         fprintf(stderr, "CRYPTO_THREAD_unlock() failed\n");
-        return 0;
+        goto err;
     }
 
+    ret = 1;
+err:
     CRYPTO_THREAD_lock_free(lock);
 
-    return 1;
+    return ret;
 }
 
 static CRYPTO_ONCE once_run = CRYPTO_ONCE_STATIC_INIT;

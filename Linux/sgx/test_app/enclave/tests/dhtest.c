@@ -756,7 +756,7 @@ err:
 static int dh_rfc5114_fix_nid_test(void)
 {
     int ok = 0;
-    EVP_PKEY_CTX *paramgen_ctx;
+    EVP_PKEY_CTX *paramgen_ctx = NULL;
 
     /* Run the test. Success is any time the test does not cause a SIGSEGV interrupt */
     OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();//added for keygen test with FIPS provider
