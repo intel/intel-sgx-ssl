@@ -157,7 +157,7 @@ static void message(BIO *out, char *m)
 
 int bn_test()
 {
-    BN_CTX *ctx;
+    BN_CTX *ctx = NULL;
     BIO *out;
     char *outfile = NULL;
 
@@ -342,12 +342,14 @@ int bn_test()
 
     return 0;
  err:
+    BN_CTX_free(ctx);
     BIO_puts(out, "1\n");       /* make sure the Perl script fed by bc
                                  * notices the failure, see test_bn in
                                  * test/Makefile.ssl */
     (void)BIO_flush(out);
 
     ERR_print_errors_fp(stderr);
+    BIO_free(out);
     return 1;
 }
 
@@ -395,6 +397,7 @@ int test_sub(BIO *bp)
 {
     BIGNUM *a, *b, *c;
     int i;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -405,7 +408,7 @@ int test_sub(BIO *bp)
             BN_bntest_rand(a, 512, 0, 0);
             BN_copy(b, a);
             if (BN_set_bit(a, i) == 0)
-                return (0);
+                goto err;
             BN_add_word(b, i);
         } else {
             BN_bntest_rand(b, 400 + i - num1, 0, 0);
@@ -427,13 +430,15 @@ int test_sub(BIO *bp)
         BN_sub(c, c, a);
         if (!BN_is_zero(c)) {
             fprintf(stderr, "Subtract test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_free(a);
     BN_free(b);
     BN_free(c);
-    return (1);
+    return (ret);
 }
 
 int test_div(BIO *bp, BN_CTX *ctx)
@@ -529,6 +534,7 @@ int test_div_word(BIO *bp)
     BIGNUM *a, *b;
     BN_ULONG r, rmod, s;
     int i;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -546,7 +552,7 @@ int test_div_word(BIO *bp)
 
 		if (rmod != r) {
             fprintf(stderr, "Mod (word) test failed!\n");
-            return 0;
+            goto err;
         }
         
         if (bp != NULL) {
@@ -573,12 +579,14 @@ int test_div_word(BIO *bp)
         BN_sub(b, a, b);
         if (!BN_is_zero(b)) {
             fprintf(stderr, "Division (word) test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_free(a);
     BN_free(b);
-    return (1);
+    return (ret);
 }
 
 int test_div_recp(BIO *bp, BN_CTX *ctx)
@@ -791,6 +799,7 @@ int test_mont(BIO *bp, BN_CTX *ctx)
     BIGNUM *n;
     int i;
     BN_MONT_CTX *mont;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -802,18 +811,18 @@ int test_mont(BIO *bp, BN_CTX *ctx)
 
     mont = BN_MONT_CTX_new();
     if (mont == NULL)
-        return 0;
+        goto err;
 
     BN_zero(n);
     if (BN_MONT_CTX_set(mont, n, ctx)) {
         fprintf(stderr, "BN_MONT_CTX_set succeeded for zero modulus!\n");
-        return 0;
+        goto err;
     }
 
     BN_set_word(n, 16);
     if (BN_MONT_CTX_set(mont, n, ctx)) {
         fprintf(stderr, "BN_MONT_CTX_set succeeded for even modulus!\n");
-        return 0;
+        goto err;
     }
 
     BN_bntest_rand(a, 100, 0, 0);
@@ -850,9 +859,11 @@ int test_mont(BIO *bp, BN_CTX *ctx)
         BN_sub(d, d, A);
         if (!BN_is_zero(d)) {
             fprintf(stderr, "Montgomery multiplication test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_MONT_CTX_free(mont);
     BN_free(a);
     BN_free(b);
@@ -861,7 +872,7 @@ int test_mont(BIO *bp, BN_CTX *ctx)
     BN_free(A);
     BN_free(B);
     BN_free(n);
-    return (1);
+    return (ret);
 }
 
 int test_mod(BIO *bp, BN_CTX *ctx)
@@ -1123,6 +1134,7 @@ int test_mod_exp_mont5(BIO *bp, BN_CTX *ctx)
 {
     BIGNUM *a, *p, *m, *d, *e;
     BN_MONT_CTX *mont;
+    int ret = 0;
 
     a = BN_new();
     p = BN_new();
@@ -1136,19 +1148,19 @@ int test_mod_exp_mont5(BIO *bp, BN_CTX *ctx)
     BN_bntest_rand(a, 1024, 0, 0);
     BN_zero(p);
     if (!BN_mod_exp_mont_consttime(d, a, p, m, ctx, NULL))
-        return 0;
+        goto err;
     if (!BN_is_one(d)) {
         fprintf(stderr, "Modular exponentiation test failed!\n");
-        return 0;
+        goto err;
     }
     /* Zero input */
     BN_bntest_rand(p, 1024, 0, 0);
     BN_zero(a);
     if (!BN_mod_exp_mont_consttime(d, a, p, m, ctx, NULL))
-        return 0;
+        goto err;
     if (!BN_is_zero(d)) {
         fprintf(stderr, "Modular exponentiation test failed!\n");
-        return 0;
+        goto err;
     }
     /*
      * Craft an input whose Montgomery representation is 1, i.e., shorter
@@ -1158,38 +1170,41 @@ int test_mod_exp_mont5(BIO *bp, BN_CTX *ctx)
     BN_one(a);
     BN_MONT_CTX_set(mont, m, ctx);
     if (!BN_from_montgomery(e, a, mont, ctx))
-        return 0;
+        goto err;
     if (!BN_mod_exp_mont_consttime(d, e, p, m, ctx, NULL))
-        return 0;
+        goto err;
     if (!BN_mod_exp_simple(a, e, p, m, ctx))
-        return 0;
+        goto err;
     if (BN_cmp(a, d) != 0) {
         fprintf(stderr, "Modular exponentiation test failed!\n");
-        return 0;
+        goto err;
     }
     /* Finally, some regular test vectors. */
     BN_bntest_rand(e, 1024, 0, 0);
     if (!BN_mod_exp_mont_consttime(d, e, p, m, ctx, NULL))
-        return 0;
+        goto err;
     if (!BN_mod_exp_simple(a, e, p, m, ctx))
-        return 0;
+        goto err;
     if (BN_cmp(a, d) != 0) {
         fprintf(stderr, "Modular exponentiation test failed!\n");
-        return 0;
+        goto err;
     }
+    ret = 1;
+err:
     BN_MONT_CTX_free(mont);
     BN_free(a);
     BN_free(p);
     BN_free(m);
     BN_free(d);
     BN_free(e);
-    return (1);
+    return (ret);
 }
 
 int test_exp(BIO *bp, BN_CTX *ctx)
 {
     BIGNUM *a, *b, *d, *e, *one;
     int i;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -1203,7 +1218,7 @@ int test_exp(BIO *bp, BN_CTX *ctx)
         BN_bntest_rand(b, 2 + i, 0, 0);
 
         if (BN_exp(d, a, b, ctx) <= 0)
-            return (0);
+            goto err;
 
         if (bp != NULL) {
             if (!results) {
@@ -1221,15 +1236,17 @@ int test_exp(BIO *bp, BN_CTX *ctx)
         BN_sub(e, e, d);
         if (!BN_is_zero(e)) {
             fprintf(stderr, "Exponentiation test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_free(a);
     BN_free(b);
     BN_free(d);
     BN_free(e);
     BN_free(one);
-    return (1);
+    return (ret);
 }
 
 #ifndef OPENSSL_NO_EC2M
@@ -1866,6 +1883,7 @@ int test_lshift(BIO *bp, BN_CTX *ctx, BIGNUM *a_)
 {
     BIGNUM *a, *b, *c, *d;
     int i;
+    int ret = 1;
 
     b = BN_new();
     c = BN_new();
@@ -1905,20 +1923,22 @@ int test_lshift(BIO *bp, BN_CTX *ctx, BIGNUM *a_)
             fprintf(stderr, "\nd=");
             BN_print_fp(stderr, d);
             fprintf(stderr, "\n");
-            return 0;
+            ret = 0;
+            break;
         }
     }
     BN_free(a);
     BN_free(b);
     BN_free(c);
     BN_free(d);
-    return (1);
+    return (ret);
 }
 
 int test_lshift1(BIO *bp)
 {
     BIGNUM *a, *b, *c;
     int i;
+    int ret = 1;
 
     a = BN_new();
     b = BN_new();
@@ -1941,7 +1961,8 @@ int test_lshift1(BIO *bp)
         BN_sub(a, b, c);
         if (!BN_is_zero(a)) {
             fprintf(stderr, "Left shift one test failed!\n");
-            return 0;
+            ret = 0;
+            break;
         }
 
         BN_copy(a, b);
@@ -1949,13 +1970,14 @@ int test_lshift1(BIO *bp)
     BN_free(a);
     BN_free(b);
     BN_free(c);
-    return (1);
+    return (ret);
 }
 
 int test_rshift(BIO *bp, BN_CTX *ctx)
 {
     BIGNUM *a, *b, *c, *d, *e;
     int i;
+    int ret = 1;
 
     a = BN_new();
     b = BN_new();
@@ -1983,7 +2005,8 @@ int test_rshift(BIO *bp, BN_CTX *ctx)
         BN_sub(d, d, b);
         if (!BN_is_zero(d)) {
             fprintf(stderr, "Right shift test failed!\n");
-            return 0;
+            ret = 0;
+            break;
         }
     }
     BN_free(a);
@@ -1991,13 +2014,14 @@ int test_rshift(BIO *bp, BN_CTX *ctx)
     BN_free(c);
     BN_free(d);
     BN_free(e);
-    return (1);
+    return (ret);
 }
 
 int test_rshift1(BIO *bp)
 {
     BIGNUM *a, *b, *c;
     int i;
+    int ret = 1;
 
     a = BN_new();
     b = BN_new();
@@ -2020,14 +2044,15 @@ int test_rshift1(BIO *bp)
         BN_sub(c, c, b);
         if (!BN_is_zero(c) && !BN_abs_is_word(c, 1)) {
             fprintf(stderr, "Right shift one test failed!\n");
-            return 0;
+            ret = 0;
+            break;
         }
         BN_copy(a, b);
     }
     BN_free(a);
     BN_free(b);
     BN_free(c);
-    return (1);
+    return (ret);
 }
 
 int rand_neg(void)
