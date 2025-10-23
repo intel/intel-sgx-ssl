@@ -158,7 +158,7 @@ static void message(BIO *out, char *m)
 int bn_test()
 {
     BN_CTX *ctx = NULL;
-    BIO *out;
+    BIO *out = NULL;
     char *outfile = NULL;
 
     results = 0;
@@ -357,6 +357,7 @@ int test_add(BIO *bp)
 {
     BIGNUM *a, *b, *c;
     int i;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -384,13 +385,15 @@ int test_add(BIO *bp)
         BN_add(c, c, a);
         if (!BN_is_zero(c)) {
             fprintf(stderr, "Add test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_free(a);
     BN_free(b);
     BN_free(c);
-    return (1);
+    return (ret);
 }
 
 int test_sub(BIO *bp)
@@ -445,6 +448,7 @@ int test_div(BIO *bp, BN_CTX *ctx)
 {
     BIGNUM *a, *b, *c, *d, *e;
     int i;
+    int ret = 0;
 
     a = BN_new();
     b = BN_new();
@@ -495,15 +499,17 @@ int test_div(BIO *bp, BN_CTX *ctx)
         BN_sub(d, d, a);
         if (!BN_is_zero(d)) {
             fprintf(stderr, "Division test failed!\n");
-            return 0;
+            goto err;
         }
     }
+    ret = 1;
+err:
     BN_free(a);
     BN_free(b);
     BN_free(c);
     BN_free(d);
     BN_free(e);
-    return (1);
+    return (ret);
 }
 
 static void print_word(BIO *bp, BN_ULONG w)
