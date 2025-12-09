@@ -1,14 +1,20 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.779
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.36422.26
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsgx_tsgxssl", "libsgx_tsgxssl\libsgx_tsgxssl.vcxproj", "{CAB477F7-900D-4B9A-9F10-30A41D130C1C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsgx_usgxssl", "libsgx_usgxssl\libsgx_usgxssl.vcxproj", "{5E02F357-8A0E-4E37-96F3-DDA4ADED4E5B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "test_app\app\TestApp.vcxproj", "{7E653C46-DAAA-4DA1-ACDA-7B477EC0307C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5E02F357-8A0E-4E37-96F3-DDA4ADED4E5B} = {5E02F357-8A0E-4E37-96F3-DDA4ADED4E5B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestEnclave", "test_app\enclave\TestEnclave.vcxproj", "{2D7787DF-3342-474E-AC6D-01E60D7C579E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CAB477F7-900D-4B9A-9F10-30A41D130C1C} = {CAB477F7-900D-4B9A-9F10-30A41D130C1C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
