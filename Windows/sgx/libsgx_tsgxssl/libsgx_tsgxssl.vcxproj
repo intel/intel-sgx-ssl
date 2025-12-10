@@ -207,7 +207,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\package\include;$(SolutionDir)..\..\..\..\common\inc\;$(SolutionDir)..\..\..\..\common\inc\tlibc;$(SolutionDir)..\..\..\..\sdk\tlibstdcxx\stlport;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\libc++;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\stlport;%(AdditionalIncludeDirectories);$(VCInstallDir)include;$(IncludePath)</AdditionalIncludeDirectories>
@@ -226,7 +226,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\package\include;$(SolutionDir)..\..\..\..\common\inc\;$(SolutionDir)..\..\..\..\common\inc\tlibc;$(SolutionDir)..\..\..\..\sdk\tlibstdcxx\stlport;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\libc++;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\stlport;%(AdditionalIncludeDirectories);$(VCInstallDir)include;$(IncludePath)</AdditionalIncludeDirectories>
