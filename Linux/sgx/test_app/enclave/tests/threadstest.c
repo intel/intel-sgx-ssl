@@ -120,8 +120,9 @@ static int wait_for_thread(thread_t thread)
 void new_thread_func()
 {
     printf("in new thread, id: %llu\n",sgx_thread_self());
-    if (NULL == func) {
+    if (func == NULL) {
         fprintf(stderr, "Thread function not initialized\n");
+        busy_wait = 0;
         return;
     }
     func();
