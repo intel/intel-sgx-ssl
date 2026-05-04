@@ -21,11 +21,11 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: download SDK
-      run: wget https://download.01.org/intel-sgx/sgx-linux/2.27/distro/ubuntu24.04-server/sgx_linux_x64_sdk_2.27.100.1.bin
+      run: wget https://download.01.org/intel-sgx/sgx-linux/2.29/distro/ubuntu24.04-server/sgx_linux_x64_sdk_2.29.100.1.bin
     - name: install SDK
       run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
     - name: download OpenSSL code
-      run: wget https://www.openssl.org/source/openssl-3.0.19.tar.gz --directory-prefix=openssl_source/
+      run: wget https://www.openssl.org/source/openssl-3.0.20.tar.gz --directory-prefix=openssl_source/
     - name: build SGXSSL
       run: source sgxsdk/environment; cd Linux; make all; DEBUG=1 make all
     - name: run unit test in SIM
