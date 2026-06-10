@@ -105,7 +105,7 @@ make test FIPS=1
 make fips_test FIPS=1
 ```
 
-FIPS support was introduced as an experimental feature, and the current design has a limitation that relies on the default OpenSSL and FIPS provider configuration files.
+FIPS support was introduced as an experimental feature, and the current design relies on OpenSSL’s default configuration lookup for `openssl.cnf` (which in turn includes the FIPS module configuration, e.g., `fipsmodule.cnf`).
 
 In the FIPS build of SGX-SSL, an attacker with write access to the directory from which the enclave is executed could modify the FIPS provider configuration file. This introduces a potential integrity risk, as the configuration may be altered outside the trusted computing base.
 
