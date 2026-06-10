@@ -104,3 +104,9 @@ You may build and run one or both test programs that utilize the FIPS provider. 
 make test FIPS=1
 make fips_test FIPS=1
 ```
+
+FIPS support was introduced as an experimental feature, and the current design has a limitation that relies on the default OpenSSL and FIPS provider configuration files.
+
+In the FIPS build of SGX-SSL, an attacker with write access to the directory from which the enclave is executed could modify the FIPS provider configuration file. This introduces a potential integrity risk, as the configuration may be altered outside the trusted computing base.
+
+At this time, we are documenting this behavior as a known limitation and will assess whether further action is warranted based on future customer requirements.
