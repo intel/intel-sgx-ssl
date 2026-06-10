@@ -104,3 +104,9 @@ You may build and run one or both test programs that utilize the FIPS provider. 
 make test FIPS=1
 make fips_test FIPS=1
 ```
+
+FIPS support was introduced as an experimental feature, and the current design relies on OpenSSL’s default configuration lookup for `openssl.cnf` (which in turn includes the FIPS module configuration, e.g., `fipsmodule.cnf`).
+
+In the FIPS build of Intel® SGX SSL, an attacker with write access to the untrusted filesystem path(s) used for OpenSSL configuration (for example `openssl.cnf` and any included `fipsmodule.cnf`) could modify those files. This introduces a potential integrity risk, as configuration may be altered outside the trusted computing base.
+
+At this time, we are documenting this behavior as a known limitation and will assess whether further action is warranted based on future customer requirements.
