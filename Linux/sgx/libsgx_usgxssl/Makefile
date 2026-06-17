@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -48,6 +48,11 @@ else
 		include ../../../../../buildenv.mk
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
+	else ifeq ($(LINUX_SGX_BUILD), 2)
+		include ../../../../../QuoteGeneration/buildenv.mk
+		SGX_EDGER8R := $(SERVTD_ATTEST_STD_LIB_PATH)/sgx_edger8r
+		SGX_SDK_INC := $(SERVTD_ATTEST_STD_INC_PATH)
+		LIBCXX_INC := $(SERVTD_ATTEST_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
 	else
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
@@ -66,7 +71,7 @@ else
 	SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
 endif
 
-SGX_EDL_FILE := $(PACKAGE_INCLUDE)/sgx_tsgxssl.edl
+#SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
 ######## App Settings ########
 
@@ -75,7 +80,11 @@ Sgx_ussl_Include_Paths := -I. -I$(SGX_SDK_INC)
 Sgx_ussl_C_Flags := $(SGX_COMMON_CFLAGS) -fpie -fpic -fstack-protector -Wformat -Wformat-security -Wno-attributes $(Sgx_ussl_Include_Paths)
 Sgx_ussl_Cpp_Flags := $(Sgx_ussl_C_Flags) -std=c++11
 
+ifeq ($(FIPS), 1)
 Sgx_ussl_Cpp_Files := $(wildcard *.cpp)
+else
+Sgx_ussl_Cpp_Files := $(filter-out ufile.cpp, $(sort $(wildcard *.cpp)))
+endif
 Sgx_ussl_C_Files := $(wildcard *.c)
 
 Sgx_ussl_Cpp_Objects := $(addprefix $(OBJDIR)/, $(Sgx_ussl_Cpp_Files:.cpp=.o))
@@ -94,9 +103,9 @@ all: $(UNTRUSTED_LIB)
 #	@mkdir -p $(UNTRUSTED_DIR) && cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --header-only --untrusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC)
 #	@echo "GEN  =>  $@"
 
-sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c
-	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
+#sgx_tsgxssl_u.o: $(UNTRUSTED_DIR)/sgx_tsgxssl_u.c
+#	$(VCC) $(Sgx_ussl_C_Flags) -c $< -o $@
+#	@echo "CC   <=  $<"
 
 $(OBJDIR)/%.o : %.cpp
 	$(VCC) $(Sgx_ussl_Cpp_Flags) -c $< -o $@
