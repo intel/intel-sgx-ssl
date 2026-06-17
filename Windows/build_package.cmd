@@ -112,17 +112,12 @@ goto end_copying
 
 :extra_copying_load
 
-copy /y  windows\keccak1600-x86_64.asm %OPENSSL_VERSION%\crypto\sha
-copy /y  windows\rsaz-avx2.asm %OPENSSL_VERSION%\crypto\bn
-copy /y  windows\rsaz-x86_64.asm %OPENSSL_VERSION%\crypto\bn
-copy /y  windows\x86_64-mont.asm %OPENSSL_VERSION%\crypto\bn
-copy /y  windows\x86_64-mont5.asm %OPENSSL_VERSION%\crypto\bn
+xcopy /Y /Q /S  Windows\crypto %OPENSSL_VERSION%\crypto
+goto end_copying
 
 :extra_copying_cf
 
-copy /y  windows\aesni-x86_64.asm %OPENSSL_VERSION%\crypto\aes
-copy /y  windows\vpaes-x86_64.asm %OPENSSL_VERSION%\crypto\aes
-copy /y  windows\x86_64cpuid.asm %OPENSSL_VERSION%\crypto
+rem empty for now 
 
 :end_copying
 

@@ -1,0 +1,32 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - name: download SDK
+      run: wget https://download.01.org/intel-sgx/sgx-linux/2.29/distro/ubuntu24.04-server/sgx_linux_x64_sdk_2.29.100.1.bin
+    - name: install SDK
+      run: chmod +x *.bin; echo yes | ./sgx_linux_x64_sdk_2.*.bin
+    - name: download OpenSSL code
+      run: wget https://www.openssl.org/source/openssl-3.0.21.tar.gz --directory-prefix=openssl_source/
+    - name: build SGXSSL
+      run: source sgxsdk/environment; cd Linux; make all; DEBUG=1 make all
+    - name: run unit test in SIM
+      run: source sgxsdk/environment; cd Linux; make -C sgx/test_app/ clean; SKIP_INTELCPU_CHECK=TRUE SGX_MODE=SIM make test      

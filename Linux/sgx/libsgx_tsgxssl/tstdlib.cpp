@@ -71,6 +71,11 @@ char *sgxssl_getenv(const char *name)
 		return NULL;
 	}
 
+	if (!strcmp(name, "OPENSSL_CONF_INCLUDE" )) {
+                FEND;
+                return NULL;
+        }
+
 	if (!strcmp(name, "OPENSSL_ENGINES" )) {
 		FEND;
 		return (char *) PATH_DEV_NULL;

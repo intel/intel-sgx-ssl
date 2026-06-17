@@ -32,32 +32,19 @@
 ## 
  
 # svn_revision.pl
-# generates tsgxssl_version.h file with the current SVN revision number
-# uses SubWCRev.exe from Tortoise SVN bin directory to get the SVN revision number
-
-my $result = `"c:/Program Files/TortoiseSVN/bin/SubWCRev.exe" .`;
-
-# Split revision tool output to lines and take second line
-my @result = split('\n',$result);
-my $line = $result[1];
-
-# Split second line to words and take revision value from last word
-my @line = split(' ',$line);
-my $version = $line[4];
+# generates tsgxssl_version.h file 
 
 # Generate header file like output
-print "// auto generated file. do not add to SVN repository\n\n";
+print "// auto generated file. do not edit\n\n";
 
 print "#ifndef __SGXSSL_VERSION_H__\n";
 print "#define __SGXSSL_VERSION_H__\n\n";
 print "#include <sys/cdefs.h>\n\n";
 
-print "// revision ID field taken from SVN repository\n";
-print "#define STRFILEVER \"1.8.100.";
-print "$version\"\n\n";
+print "#define STRFILEVER \"3.0\"\n\n";
 
-print "#define SGX_SSL_VERSION_STR  __CONCAT(\"SGX_SSL_VERSION_\", \"1.8.100.\")\n\n";
+print "#define SGX_SSL_VERSION_STR  __CONCAT(\"SGX_SSL_VERSION_\", \"3.0.\")\n\n";
 
 print "#endif // __SGXSSL_VERSION_H__\n";
 
-exit ($version)
+exit 

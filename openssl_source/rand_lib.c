@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2021 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2023 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the Apache License 2.0 (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -96,6 +96,7 @@ void ossl_rand_cleanup_int(void)
     CRYPTO_THREAD_lock_free(rand_meth_lock);
     rand_meth_lock = NULL;
 # endif
+    ossl_release_default_drbg_ctx();
     rand_inited = 0;
 }
 
@@ -119,6 +120,8 @@ void RAND_keep_random_devices_open(int keep)
  */
 int RAND_poll(void)
 {
+    static const char salt[] = "polling";
+
 # ifndef OPENSSL_NO_DEPRECATED_3_0
     const RAND_METHOD *meth = RAND_get_rand_method();
     int ret = meth == RAND_OpenSSL();
@@ -147,14 +150,12 @@ int RAND_poll(void)
         ret = 1;
      err:
         ossl_rand_pool_free(pool);
+        return ret;
     }
-    return ret;
-# else
-    static const char salt[] = "polling";
+# endif
 
     RAND_seed(salt, sizeof(salt));
     return 1;
-# endif
 }
 
 # ifndef OPENSSL_NO_DEPRECATED_3_0
@@ -540,6 +541,8 @@ static EVP_RAND_CTX *rand_new_seed(OSSL_LIB_CTX *libctx)
     EVP_RAND_CTX *ctx;
     char *name;
 
+    if (dgbl == NULL)
+        return NULL;
     name = dgbl->seed_name != NULL ? dgbl->seed_name : "SEED-SRC";
     rand = EVP_RAND_fetch(libctx, name, dgbl->seed_propq);
     if (rand == NULL) {
@@ -571,6 +574,8 @@ static EVP_RAND_CTX *rand_new_drbg(OSSL_LIB_CTX *libctx, EVP_RAND_CTX *parent,
     OSSL_PARAM params[7], *p = params;
     char *name, *cipher;
 
+    if (dgbl == NULL)
+        return NULL;
     name = dgbl->rng_name != NULL ? dgbl->rng_name : "CTR-DRBG";
     rand = EVP_RAND_fetch(libctx, name, dgbl->rng_propq);
     if (rand == NULL) {
@@ -770,24 +775,27 @@ static int random_conf_init(CONF_IMODULE *md, const CONF *cnf)
         return 0;
     }
 
+    if (dgbl == NULL)
+        return 0;
+
     for (i = 0; i < sk_CONF_VALUE_num(elist); i++) {
         cval = sk_CONF_VALUE_value(elist, i);
-        if (strcasecmp(cval->name, "random") == 0) {
+        if (OPENSSL_strcasecmp(cval->name, "random") == 0) {
             if (!random_set_string(&dgbl->rng_name, cval->value))
                 return 0;
-        } else if (strcasecmp(cval->name, "cipher") == 0) {
+        } else if (OPENSSL_strcasecmp(cval->name, "cipher") == 0) {
             if (!random_set_string(&dgbl->rng_cipher, cval->value))
                 return 0;
-        } else if (strcasecmp(cval->name, "digest") == 0) {
+        } else if (OPENSSL_strcasecmp(cval->name, "digest") == 0) {
             if (!random_set_string(&dgbl->rng_digest, cval->value))
                 return 0;
-        } else if (strcasecmp(cval->name, "properties") == 0) {
+        } else if (OPENSSL_strcasecmp(cval->name, "properties") == 0) {
             if (!random_set_string(&dgbl->rng_propq, cval->value))
                 return 0;
-        } else if (strcasecmp(cval->name, "seed") == 0) {
+        } else if (OPENSSL_strcasecmp(cval->name, "seed") == 0) {
             if (!random_set_string(&dgbl->seed_name, cval->value))
                 return 0;
-        } else if (strcasecmp(cval->name, "seed_properties") == 0) {
+        } else if (OPENSSL_strcasecmp(cval->name, "seed_properties") == 0) {
             if (!random_set_string(&dgbl->seed_propq, cval->value))
                 return 0;
         } else {

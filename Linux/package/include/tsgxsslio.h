@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Intel Corporation. All rights reserved.
+ * Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,6 @@
 #ifndef _TSGXSSL_IO_H_
 #define _TSGXSSL_IO_H_
 
-typedef void FILE;
+typedef unsigned long FILE;
 
 #endif // _TSGXSSL_IO_H_

@@ -119,28 +119,36 @@ static int wait_for_thread(thread_t thread)
 
 void new_thread_func()
 {
-	printf("in new thread, id: %llu\n",sgx_thread_self());
-	func();
-	busy_wait = 0;
+    printf("in new thread, id: %llu\n",sgx_thread_self());
+    if (func == NULL) {
+        fprintf(stderr, "Thread function not initialized\n");
+        busy_wait = 0;
+        return;
+    }
+    func();
+    busy_wait = 0;
 }
 
 static int test_lock(void)
 {
     CRYPTO_RWLOCK *lock = CRYPTO_THREAD_lock_new();
+    int ret = 0;
 
     if (!CRYPTO_THREAD_read_lock(lock)) {
         fprintf(stderr, "CRYPTO_THREAD_read_lock() failed\n");
-        return 0;
+        goto err;
     }
 
     if (!CRYPTO_THREAD_unlock(lock)) {
         fprintf(stderr, "CRYPTO_THREAD_unlock() failed\n");
-        return 0;
+        goto err;
     }
 
+    ret = 1;
+err:
     CRYPTO_THREAD_lock_free(lock);
 
-    return 1;
+    return ret;
 }
 
 static CRYPTO_ONCE once_run = CRYPTO_ONCE_STATIC_INIT;

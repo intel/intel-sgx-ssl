@@ -203,7 +203,7 @@ my %globals;
 		    $epilogue = "movq	8(%rsp),%rdi\n\t" .
 				"movq	16(%rsp),%rsi\n\t";
 		}
-	    	$epilogue . "ret ; .byte	0xf3,0xc3";
+	        $epilogue . "nop\n\trep ret ; .byte	0xf3,0xc3";
 	    } elsif ($self->{op} eq "call" && !$elf && $current_segment eq ".init") {
 		".p2align\t3\n\t.quad";
 	    } else {
@@ -217,7 +217,7 @@ my %globals;
 		    $self->{op} = "mov	rdi,QWORD$PTR\[8+rsp\]\t;WIN64 epilogue\n\t".
 				  "mov	rsi,QWORD$PTR\[16+rsp\]\n\t";
 	    	}
-		$self->{op} .= "ret ; DB\t0F3h,0C3h\t\t;repret";
+		$self->{op} .= "nop\n\trep ret ; DB\t0F3h,0C3h\t\t;repret";
 	    } elsif ($self->{op} =~ /^(pop|push)f/) {
 		$self->{op} .= $self->{sz};
 	    } elsif ($self->{op} eq "call" && $current_segment eq ".CRT\$XCU") {

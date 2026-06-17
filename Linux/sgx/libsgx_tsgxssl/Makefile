@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2020 Intel Corporation. All rights reserved.
+# Copyright (C) 2011-2024 Intel Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -50,6 +50,11 @@ else
 		SGX_EDGER8R := $(BUILD_DIR)/sgx_edger8r
 		SGX_SDK_INC := $(COMMON_DIR)/inc
 		LIBCXX_INC := $(LINUX_SDK_DIR)/tlibcxx/include
+	else ifeq ($(LINUX_SGX_BUILD), 2)
+		include ../../../../../QuoteGeneration/buildenv.mk
+		SGX_EDGER8R := $(SERVTD_ATTEST_STD_LIB_PATH)/sgx_edger8r
+		SGX_SDK_INC := $(SERVTD_ATTEST_STD_INC_PATH)
+		LIBCXX_INC := $(SERVTD_ATTEST_LINUX_TRUNK_ROOT_PATH)/sdk/tlibcxx/include
 	else
 		SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 		SGX_SDK_INC := $(SGX_SDK)/include
@@ -69,6 +74,9 @@ else
 	SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
 endif
 
+ifeq ($(FIPS), 1)
+SGX_COMMON_CFLAGS += -DSGXSSL_FIPS
+endif
 
 ifeq ($(SGX_MODE), HW)
 ifndef DEBUG
@@ -78,9 +86,19 @@ endif
 endif
 endif
 
+ifeq ($(FIPS), 1)
+SGXSSL_ADDITIONAL_EDL_PATH=$(PACKAGE_INC)/filefunc
+else
+SGXSSL_ADDITIONAL_EDL_PATH=$(PACKAGE_INC)/nofilefunc
+endif
+
 SGX_EDL_FILE := $(PACKAGE_INC)/sgx_tsgxssl.edl
 
+ifeq ($(FIPS), 1)
 Sgx_tssl_Cpp_Files := $(sort $(wildcard *.cpp))
+else
+Sgx_tssl_Cpp_Files := $(filter-out tfile.cpp, $(sort $(wildcard *.cpp)))
+endif
 Sgx_tssl_C_Files := $(sort $(wildcard *.c))
 Sgx_tssl_S_Files := $(sort $(wildcard *.S))
 
@@ -104,19 +122,19 @@ $(shell mkdir -p $(OBJDIR))
 all: $(TRUSTED_LIB)
 
 ######## sgx_tsgxssl Objects ########
-sgx_tsgxssl_t.c: $(SGX_EDGER8R) $(SGX_EDL_FILE)
-	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC)
+sgx_tsgxssl_t.h: $(SGX_EDGER8R) $(SGX_EDL_FILE)
+	$(SGX_EDGER8R) --header-only --trusted $(SGX_EDL_FILE) --search-path $(SGX_SDK_INC) --search-path $(SGXSSL_ADDITIONAL_EDL_PATH)
 	@echo "GEN  =>  $@"
 
 sgx_tsgxssl_t.o: sgx_tsgxssl_t.c
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-$(OBJDIR)/%.o : %.cpp sgx_tsgxssl_t.c
+$(OBJDIR)/%.o : %.cpp sgx_tsgxssl_t.h
 	$(VCXX) $(Sgx_tssl_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(OBJDIR)/%.o : %.c sgx_tsgxssl_t.c
+$(OBJDIR)/%.o : %.c sgx_tsgxssl_t.h
 	$(VCC) $(Sgx_tssl_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
@@ -124,7 +142,7 @@ $(OBJDIR)/%.o : %.S
 	$(VCC) $(Common_C_Cpp_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
-$(TRUSTED_LIB): sgx_tsgxssl_t.c $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects)
+$(TRUSTED_LIB): sgx_tsgxssl_t.h $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects)
 	ar rcs $(TRUSTED_LIB) $(Sgx_tssl_Cpp_Objects) $(Sgx_tssl_C_Objects) $(Sgx_tssl_S_Objects) 
 	@echo "LINK =>  $@"
 	@cp $@ $(PACKAGE_LIB)/$(TRUSTED_LIB)

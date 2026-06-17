@@ -1,0 +1,25 @@
+#
+# OpenSSL example configuration file.
+# See https://docs.openssl.org/master/man5/config/ for more info.
+#
+# This is mostly being used for explicitly activating the FIPS
+# provider so the default provider is not activated implicitly.
+#
+
+config_diagnostics = 1
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+alg_section = algorithm_sect
+
+[provider_sect]
+fips = fips_sect
+base = base_sect
+
+[base_sect]
+activate = 1
+
+[algorithm_sect]
+default_properties = fips=yes
+

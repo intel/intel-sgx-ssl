@@ -51,6 +51,7 @@ export PACKAGE_INC := $(ROOT_DIR)/../package/include/
 export TRUSTED_LIB_DIR := $(ROOT_DIR)/libsgx_tsgxssl/
 export UNTRUSTED_LIB_DIR := $(ROOT_DIR)/libsgx_usgxssl/
 export TEST_DIR := $(ROOT_DIR)/test_app/
+export FIPS_TEST_DIR := $(ROOT_DIR)/fips_test/
 export OS_ID=0
 export LINUX_SGX_BUILD ?= 0
 export TRUSTED_LIB := libsgx_tsgxssl.a
