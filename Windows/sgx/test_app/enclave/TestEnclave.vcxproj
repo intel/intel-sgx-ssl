@@ -260,7 +260,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"</Command>
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"</Command>
       <Message>sign the enclave</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -283,7 +283,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>generate the enclave signing material</Message>
     </PostBuildEvent>
@@ -308,7 +308,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>generate the enclave signing material</Message>
     </PostBuildEvent>
@@ -333,7 +333,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>generate the enclave signing material</Message>
     </PostBuildEvent>
@@ -358,7 +358,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>sign the enclave</Message>
     </PostBuildEvent>
@@ -481,7 +481,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>generate the enclave signing material</Message>
     </PostBuildEvent>
@@ -507,7 +507,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SGXSDKInstallPath)bin\win32\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
+      <Command>"$(SGXSDKInstallPath)bin\x64\release\sgx_sign.exe" sign -key "$(ProjectDir)TestEnclave_private.pem" -enclave "$(OutDir)TestEnclave.dll" -out "$(OutDir)TestEnclave.signed.dll" -config "$(ProjectDir)TestEnclave.config.xml"
 </Command>
       <Message>sign the enclave</Message>
     </PostBuildEvent>
