@@ -326,7 +326,9 @@ const RAND_METHOD *RAND_get_rand_method(void)
 int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
                        unsigned int strength)
 {
-    EVP_RAND_CTX *rand;
+    (void)(ctx); /* Unused parameters can trigger -Wunused warnings */
+    (void)(strength);
+
 #if !defined(OPENSSL_NO_DEPRECATED_3_0) && !defined(FIPS_MODULE)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
@@ -337,8 +339,12 @@ int RAND_priv_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
-    //use RDRAND for SGX Enclave instead
-    return get_sgx_rand_bytes(buf, num);
+    // SGX enclaves use RDRAND exclusively
+    if (num > INT_MAX) {
+        ERR_raise(ERR_LIB_RAND, RAND_R_REQUEST_TOO_LARGE_FOR_DRBG);
+        return 0;
+    }
+    return get_sgx_rand_bytes(buf, (int)num);
 }
 
 int RAND_priv_bytes(unsigned char *buf, int num)
@@ -351,7 +357,9 @@ int RAND_priv_bytes(unsigned char *buf, int num)
 int RAND_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
                   unsigned int strength)
 {
-    EVP_RAND_CTX *rand;
+    (void)(ctx); /* Unused parameters can trigger -Wunused warnings */
+    (void)(strength);
+
 #if !defined(OPENSSL_NO_DEPRECATED_3_0) && !defined(FIPS_MODULE)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
@@ -362,14 +370,12 @@ int RAND_bytes_ex(OSSL_LIB_CTX *ctx, unsigned char *buf, size_t num,
         return -1;
     }
 #endif
-    //use RDRAND for SGX Enclave insteadly
-    return get_sgx_rand_bytes(buf, num);
-
-    rand = RAND_get0_public(ctx);
-    if (rand != NULL)
-        return EVP_RAND_generate(rand, buf, num, strength, 0, NULL, 0);
-
-    return 0;
+    // SGX enclaves use RDRAND exclusively
+    if (num > INT_MAX) {
+        ERR_raise(ERR_LIB_RAND, RAND_R_REQUEST_TOO_LARGE_FOR_DRBG);
+        return 0;
+    }
+    return get_sgx_rand_bytes(buf, (int)num);
 }
 
 int RAND_bytes(unsigned char *buf, int num)
