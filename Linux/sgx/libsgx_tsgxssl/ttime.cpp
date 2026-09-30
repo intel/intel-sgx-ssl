@@ -144,14 +144,11 @@ int sgxssl_clock_gettime(int clk_id, struct timespec *tp)
 	return 0;
 }
 
-void sgxssl_usleep(int micro_seconds)
-{
-	(void)(micro_seconds);
-	return;
-}
+/* Intentionally left as a no-op for the time being */
 void sgxssl_sleep(int seconds)
 {
-        (void)(seconds);
-	return;
+    (void)(seconds);
+    return;
 }
+
 }
