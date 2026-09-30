@@ -36,7 +36,7 @@
 SGXSSL_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SGXSSL_ROOT
 
-OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.0.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
+OPENSSL_VERSION=`ls $SGXSSL_ROOT/../openssl_source/*3.5.*.tar.gz | head -1 | grep -o '[^/]*$' | sed -s -- 's/\.tar\.gz//'`
 if [ "$OPENSSL_VERSION" == "" ]
 then
 	echo "In order to run this script, the OpenSSL tar.gz package must be located in the openssl_source/ directory."
@@ -140,14 +140,28 @@ echo $MITIGATION_FLAGS
 echo $SPACE_OPT 
 
 sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
-cp rand_lib.c $OPENSSL_VERSION/crypto/rand/rand_lib.c || exit 1
 cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
+cp prov_seed.c $OPENSSL_VERSION/crypto/rand/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=none $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
+# OpenSSL's OSSL_sleep() may call sleep() for the whole-second portion of a
+# delay, while OPENSSL_USE_SLEEP_BUSYLOOP uses a busy loop for the remaining
+# interval. SGX SSL maps sleep() to sgxssl_sleep(), which is intentionally a
+# no-op because sleeping is not supported inside the enclave.
+#
+# OSSL_sleep() recomputes the remaining time after calling sleep(), so
+# the busy-loop path provides the actual delay when sgxssl_sleep() returns
+# immediately. The busy loop obtains the current time through the existing
+# gettimeofday() OCALL and is therefore inefficient, but OSSL_sleep() is
+# expected to be used only by polling/retry paths rather than normal
+# cryptographic operations.
+#
+# A dedicated sleep OCALL can be considered if these paths become
+# performance-critical.
+RAND_SEED=rdcpu
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=$RAND_SEED $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng no-quic no-dgram no-sock no-tfo no-thread-pool -DOPENSSL_USE_SLEEP_BUSYLOOP -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -D_GNU_SOURCE -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
 
-sed -i 's/ENGINE_set_default_RAND/dummy_ENGINE_set_default_RAND/' crypto/engine/tb_rand.c || exit 1
 sed -i 's/return RUN_ONCE(&locale_base, ossl_init_locale_base);/return 1;/' crypto/ctype.c || exit 1
 sed -i '/RAND_get0_private/,+1d'  crypto/rsa/rsa_sp800_56b_gen.c || exit 1
 make build_generated || exit 1
