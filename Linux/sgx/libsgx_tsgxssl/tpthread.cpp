@@ -99,16 +99,5 @@ int sgxssl_pthread_once (sgxssl_pthread_once_t *once_control, void (*init_routin
 	return 0;
 }
 
-//Thread forking isn't supported inside enclave.
-int sgxssl_pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void))
-{
-    FSTART;
-    SGX_UNREACHABLE_CODE(SET_ERRNO);
-
-    FEND;
-    //Operation not permitted
-    return EPERM;
-}
-
 }
 

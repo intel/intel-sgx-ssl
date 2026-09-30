@@ -246,10 +246,23 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define __builtin___strcat_chk sgxssl___builtin___strcat_chk
 
 #define time sgxssl_time
+/*
+ * OSSL_SAFE_MATH_UNSIGNED(time, uint64_t) generates helpers such as
+ * safe_add_time() and safe_sub_time(). Since SGX SSL maps time to
+ * sgxssl_time, macro expansion instead generates helpers named
+ * safe_add_sgxssl_time(), safe_sub_sgxssl_time(), etc.
+ *
+ * Map OpenSSL's explicit safe_*_time references to those generated
+ * helper names. These are inline OpenSSL helpers, not SGX SSL APIs.
+ */
+#define safe_add_time safe_add_sgxssl_time
+#define safe_sub_time safe_sub_sgxssl_time
+#define safe_mul_time safe_mul_sgxssl_time
+#define safe_div_time safe_div_sgxssl_time
+#define safe_muldiv_time safe_muldiv_sgxssl_time
 #define gmtime_r sgxssl_gmtime_r
 #define gmtime sgxssl_gmtime
 #define gettimeofday sgxssl_gettimeofday
-#define usleep sgxssl_usleep
 #define sleep sgxssl_sleep
 
 //openssl 1.1.1 new APIs
@@ -257,7 +270,6 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define getpid sgxssl_getpid
 #define stat sgxssl_stat
 #define syscall sgxssl_syscall
-#define pthread_atfork sgxssl_pthread_atfork
 #define opendir sgxssl_opendir
 #define readdir sgxssl_readdir
 #define closedir sgxssl_closedir

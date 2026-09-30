@@ -38,8 +38,11 @@
 #include "tcommon.h"
 
 
-// It is enouph to keep cpuid values for leaves 0x0, 0x1, and 0x4 (ecx = 0x0)
+// Keep cpuid values for leaves used by OPENSSL_cpuid_setup
+// (leaf 0x7 includes subleaf 0x0; additional subleaf data is stored separately)
 uint32_t cpuinfo[8][4] = { { 0x0, 0x0, 0x0, 0x0 } };
+uint32_t cpuinfo_leaf7_subleaf1[4] = { 0x0, 0x0, 0x0, 0x0 };
+uint32_t cpuinfo_leaf24_subleaf0[4] = { 0x0, 0x0, 0x0, 0x0 };
 uint32_t intel_cpuid_leaf_0_ebx = 0x756e6547;	//ebx = "Genu"
 uint32_t intel_cpuid_leaf_0_ecx = 0x6c65746e;	// ecx = "ntel"
 uint32_t intel_cpuid_leaf_0_edx = 0x49656e69;	// edx = "ineI"
@@ -80,14 +83,27 @@ int sgxssl_exception_handler(sgx_exception_info_t* info)
 			if (leaf != 0x0
 				&& leaf != 0x1
 				&& (leaf != 0x4 || sub_leaf != 0x0)
-				&& (leaf != 0x7 || sub_leaf != 0x0)) {
+				&& (leaf != 0x7 || (sub_leaf != 0x0 && sub_leaf != 0x1))
+				&& (leaf != 0x24 || sub_leaf != 0x0)) {
 				return EXCEPTION_CONTINUE_SEARCH;
 			}
 
-			info->cpu_context.rax = cpuinfo[leaf][0];
-			info->cpu_context.rbx = cpuinfo[leaf][1];
-			info->cpu_context.rcx = cpuinfo[leaf][2];
-			info->cpu_context.rdx = cpuinfo[leaf][3];
+			if (leaf == 0x7 && sub_leaf == 0x1) {
+				info->cpu_context.rax = cpuinfo_leaf7_subleaf1[0];
+				info->cpu_context.rbx = cpuinfo_leaf7_subleaf1[1];
+				info->cpu_context.rcx = cpuinfo_leaf7_subleaf1[2];
+				info->cpu_context.rdx = cpuinfo_leaf7_subleaf1[3];
+			} else if (leaf == 0x24 && sub_leaf == 0x0) {
+				info->cpu_context.rax = cpuinfo_leaf24_subleaf0[0];
+				info->cpu_context.rbx = cpuinfo_leaf24_subleaf0[1];
+				info->cpu_context.rcx = cpuinfo_leaf24_subleaf0[2];
+				info->cpu_context.rdx = cpuinfo_leaf24_subleaf0[3];
+			} else {
+				info->cpu_context.rax = cpuinfo[leaf][0];
+				info->cpu_context.rbx = cpuinfo[leaf][1];
+				info->cpu_context.rcx = cpuinfo[leaf][2];
+				info->cpu_context.rdx = cpuinfo[leaf][3];
+			}
 			info->cpu_context.rip += 2;
 
 			return EXCEPTION_CONTINUE_EXECUTION;
@@ -176,6 +192,16 @@ static void setup_cpuinfo(uint32_t *cpuinfo_table)
 		&cpuinfo[7][1],
 		&cpuinfo[7][2],
 		&cpuinfo[7][3]);
+
+    /*
+     * OpenSSL 3.5 also probes leaf 0x7 subleaf 0x1 and, conditionally,
+     * leaf 0x24 subleaf 0x0. SGX CPUID helper exposes only one input
+     * leaf selector, so we conservatively provide zeros for these extra
+     * subleaves. This keeps probes inside enclave-safe emulation paths and
+     * disables unsupported advanced feature paths (e.g. AVX10 details).
+     */
+    memset(cpuinfo_leaf7_subleaf1, 0x0, sizeof(cpuinfo_leaf7_subleaf1));
+    memset(cpuinfo_leaf24_subleaf0, 0x0, sizeof(cpuinfo_leaf24_subleaf0));
 
 	return;
 }
