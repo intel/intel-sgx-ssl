@@ -133,6 +133,11 @@ static sgx_errlist_t sgx_errlist[] = {
         NULL
     },
     {
+        SGX_ERROR_ENCLAVE_CRASHED,
+        "Enclave crashed.",
+        "An exception occurred inside the enclave."
+    },
+    {
         SGX_ERROR_ENCLAVE_FILE_ACCESS,
         "Can't open enclave file.",
         NULL
@@ -282,7 +287,8 @@ int main(int argc, char *argv[])
  
     sgx_status_t status = t_sgxssl_call_apis(global_eid);
     if (status != SGX_SUCCESS) {
-        printf("Call to t_sgxssl_call_apis has failed.\n");
+        printf("Call to t_sgxssl_call_apis has failed: 0x%08x\n", status);
+        print_error_message(status);
         return 1;    //Test failed
     }
 
