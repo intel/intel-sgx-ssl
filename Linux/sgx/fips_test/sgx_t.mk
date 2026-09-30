@@ -184,4 +184,5 @@ install_conf:
 
 clean:
 	@rm -f enclave.* $(ENCLAVE_DIR)/enclave_t.* $(Enclave_Cpp_Objects) $(Enclave_C_Objects) $(Enclave_Test_Key)
-	@rm -f fips.so openssl.cnf
+	@rm -rf fips.so openssl.cnf
+	@rm -rf $(ENCLAVE_DIR)/crypto/ $(ENCLAVE_DIR)/internal/

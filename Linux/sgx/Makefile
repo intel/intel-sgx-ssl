@@ -91,7 +91,7 @@ clean:
 	$(MAKE) -C $(UNTRUSTED_LIB_DIR) clean
 	$(MAKE) -C $(TEST_DIR) clean
 	$(MAKE) -C $(FIPS_TEST_DIR) clean
-	rm -f $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB)
+	rm -f $(PACKAGE_LIB)/$(TRUSTED_LIB) $(PACKAGE_LIB)/$(UNTRUSTED_LIB) osslverstr.h
 
 test: $(PACKAGE_LIB)/$(OPENSSL_LIB) all
 	$(MAKE) -C $(TEST_DIR) test 
