@@ -252,8 +252,8 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
  * sgxssl_time, macro expansion instead generates helpers named
  * safe_add_sgxssl_time(), safe_sub_sgxssl_time(), etc.
  *
- * Map OpenSSL's explicit safe_*_time references to those generate*
- * helper names. These are inline*OpenSSL helpers, not SGX SSL APIs.
+ * Map OpenSSL's explicit safe_*_time references to those generated
+ * helper names. These are inline OpenSSL helpers, not SGX SSL APIs.
  */
 #define safe_add_time safe_add_sgxssl_time
 #define safe_sub_time safe_sub_sgxssl_time
