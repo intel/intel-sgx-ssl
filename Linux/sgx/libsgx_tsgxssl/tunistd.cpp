@@ -138,16 +138,18 @@ long sgxssl_sysconf(int name)
 	return -1;
 }
 
-//Process ID is used as RNG entropy, SGXSSL use sgx_get_rand() hence this function is redundant.
+// Process ID is not meaningful inside enclaves. OpenSSL 3.0 used it as
+// additional RNG seed material, which is unnecessary with sgx_get_rand().
+// OpenSSL 3.5 also uses it to detect forks. Since SGX SSL does not support
+// fork semantics, return a stable non-zero value.
 //
 int sgxssl_getpid() {
-
-    SGX_UNREACHABLE_CODE(SET_ERRNO);
-    return 0;
+    return 1;
 }
 
 #ifdef SGXSSL_FIPS
-int getpid() {
+int getpid()
+{
     int pid = 0;
     if ( u_sgxssl_getpid(&pid) != 0 ) SGX_UNREACHABLE_CODE(SET_ERRNO);
     return pid;
