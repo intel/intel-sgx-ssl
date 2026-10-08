@@ -52,7 +52,6 @@ unsigned int sm2_user_id_len = sizeof(sm2_user_id)-1;
 static int create_key_pair_sm2(char** private_key, char** public_key)
 {
 	int ret = 0;
-	EC_GROUP *ec_group = NULL;
 	BIO *pri_bio = NULL, *pub_bio = NULL;
 	size_t pri_len = 0, pub_len = 0;
 	EVP_PKEY *evp_pkey = NULL;
@@ -407,7 +406,7 @@ end:
 }
 
 // Decrypt the text
-static int decrypt_sm2(const char* private_key, const char* cipher_text, size_t cipher_len, unsigned char** plain_text, size_t* plain_len)
+static int decrypt_sm2(const char* private_key, const unsigned char* cipher_text, size_t cipher_len, unsigned char** plain_text, size_t* plain_len)
 {
 	int ret = 0;
 	size_t buf_len = 0;
@@ -566,7 +565,6 @@ int ecall_sm3(void)
 end:
 	// 4. Clean up and return
 	EVP_MD_CTX_free(evp_ctx);
-	EVP_MD_free(sm3_md);
 
 	return ret;
 }

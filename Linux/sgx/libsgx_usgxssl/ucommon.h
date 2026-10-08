@@ -37,8 +37,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#pragma warning( disable: 4100 )
-
 #define SGX_BUFSIZ 512
 
 #define PRINT(...) 	{printf(__VA_ARGS__);}

@@ -293,7 +293,8 @@ void t_sgxssl_call_apis()
     printf("Start tests\n");
     
     SGXSSLSetPrintToStdoutStderrCB(vprintf_cb);
-    OSSL_PROVIDER *prov;
+    OSSL_PROVIDER *prov = NULL;
+
 #ifndef SGXSSL_FIPS
     prov = OSSL_PROVIDER_load(NULL, "default");
 #else
@@ -342,12 +343,10 @@ void t_sgxssl_call_apis()
         OSSL_PROVIDER_get_params(prov, request);
         printf("Provider buildinfo: %s\n", build);
      } else {
-	printf("OSSL_PROVIDER_self_test: failed\n");
+        printf("OSSL_PROVIDER_self_test: failed\n");
         OSSL_PROVIDER_unload(prov);
         return;
      }	
-
-    //CRYPTO_set_mem_functions(priv_malloc, priv_realloc, priv_free);
 
     // Initialize SGXSSL crypto
     OPENSSL_init_crypto(0, NULL);
@@ -371,7 +370,7 @@ void t_sgxssl_call_apis()
         printf("test ec_key_gen returned error %d\n", ret);
         goto end;
     }
-	printf("test ec_key_gen completed\n");
+    printf("test ec_key_gen completed\n");
 
     ret = rsa_test();
     if (ret != 0)
@@ -379,95 +378,96 @@ void t_sgxssl_call_apis()
         printf("test rsa_test returned error %d\n", ret);
        	goto end;
     }
-        printf("test rsa_test completed\n");
+    printf("test rsa_test completed\n");
 
     ret = ec_test();
     if (ret != 0)
     {
-    	printf("test ec_test returned error %d\n", ret);
+        printf("test ec_test returned error %d\n", ret);
         goto end;
     }
-	printf("test ec_test completed\n");
+    printf("test ec_test completed\n");
 
-	ret = ecdh_test();
-	if (ret != 0)
+    ret = ecdh_test();
+    if (ret != 0)
     {
-    	printf("test ecdh_test returned error %d\n", ret);
+        printf("test ecdh_test returned error %d\n", ret);
         goto end;
     }
-	printf("test ecdh_test completed\n"); 
+    printf("test ecdh_test completed\n"); 
 
-	ret = ecdsa_test();
-	if (ret != 0)
+    ret = ecdsa_test();
+    if (ret != 0)
     {
         printf("test ecdsa_test returned error %d\n", ret);
         goto end;
     }
-	printf("test ecdsa_test completed\n");
+    printf("test ecdsa_test completed\n");
 
-	ret = bn_test();
-	if (ret != 0)
+    ret = bn_test();
+    if (ret != 0)
     {
-    	printf("test bn_test returned error %d\n", ret);
+        printf("test bn_test returned error %d\n", ret);
         goto end;
     }
-        printf("test bn_test completed\n");
+    printf("test bn_test completed\n");
 
-        ret = dhtest();
-        if (ret != 0)
+    ret = dhtest();
+    if (ret != 0)
     {
        	printf("test dhtest returned error %d\n", ret);
         goto end;
     }
-        printf("test dhtest completed\n");
+    printf("test dhtest completed\n");
 
-	ret = aesccm_test();
-	if (ret != 0)
+    ret = aesccm_test();
+    if (ret != 0)
     {
          printf("test aesccm_test returned error %d\n", ret);
          goto end;
     }
-	printf("test aesccm_test completed\n");
+    printf("test aesccm_test completed\n");
 
-	ret = aesgcm_test();
-	if (ret != 0)
-	{
-		printf("test aesgcm_test returned error %d\n", ret);
-		goto end;
-	}
-	printf("test aesgcm_test completed\n");
-
-       ret = sha256_test();
-	if (ret != 0)
+    ret = aesgcm_test();
+    if (ret != 0)
     {
-    	printf("test sha256_test returned error %d\n", ret);
+        printf("test aesgcm_test returned error %d\n", ret);
         goto end;
     }
-	printf("test sha256_test completed\n");
+    printf("test aesgcm_test completed\n");
+
+    ret = sha256_test();
+    if (ret != 0)
+    {
+        printf("test sha256_test returned error %d\n", ret);
+        goto end;
+    }
+    printf("test sha256_test completed\n");
 	
-	ret = sha1_test();
-	if (ret != 0)
+    ret = sha1_test();
+    if (ret != 0)
     {
         printf("test sha1_test returned error %d\n", ret);
         goto end;
     }
-	printf("test sha1_test completed\n");
+    printf("test sha1_test completed\n");
 
-	ret = hmac_tests();
-        if (ret != 0)
+    ret = hmac_tests();
+    if (ret != 0)
     {
-        printf("test hmac_test returned error %d\n", ret);
+        printf("test hmac_tests returned error %d\n", ret);
         goto end;
     }
-        printf("test hmac_test completed\n");
+    printf("test hmac_tests completed\n");
 
-	ret = threads_test();
-	if (ret != 0)
+    ret = threads_test();
+    if (ret != 0)
     {
     	printf("test threads_test returned error %d\n", ret);
         goto end;
     }
-	printf("test threads_test completed\n");
+    printf("test threads_test completed\n");
+
 #ifndef SGXSSL_FIPS
     //GM SM2 - sign and verify
     ret = ecall_sm2_sign_verify();
