@@ -25,14 +25,15 @@
 # include "internal/nelem.h"
 # include "ecdsatest.h"
 
-static fake_random_generate_cb fbytes;
 
 static const char *numbers[2];
 static size_t crv_len = 0;
 static EC_builtin_curve *curves = NULL;
-static OSSL_PROVIDER *fake_rand = NULL;
 
 #if 0 //SGX SSL will use RDRAND only
+static fake_random_generate_cb fbytes;
+static OSSL_PROVIDER *fake_rand = NULL;
+
 static int fbytes(unsigned char *buf, size_t num, ossl_unused const char *name,
                   EVP_RAND_CTX *ctx)
 {
@@ -78,14 +79,19 @@ static int x9_62_tests(int n)
     unsigned char *pbuf = NULL, *qbuf = NULL, *message = NULL;
     unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int dgst_len = 0;
-    long q_len, msg_len = 0;
+    long msg_len = 0;
+#if 0 //SGX SSL will use RDRAND only
+    long q_len;
     size_t p_len;
+#endif
     EVP_MD_CTX *mctx = NULL;
     EC_KEY *key = NULL;
     ECDSA_SIG *signature = NULL;
     BIGNUM *r = NULL, *s = NULL;
     BIGNUM *kinv = NULL, *rp = NULL;
+#if 0 //SGX SSL will use RDRAND only
     const BIGNUM *sig_r = NULL, *sig_s = NULL;
+#endif
 
     nid = ecdsa_cavs_kats[n].nid;
     md_nid = ecdsa_cavs_kats[n].md_nid;
@@ -157,6 +163,7 @@ static int x9_62_tests(int n)
     return ret;
 }
 
+# ifndef SGXSSL_FIPS
 /*-
  * Positive and negative ECDSA testing through EVP interface:
  * - EVP_DigestSign (this is the one-shot version)
@@ -338,6 +345,7 @@ static int test_builtin_as_ec(int n)
 {
     return test_builtin(n, EVP_PKEY_EC);
 }
+#endif
 
 # ifndef OPENSSL_NO_SM2
 static int test_builtin_as_sm2(int n)

@@ -47,7 +47,9 @@ void SGXSSLSetPrintToStdoutStderrCB(PRINT_TO_STDOUT_STDERR_CB cb)
 }
 
 
-// By default reaching unreachable code will cause an enclave to be aborted.
+// By default reaching unreachable code will abort the enclave.
+// To help diagnose unsupported runtime paths, set it to
+// UNREACH_CODE_REPORT_ERR_AND_CONTNUE.
 UnreachableCodePolicy_t s_unreach_code_policy = UNREACH_CODE_ABORT_ENCLAVE;	
 
 void SGXSSLSetUnreachableCodePolicy(UnreachableCodePolicy_t policy)

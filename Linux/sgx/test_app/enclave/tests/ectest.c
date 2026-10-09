@@ -2405,6 +2405,7 @@ static int do_test_custom_explicit_fromdata(EC_GROUP *group, BN_CTX *ctx,
     char name[80];
     unsigned char buf[1024];
     size_t buf_len, name_len;
+    OSSL_LIB_CTX *libctx = NULL;
 #ifndef OPENSSL_NO_EC2M
     unsigned int k1 = 0, k2 = 0, k3 = 0;
     const char *basis_name = NULL;
@@ -2460,7 +2461,7 @@ static int do_test_custom_explicit_fromdata(EC_GROUP *group, BN_CTX *ctx,
                                              EC_GROUP_get0_order(group))))
         goto err;
 
-    OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();//added for keygen test with FIPS provider
+    libctx = OSSL_LIB_CTX_new();//added for keygen test with FIPS provider
     if (libctx == NULL) {
         goto err;
     }
@@ -3059,7 +3060,3 @@ int ec_test(void)
     return 0;
 }
 
-static void cleanup_tests(void)
-{
-    OPENSSL_free(curves);
-}

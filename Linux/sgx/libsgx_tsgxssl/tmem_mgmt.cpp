@@ -96,8 +96,7 @@ static void * mmap_alloc (size_t length)
 	try {
 		info = new MmapInfo(malloc_addr, length);
 	}
-	catch (std::bad_alloc e) {
-		(void)e; // remove warning
+	catch (const std::bad_alloc&) {
 		free(malloc_addr);
 		return NULL;
 	}

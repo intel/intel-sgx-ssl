@@ -15,34 +15,6 @@
 #include "internal/nelem.h"
 #include <openssl/asn1.h>
 
-/*
- * A common routine to output test failure messages.  Generally this should not
- * be called directly, rather it should be called by the following functions.
- *
- * |desc| is a printf formatted description with arguments |args| that is
- * supplied by the user and |desc| can be NULL.  |type| is the data type
- * that was tested (int, char, ptr, ...).  |fmt| is a system provided
- * printf format with following arguments that spell out the failure
- * details i.e. the actual values compared and the operator used.
- *
- * The typical use for this is from an utility test function:
- *
- * int test6(const char *file, int line, int n) {
- *     if (n != 6) {
- *         test_fail_message(1, file, line, "int", "value %d is not %d", n, 6);
- *         return 0;
- *     }
- *     return 1;
- * }
- *
- * calling test6(3, "oops") will return 0 and produce out along the lines of:
- *      FAIL oops: (int) value 3 is not 6\n
- */
-static void test_fail_message(const char *prefix, const char *file, int line,
-                              const char *type, const char *left,
-                              const char *right, const char *op,
-                              const char *fmt, ...)
-            PRINTF_FORMAT(8, 9);
 
 void test_error(const char *file, int line, const char *desc, ...)
 {
