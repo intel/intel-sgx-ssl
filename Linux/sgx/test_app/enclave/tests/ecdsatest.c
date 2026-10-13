@@ -166,6 +166,7 @@ err:
     return ret;
 }
 
+#ifndef SGXSSL_FIPS
 /*-
  * Positive and negative ECDSA testing through EVP interface:
  * - EVP_DigestSign (this is the one-shot version)
@@ -348,8 +349,6 @@ static int test_builtin_as_ec(int n)
 {
     return test_builtin(n, EVP_PKEY_EC);
 }
-
-#ifndef SGXSSL_FIPS
 
 #ifndef OPENSSL_NO_SM2
 static int test_builtin_as_sm2(int n)

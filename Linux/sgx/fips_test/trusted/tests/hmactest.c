@@ -84,6 +84,7 @@ static struct test_st {
 
 static char *pt(unsigned char *md, unsigned int len);
 
+#ifndef SGXSSL_FIPS
 #ifndef OPENSSL_NO_MD5
 static int test_hmac_md5(int idx)
 {
@@ -102,6 +103,7 @@ static int test_hmac_md5(int idx)
 
     return TEST_ptr(p) && TEST_str_eq(p, test[idx].digest);
 }
+#endif
 #endif
 
 static int test_hmac_bad(void)
@@ -434,7 +436,7 @@ err:
 
 int hmac_tests(void)
 {
-#ifndef OPENSSL_NO_MD5
+#ifndef SGXSSL_FIPS
     ADD_ALL_TESTS(test_hmac_md5, 4);
 #endif
     ADD_TEST(test_hmac_single_shot);

@@ -367,6 +367,7 @@ err:
     return r;
 }
 
+#ifndef SGXSSL_FIPS
 static int test_EVP_rsa_legacy_key(void)
 {
     int ret;
@@ -485,6 +486,7 @@ static int test_EVP_rsa_legacy_key(void)
     EVP_PKEY_free(pkey);
     return ret;
 }
+#endif
 
 static RSA *load_key(int priv)
 {
@@ -695,7 +697,13 @@ int rsa_test(void)
     ADD_ALL_TESTS(test_rsa_oaep, 3);
     ADD_ALL_TESTS(test_rsa_security_bit, OSSL_NELEM(rsa_security_bits_cases));
     ADD_TEST(test_rsa_saos);
+#ifndef SGXSSL_FIPS
+    /*
+     * Omit test_EVP_rsa_legacy_key since it is not compatible with a
+     * FIPS-provider-only configuration
+     */
     ADD_TEST(test_EVP_rsa_legacy_key);
+#endif
     printf("%s: passed all tests\n", __func__);
     return 0;
 }
