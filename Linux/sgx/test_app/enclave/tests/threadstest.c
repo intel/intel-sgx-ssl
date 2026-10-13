@@ -1,127 +1,53 @@
-/* ====================================================================
- * Copyright (c) 2016 The OpenSSL Project.  All rights reserved.
+/*
+ * Copyright 2016-2026 The OpenSSL Project Authors. All Rights Reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgment:
- *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
- *
- * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
- *    endorse or promote products derived from this software without
- *    prior written permission. For written permission, please contact
- *    openssl-core@openssl.org.
- *
- * 5. Products derived from this software may not be called "OpenSSL"
- *    nor may "OpenSSL" appear in their names without prior written
- *    permission of the OpenSSL Project.
- *
- * 6. Redistributions of any form whatsoever must retain the following
- *    acknowledgment:
- *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
- *
- * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
- * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
- * ====================================================================
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
  */
 
 #include <stdio.h>
 
 #include <openssl/crypto.h>
-#include "threads.h"
+
+#include "testutil.h"
 
 #include <sgx.h>
 
-#define fprintf(stream, msg...) printf(msg)
+sgx_status_t ucreate_thread(int *retval);
 
-sgx_status_t ucreate_thread();
-
-void (*func)(void) = NULL;
-volatile int busy_wait = 0;
-
-#if !defined(OPENSSL_THREADS) || defined(CRYPTO_TDEBUG)
+static void (*func)(void) = NULL;
+static volatile int busy_wait = 0;
 
 typedef unsigned int thread_t;
 
 static int run_thread(thread_t *t, void (*f)(void))
 {
-       int res = 0;
-       func = f;
-       busy_wait = 1;
-       sgx_status_t status = ucreate_thread(&res);
-       if (status != SGX_SUCCESS || res != 0)
-               return 0;
-       return 1;
+    int res = 0;
+    sgx_status_t status;
+
+    (void)t;
+    func = f;
+    busy_wait = 1;
+
+    status = ucreate_thread(&res);
+    if (status != SGX_SUCCESS || res != 0)
+        return 0;
+    return 1;
 }
 
 static int wait_for_thread(thread_t thread)
 {
-	while (busy_wait == 1);
-	return 1;
+    (void)thread;
+    while (busy_wait == 1)
+        ;
+    return 1;
 }
 
-#else
-
-typedef pthread_t thread_t;
-
-/*
-static void *thread_run(void *arg)
+void new_thread_func(void)
 {
-    void (*f)(void);
-    *(void **) (&f) = arg;
-    f();
-    return NULL;
-}
-*/
-
-static int run_thread(thread_t *t, void (*f)(void))
-{
-	int res = 0;
-	func = f;
-	busy_wait = 1;
-	sgx_status_t status = ucreate_thread(&res);
-	if (status != SGX_SUCCESS || res != 0)
-		return 0;
-	return 1;
-    // return pthread_create(t, NULL, thread_run, *(void **) &f) == 0;
-}
-
-static int wait_for_thread(thread_t thread)
-{
-	while (busy_wait == 1);
-	return 1;
-	//return pthread_join(thread, NULL) == 0;
-}
-
-#endif
-
-void new_thread_func()
-{
-    printf("in new thread, id: %llu\n",sgx_thread_self());
     if (func == NULL) {
-        fprintf(stderr, "Thread function not initialized\n");
         busy_wait = 0;
         return;
     }
@@ -132,23 +58,19 @@ void new_thread_func()
 static int test_lock(void)
 {
     CRYPTO_RWLOCK *lock = CRYPTO_THREAD_lock_new();
-    int ret = 0;
+    int res;
 
-    if (!CRYPTO_THREAD_read_lock(lock)) {
-        fprintf(stderr, "CRYPTO_THREAD_read_lock() failed\n");
-        goto err;
-    }
+    if (!TEST_ptr(lock))
+        return 0;
 
-    if (!CRYPTO_THREAD_unlock(lock)) {
-        fprintf(stderr, "CRYPTO_THREAD_unlock() failed\n");
-        goto err;
-    }
+    res = TEST_true(CRYPTO_THREAD_read_lock(lock))
+        && TEST_true(CRYPTO_THREAD_unlock(lock))
+        && TEST_true(CRYPTO_THREAD_write_lock(lock))
+        && TEST_true(CRYPTO_THREAD_unlock(lock));
 
-    ret = 1;
-err:
     CRYPTO_THREAD_lock_free(lock);
 
-    return ret;
+    return res;
 }
 
 static CRYPTO_ONCE once_run = CRYPTO_ONCE_STATIC_INIT;
@@ -167,23 +89,12 @@ static void once_run_thread_cb(void)
 static int test_once(void)
 {
     thread_t thread;
-    if (!run_thread(&thread, once_run_thread_cb) ||
-        !wait_for_thread(thread))
-    {
-        fprintf(stderr, "run_thread() failed\n");
-        return 0;
-    }
 
-    if (!CRYPTO_THREAD_run_once(&once_run, once_do_run)) {
-        fprintf(stderr, "CRYPTO_THREAD_run_once() failed\n");
+    if (!TEST_true(run_thread(&thread, once_run_thread_cb))
+        || !TEST_true(wait_for_thread(thread))
+        || !TEST_true(CRYPTO_THREAD_run_once(&once_run, once_do_run))
+        || !TEST_int_eq(once_run_count, 1))
         return 0;
-    }
-
-    if (once_run_count != 1) {
-        fprintf(stderr, "once run %u times\n", once_run_count);
-        return 0;
-    }
-
     return 1;
 }
 
@@ -208,21 +119,14 @@ static void thread_local_thread_cb(void)
     void *ptr;
 
     ptr = CRYPTO_THREAD_get_local(&thread_local_key);
-    if (ptr != NULL) {
-        fprintf(stderr, "ptr not NULL\n");
+    if (!TEST_ptr_null(ptr)
+        || !TEST_true(CRYPTO_THREAD_set_local(&thread_local_key,
+            &destructor_run_count)))
         return;
-    }
-
-    if (!CRYPTO_THREAD_set_local(&thread_local_key, &destructor_run_count)) {
-        fprintf(stderr, "CRYPTO_THREAD_set_local() failed\n");
-        return;
-    }
 
     ptr = CRYPTO_THREAD_get_local(&thread_local_key);
-    if (ptr != &destructor_run_count) {
-        fprintf(stderr, "invalid ptr\n");
+    if (!TEST_ptr_eq(ptr, &destructor_run_count))
         return;
-    }
 
     thread_local_thread_cb_ok = 1;
 }
@@ -232,67 +136,167 @@ static int test_thread_local(void)
     thread_t thread;
     void *ptr = NULL;
 
-    if (!CRYPTO_THREAD_init_local(&thread_local_key, thread_local_destructor)) {
-        fprintf(stderr, "CRYPTO_THREAD_init_local() failed\n");
+    if (!TEST_true(CRYPTO_THREAD_init_local(&thread_local_key,
+            thread_local_destructor)))
         return 0;
-    }
 
     ptr = CRYPTO_THREAD_get_local(&thread_local_key);
-    if (ptr != NULL) {
-        fprintf(stderr, "ptr not NULL\n");
+    if (!TEST_ptr_null(ptr)
+        || !TEST_true(run_thread(&thread, thread_local_thread_cb))
+        || !TEST_true(wait_for_thread(thread))
+        || !TEST_int_eq(thread_local_thread_cb_ok, 1))
         return 0;
-    }
-
-    if (!run_thread(&thread, thread_local_thread_cb) ||
-        !wait_for_thread(thread))
-    {
-        fprintf(stderr, "run_thread() failed\n");
-        return 0;
-    }
-
-    if (thread_local_thread_cb_ok != 1) {
-        fprintf(stderr, "thread-local thread callback failed\n");
-        return 0;
-    }
 
 #if defined(OPENSSL_THREADS) && !defined(CRYPTO_TDEBUG)
-
     ptr = CRYPTO_THREAD_get_local(&thread_local_key);
-    if (ptr != NULL) {
-        fprintf(stderr, "ptr not NULL\n");
+    if (!TEST_ptr_null(ptr))
         return 0;
-    }
 
-	// not supported in enclave - no atexit function
-    //if (destructor_run_count != 1) {
-    //    fprintf(stderr, "thread-local destructor run %u times\n",
-    //            destructor_run_count);
-    //    return 0;
-    //}
-
+    /* no atexit-like callback support for this in enclave */
+    (void)destructor_run_count;
 #endif
-    if (!CRYPTO_THREAD_cleanup_local(&thread_local_key)) {
-        fprintf(stderr, "CRYPTO_THREAD_cleanup_local() failed\n");
-        return 0;
-    }
 
+    if (!TEST_true(CRYPTO_THREAD_cleanup_local(&thread_local_key)))
+        return 0;
     return 1;
 }
 
-int threads_test()
+static int test_thread_local_multi_key(void)
 {
-	printf("original thread, id: %llu\n",sgx_thread_self());
-    
-    if (!test_lock())
-      return 1;
+    int dummy;
+    int i;
 
-    if (!test_once())
-      return 1;
+    for (i = 0; i < 1000; i++) {
+        if (!TEST_true(CRYPTO_THREAD_init_local(&thread_local_key,
+                thread_local_destructor)))
+            return 0;
 
-    if (!test_thread_local())
-      return 1;
+        if (!TEST_true(CRYPTO_THREAD_set_local(&thread_local_key, &dummy)))
+            return 0;
 
-    printf("PASS\n");
-    return 0;
+        if (!TEST_true(CRYPTO_THREAD_cleanup_local(&thread_local_key)))
+            return 0;
+    }
+    return 1;
 }
 
+static int test_atomic(void)
+{
+    int val = 0, ret = 0, testresult = 0;
+    uint64_t val64 = 1, ret64 = 0;
+    CRYPTO_RWLOCK *lock = CRYPTO_THREAD_lock_new();
+
+    if (!TEST_ptr(lock))
+        return 0;
+
+    if (CRYPTO_atomic_add(&val, 1, &ret, NULL)) {
+        if (!TEST_int_eq(val, 1) || !TEST_int_eq(val, ret))
+            goto err;
+    } else {
+        if (!TEST_int_eq(val, 0) || !TEST_int_eq(val, ret))
+            goto err;
+    }
+    val = 0;
+    ret = 0;
+
+    if (!TEST_true(CRYPTO_atomic_add(&val, 1, &ret, lock)))
+        goto err;
+    if (!TEST_int_eq(val, 1) || !TEST_int_eq(val, ret))
+        goto err;
+
+    if (CRYPTO_atomic_or(&val64, 2, &ret64, NULL)) {
+        if (!TEST_uint_eq((unsigned int)val64, 3)
+            || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+            goto err;
+    } else {
+        if (!TEST_uint_eq((unsigned int)val64, 1)
+            || !TEST_int_eq((unsigned int)ret64, 0))
+            goto err;
+    }
+    val64 = 1;
+    ret64 = 0;
+
+    if (!TEST_true(CRYPTO_atomic_or(&val64, 2, &ret64, lock)))
+        goto err;
+
+    if (!TEST_uint_eq((unsigned int)val64, 3)
+        || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+        goto err;
+
+    ret64 = 0;
+    if (CRYPTO_atomic_load(&val64, &ret64, NULL)) {
+        if (!TEST_uint_eq((unsigned int)val64, 3)
+            || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+            goto err;
+    } else {
+        if (!TEST_uint_eq((unsigned int)val64, 3)
+            || !TEST_int_eq((unsigned int)ret64, 0))
+            goto err;
+    }
+
+    ret64 = 0;
+    if (!TEST_true(CRYPTO_atomic_load(&val64, &ret64, lock)))
+        goto err;
+
+    if (!TEST_uint_eq((unsigned int)val64, 3)
+        || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+        goto err;
+
+    ret64 = 0;
+
+    if (CRYPTO_atomic_and(&val64, 5, &ret64, NULL)) {
+        if (!TEST_uint_eq((unsigned int)val64, 1)
+            || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+            goto err;
+    } else {
+        if (!TEST_uint_eq((unsigned int)val64, 3)
+            || !TEST_int_eq((unsigned int)ret64, 0))
+            goto err;
+    }
+    val64 = 3;
+    ret64 = 0;
+
+    if (!TEST_true(CRYPTO_atomic_and(&val64, 5, &ret64, lock)))
+        goto err;
+
+    if (!TEST_uint_eq((unsigned int)val64, 1)
+        || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+        goto err;
+
+    ret64 = 0;
+
+    if (CRYPTO_atomic_add64(&val64, 2, &ret64, NULL)) {
+        if (!TEST_uint_eq((unsigned int)val64, 3)
+            || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+            goto err;
+    } else {
+        if (!TEST_uint_eq((unsigned int)val64, 1)
+            || !TEST_int_eq((unsigned int)ret64, 0))
+            goto err;
+    }
+    val64 = 1;
+    ret64 = 0;
+
+    if (!TEST_true(CRYPTO_atomic_add64(&val64, 2, &ret64, lock)))
+        goto err;
+
+    if (!TEST_uint_eq((unsigned int)val64, 3)
+        || !TEST_uint_eq((unsigned int)val64, (unsigned int)ret64))
+        goto err;
+
+    testresult = 1;
+err:
+    CRYPTO_THREAD_lock_free(lock);
+    return testresult;
+}
+
+int threads_test(void)
+{
+    ADD_TEST(test_lock);
+    ADD_TEST(test_once);
+    ADD_TEST(test_thread_local);
+    ADD_TEST(test_thread_local_multi_key);
+    ADD_TEST(test_atomic);
+    printf("%s: passed all tests\n", __func__);
+    return 0;
+}
