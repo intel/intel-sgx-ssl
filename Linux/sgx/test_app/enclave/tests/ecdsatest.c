@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2002-2024 The OpenSSL Project Authors. All Rights Reserved.
  * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved
  *
  * Licensed under the Apache License 2.0 (the "License").  You may not use
@@ -18,13 +18,12 @@
 
 #ifndef OPENSSL_NO_EC
 
-# include <openssl/evp.h>
-# include <openssl/bn.h>
-# include <openssl/ec.h>
-# include <openssl/rand.h>
-# include "internal/nelem.h"
-# include "ecdsatest.h"
-
+#include <openssl/evp.h>
+#include <openssl/bn.h>
+#include <openssl/ec.h>
+#include <openssl/rand.h>
+#include "internal/nelem.h"
+#include "ecdsatest.h"
 
 static const char *numbers[2];
 static size_t crv_len = 0;
@@ -35,7 +34,7 @@ static fake_random_generate_cb fbytes;
 static OSSL_PROVIDER *fake_rand = NULL;
 
 static int fbytes(unsigned char *buf, size_t num, ossl_unused const char *name,
-                  EVP_RAND_CTX *ctx)
+    EVP_RAND_CTX *ctx)
 {
     int ret = 0;
     static int fbytes_counter = 0;
@@ -53,11 +52,12 @@ static int fbytes(unsigned char *buf, size_t num, ossl_unused const char *name,
 
     fbytes_counter = (fbytes_counter + 1) % OSSL_NELEM(numbers);
     ret = 1;
- err:
+err:
     BN_free(tmp);
     return ret;
 }
 #endif //SGX SSL will use RDRAND only
+
 /*-
  * This function hijacks the RNG to feed it the chosen ECDSA key and nonce.
  * The ECDSA KATs are from:
@@ -102,6 +102,7 @@ static int x9_62_tests(int n)
     numbers[1] = ecdsa_cavs_kats[n].k;
 
     TEST_info("ECDSA KATs for curve %s", OBJ_nid2sn(nid));
+
 #ifdef FIPS_MODULE
     if (EC_curve_nid2nist(nid) == NULL)
         return TEST_skip("skip non approved curves");
@@ -121,22 +122,23 @@ static int x9_62_tests(int n)
         || !TEST_true(BN_hex2bn(&r, r_in))
         || !TEST_true(BN_hex2bn(&s, s_in)))
         goto err;
-#if 0 //SGX SSL will use RDRAND only
+
     /* public key must match KAT */
+#if 0 //SGX SSL will use RDRAND only
     fake_rand_set_callback(RAND_get0_private(NULL), &fbytes);
     if (!TEST_true(EC_KEY_generate_key(key))
         || !TEST_true(p_len = EC_KEY_key2buf(key, POINT_CONVERSION_UNCOMPRESSED,
-                                             &pbuf, NULL))
+                          &pbuf, NULL))
         || !TEST_ptr(qbuf = OPENSSL_hexstr2buf(ecdsa_cavs_kats[n].Q, &q_len))
         || !TEST_int_eq(q_len, p_len)
         || !TEST_mem_eq(qbuf, q_len, pbuf, p_len))
         goto err;
 
     /* create the signature via ECDSA_sign_setup to avoid use of ECDSA nonces */
-    //fake_rand_set_callback(RAND_get0_private(NULL), &fbytes);
+    fake_rand_set_callback(RAND_get0_private(NULL), &fbytes);
     if (!TEST_true(ECDSA_sign_setup(key, NULL, &kinv, &rp))
         || !TEST_ptr(signature = ECDSA_do_sign_ex(digest, dgst_len,
-                                                  kinv, rp, key))
+                         kinv, rp, key))
         /* verify the signature */
         || !TEST_int_eq(ECDSA_do_verify(digest, dgst_len, signature, key), 1))
         goto err;
@@ -147,9 +149,10 @@ static int x9_62_tests(int n)
         || !TEST_BN_eq(sig_s, s))
         goto err;
 #endif //SGX SSL will use RDRAND only
+
     ret = 1;
 
- err:
+err:
     OPENSSL_free(message);
     OPENSSL_free(pbuf);
     OPENSSL_free(qbuf);
@@ -163,7 +166,6 @@ static int x9_62_tests(int n)
     return ret;
 }
 
-# ifndef SGXSSL_FIPS
 /*-
  * Positive and negative ECDSA testing through EVP interface:
  * - EVP_DigestSign (this is the one-shot version)
@@ -217,16 +219,16 @@ static int test_builtin(int n, int as)
      */
     if (nid == NID_sm2 && as == EVP_PKEY_EC) {
         TEST_info("skipped: EC key type unsupported for curve %s",
-                  OBJ_nid2sn(nid));
+            OBJ_nid2sn(nid));
         return 1;
     } else if (nid != NID_sm2 && as == EVP_PKEY_SM2) {
         TEST_info("skipped: SM2 key type unsupported for curve %s",
-                  OBJ_nid2sn(nid));
+            OBJ_nid2sn(nid));
         return 1;
     }
 
     TEST_info("testing ECDSA for curve %s as %s key type", OBJ_nid2sn(nid),
-              as == EVP_PKEY_EC ? "EC" : "SM2");
+        as == EVP_PKEY_EC ? "EC" : "SM2");
 
     if (!TEST_ptr(mctx = EVP_MD_CTX_new())
         /* get some random message data */
@@ -331,8 +333,9 @@ static int test_builtin(int n, int as)
         || !TEST_int_eq(EVP_DigestVerify(mctx, sig, sig_len, tbs, sizeof(tbs)), 1)
         || !TEST_true(EVP_MD_CTX_reset(mctx)))
         goto err;
+
     ret = 1;
- err:
+err:
     EVP_PKEY_free(pkey);
     EVP_PKEY_free(pkey_neg);
     EVP_PKEY_free(dup_pk);
@@ -345,14 +348,17 @@ static int test_builtin_as_ec(int n)
 {
     return test_builtin(n, EVP_PKEY_EC);
 }
-#endif
 
-# ifndef OPENSSL_NO_SM2
+#ifndef SGXSSL_FIPS
+
+#ifndef OPENSSL_NO_SM2
 static int test_builtin_as_sm2(int n)
 {
     return test_builtin(n, EVP_PKEY_SM2);
 }
-# endif
+#endif
+#endif
+
 static int test_ecdsa_sig_NULL(void)
 {
     int ret;
@@ -364,27 +370,33 @@ static int test_ecdsa_sig_NULL(void)
     BIGNUM *kinv = NULL, *rp = NULL;
 
     ret = TEST_ptr(eckey = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1))
-          && TEST_int_eq(EC_KEY_generate_key(eckey), 1)
-          && TEST_int_eq(ECDSA_sign(0, dgst, sizeof(dgst), NULL, &siglen0,
-                                    eckey), 1)
-          && TEST_int_gt(siglen0, 0)
-          && TEST_ptr(sig = OPENSSL_malloc(siglen0))
-          && TEST_int_eq(ECDSA_sign(0, dgst, sizeof(dgst), sig, &siglen,
-                                    eckey), 1)
-          && TEST_int_gt(siglen, 0)
-          && TEST_int_le(siglen, siglen0)
-          && TEST_int_eq(ECDSA_verify(0, dgst, sizeof(dgst), sig, siglen,
-                                      eckey), 1)
-          && TEST_int_eq(ECDSA_sign_setup(eckey, NULL, &kinv, &rp), 1)
-          && TEST_int_eq(ECDSA_sign_ex(0, dgst, sizeof(dgst), NULL, &siglen,
-                                       kinv, rp, eckey), 1)
-          && TEST_int_gt(siglen, 0)
-          && TEST_int_le(siglen, siglen0)
-          && TEST_int_eq(ECDSA_sign_ex(0, dgst, sizeof(dgst), sig, &siglen0,
-                                       kinv, rp, eckey), 1)
-          && TEST_int_eq(siglen, siglen0)
-          && TEST_int_eq(ECDSA_verify(0, dgst, sizeof(dgst), sig, siglen,
-                                      eckey), 1);
+        && TEST_int_eq(EC_KEY_generate_key(eckey), 1)
+        && TEST_int_eq(ECDSA_sign(0, dgst, sizeof(dgst), NULL, &siglen0,
+                           eckey),
+            1)
+        && TEST_int_gt(siglen0, 0)
+        && TEST_ptr(sig = OPENSSL_malloc(siglen0))
+        && TEST_int_eq(ECDSA_sign(0, dgst, sizeof(dgst), sig, &siglen,
+                           eckey),
+            1)
+        && TEST_int_gt(siglen, 0)
+        && TEST_int_le(siglen, siglen0)
+        && TEST_int_eq(ECDSA_verify(0, dgst, sizeof(dgst), sig, siglen,
+                           eckey),
+            1)
+        && TEST_int_eq(ECDSA_sign_setup(eckey, NULL, &kinv, &rp), 1)
+        && TEST_int_eq(ECDSA_sign_ex(0, dgst, sizeof(dgst), NULL, &siglen,
+                           kinv, rp, eckey),
+            1)
+        && TEST_int_gt(siglen, 0)
+        && TEST_int_le(siglen, siglen0)
+        && TEST_int_eq(ECDSA_sign_ex(0, dgst, sizeof(dgst), sig, &siglen0,
+                           kinv, rp, eckey),
+            1)
+        && TEST_int_eq(siglen, siglen0)
+        && TEST_int_eq(ECDSA_verify(0, dgst, sizeof(dgst), sig, siglen,
+                           eckey),
+            1);
     EC_KEY_free(eckey);
     OPENSSL_free(sig);
     BN_free(kinv);
@@ -399,25 +411,29 @@ int setup_tests(void)
 #ifdef OPENSSL_NO_EC
     TEST_note("Elliptic curves are disabled.");
 #else
-#if 0//SGX SSL will use RDRAND only
+#if 0 //SGX SSL will use RDRAND only
     fake_rand = fake_rand_start(NULL);
     if (fake_rand == NULL)
         return 0;
-#endif //SGX SSL will use RDRAND only    
+#endif //SGX SSL will use RDRAND only
+
     /* get a list of all internal curves */
     crv_len = EC_get_builtin_curves(NULL, 0);
     if (!TEST_ptr(curves = OPENSSL_malloc(sizeof(*curves) * crv_len))
         || !TEST_true(EC_get_builtin_curves(curves, crv_len))) {
-        //fake_rand_finish(fake_rand);
+#if 0 //SGX SSL will use RDRAND only
+        fake_rand_finish(fake_rand);
+#endif //SGX SSL will use RDRAND only
         return 0;
     }
-# ifndef SGXSSL_FIPS
+
+#ifndef SGXSSL_FIPS
     ADD_ALL_TESTS(test_builtin_as_ec, crv_len);
-# endif
+#endif
     ADD_TEST(test_ecdsa_sig_NULL);
-# ifndef OPENSSL_NO_SM2
+#ifndef OPENSSL_NO_SM2
     ADD_ALL_TESTS(test_builtin_as_sm2, crv_len);
-# endif
+#endif
     ADD_ALL_TESTS(x9_62_tests, OSSL_NELEM(ecdsa_cavs_kats));
 #endif
     printf("all ecdsa cases passed.\n");
@@ -427,14 +443,17 @@ int setup_tests(void)
 void cleanup_tests(void)
 {
 #ifndef OPENSSL_NO_EC
-    //fake_rand_finish(fake_rand);
+#if 0 //SGX SSL will use RDRAND only
+    fake_rand_finish(fake_rand);
+#endif //SGX SSL will use RDRAND only
     OPENSSL_free(curves);
 #endif
 }
 
-int ecdsa_test()
+int ecdsa_test(void)
 {
-	int ret = setup_tests();
-	cleanup_tests();
-	return ret;
+    int ret = setup_tests();
+    cleanup_tests();
+    printf("%s: passed all tests\n", __func__);
+    return ret;
 }
