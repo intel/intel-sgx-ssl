@@ -435,7 +435,7 @@ int setup_tests(void)
 #endif
     ADD_ALL_TESTS(x9_62_tests, OSSL_NELEM(ecdsa_cavs_kats));
 #endif
-    printf("all ecdsa cases passed.\n");
+    printf("%s: passed all tests\n", __func__);
     return 0;
 }
 
@@ -453,6 +453,5 @@ int ecdsa_test(void)
 {
     int ret = setup_tests();
     cleanup_tests();
-    printf("%s: passed all tests\n", __func__);
     return ret;
 }
