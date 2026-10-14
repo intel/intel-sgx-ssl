@@ -13,6 +13,7 @@
  */
 #include <stdio.h>
 #include <openssl/evp.h>
+#include "testutil.h"
 
 /* AES-CCM test data from NIST public test vectors */
 
@@ -48,20 +49,6 @@ static const unsigned char ccm_tag[] = {
 
 # define TEST_true(a)         test_true(__FILE__, __LINE__, #a, (a) != 0)
 # define TEST_ptr(a)          test_ptr(__FILE__, __LINE__, #a, a)
-
-static int test_true(const char *file, int line, const char *s, int b)
-{
-    if (b)
-        return 1;
-    return 0;
-}
-
-static int test_ptr(const char *file, int line, const char *s, const void *p)
-{
-    if (p != NULL)
-        return 1;
-    return 0;
-}
 
 static int aes_ccm_encrypt(void)
 {
@@ -106,11 +93,8 @@ static int aes_ccm_decrypt(void)
 
 int aesccm_test()
 {
-    int ret = 1;
-    if ( 0 == aes_ccm_encrypt()) goto err;
-    if ( 0 == aes_ccm_decrypt()) goto err;
-    ret = 0;
-    printf("AES CCM test PASSED\n");
-err:
-    return ret;
+    ADD_TEST(aes_ccm_encrypt);
+    ADD_TEST(aes_ccm_decrypt);
+    printf("%s: passed all tests\n", __func__);
+    return 0;
 }
