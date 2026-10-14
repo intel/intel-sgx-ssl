@@ -94,9 +94,11 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
-copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
+REM copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
+copy /y  rand_win.c %OPENSSL_VERSION%\providers\implementations\rands\seeding\
+copy /y  prov_seed.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
-copy /y x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
+copy /y  x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
 copy /y  threads_win.c %OPENSSL_VERSION%\crypto\
 
 
@@ -123,7 +125,7 @@ rem empty for now
 
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
 REM Visual Studio 2019
-call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
+REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
 
 if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
@@ -142,7 +144,17 @@ set ADDITIONAL_CONF=
 if "%OSSL3ONLY%"=="1" (
 	set ADDITIONAL_CONF=--api=3.0 no-deprecated
 )
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32
+
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% ^
+				no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng ^
+				no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio ^
+				no-quic no-dgram no-sock no-tfo no-thread-pool ^
+				-FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" ^
+				-D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC ^
+				-DOPENSSL_USE_SLEEP_BUSYLOOP ^
+				--with-rand-seed=rdcpu ^
+				-I"%SGXSDKInstallPath%include"
+				
 call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .
