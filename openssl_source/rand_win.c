@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-/*
- * SGX-SSL variant: entropy is obtained from the SGX trusted runtime
- * (sgx_read_rand -> RDRAND inside the enclave) instead of BCrypt/CryptoAPI,
- * which are not available inside an enclave.
- */
+ /*
+  * SGX-SSL variant: entropy is obtained from the SGX trusted runtime
+  * (sgx_read_rand -> RDRAND inside the enclave) instead of BCrypt/CryptoAPI,
+  * which are not available inside an enclave.
+  */
 
 #include "internal/cryptlib.h"
 #include <openssl/rand.h>
@@ -22,46 +22,33 @@
 #if defined(OPENSSL_SYS_WINDOWS) || defined(OPENSSL_SYS_WIN32)
 
 #ifndef OPENSSL_RAND_SEED_OS
-// Normally this is an error, but we are avoiding the use of all OS calls in SGX SSL.
-//#error "Unsupported seeding method configured; must be os"
+  // Normally this is an error, but we are avoiding the use of all OS calls in SGX SSL.
+  //#error "Unsupported seeding method configured; must be os"
 #endif
 
 #include <windows.h>        /* still needed for DWORD/FILETIME in nonce code */
-#include "sgx_trts.h"       /* sgx_read_rand */
-#include "sgx_error.h"      /* sgx_status_t, SGX_SUCCESS */
 
 /* Keep individual sgx_read_rand requests reasonably sized */
 #define SGXSSL_RAND_CHUNK 4096
 
-static int sgxssl_read_rand(unsigned char *buf, size_t len)
-{
-    while (len > 0) {
-        size_t chunk = len > SGXSSL_RAND_CHUNK ? SGXSSL_RAND_CHUNK : len;
+int sgxssl_read_rand(unsigned char* rand_buf, int length_in_bytes);
 
-        if (sgx_read_rand(buf, chunk) != SGX_SUCCESS)
-            return 0;
-        buf += chunk;
-        len -= chunk;
-    }
-    return 1;
-}
-
-size_t ossl_pool_acquire_entropy(RAND_POOL *pool)
+size_t ossl_pool_acquire_entropy(RAND_POOL* pool)
 {
-    unsigned char *buffer;
+    unsigned char* buffer;
     size_t bytes_needed;
     size_t entropy_available = 0;
 
-    
+
 #ifdef OPENSSL_RAND_SEED_RDTSC
-    #error "Unsupported entropy source"
+#error "Unsupported entropy source"
     entropy_available = ossl_prov_acquire_entropy_from_tsc(pool);
     if (entropy_available > 0)
         return entropy_available;
 #endif
 
 #ifdef OPENSSL_RAND_SEED_RDCPU
-    #error "Unsupported entropy source"
+#error "Unsupported entropy source"
     entropy_available = ossl_prov_acquire_entropy_from_cpu(pool);
     if (entropy_available > 0)
         return entropy_available;
@@ -87,7 +74,7 @@ size_t ossl_pool_acquire_entropy(RAND_POOL *pool)
     return ossl_rand_pool_entropy_available(pool);
 }
 
-int ossl_pool_add_nonce_data(RAND_POOL *pool)
+int ossl_pool_add_nonce_data(RAND_POOL* pool)
 {
     struct {
         DWORD pid;
@@ -101,7 +88,7 @@ int ossl_pool_add_nonce_data(RAND_POOL *pool)
     data.tid = GetCurrentThreadId();
     GetSystemTimeAsFileTime(&data.time);
 
-    return ossl_rand_pool_add(pool, (unsigned char *)&data, sizeof(data), 0);
+    return ossl_rand_pool_add(pool, (unsigned char*)&data, sizeof(data), 0);
 }
 
 int ossl_rand_pool_init(void)
