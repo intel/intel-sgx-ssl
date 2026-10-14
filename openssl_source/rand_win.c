@@ -26,11 +26,7 @@
   //#error "Unsupported seeding method configured; must be os"
 #endif
 
-#include <windows.h>        /* still needed for DWORD/FILETIME in nonce code */
-
-/* Keep individual sgx_read_rand requests reasonably sized */
-#define SGXSSL_RAND_CHUNK 4096
-
+// Returns 0 on success.
 int sgxssl_read_rand(unsigned char* rand_buf, int length_in_bytes);
 
 size_t ossl_pool_acquire_entropy(RAND_POOL* pool)
@@ -48,7 +44,6 @@ size_t ossl_pool_acquire_entropy(RAND_POOL* pool)
 #endif
 
 #ifdef OPENSSL_RAND_SEED_RDCPU
-#error "Unsupported entropy source"
     entropy_available = ossl_prov_acquire_entropy_from_cpu(pool);
     if (entropy_available > 0)
         return entropy_available;
@@ -76,19 +71,28 @@ size_t ossl_pool_acquire_entropy(RAND_POOL* pool)
 
 int ossl_pool_add_nonce_data(RAND_POOL* pool)
 {
-    struct {
-        DWORD pid;
-        DWORD tid;
-        FILETIME time;
-    } data;
+    // Normally this function fills in data with PID, TID, and time.
+    
+    //struct {
+    //    DWORD pid;
+    //    DWORD tid;
+    //    FILETIME time;
+    //} data;
 
-    memset(&data, 0, sizeof(data));
+    //memset(&data, 0, sizeof(data));
 
-    data.pid = GetCurrentProcessId();
-    data.tid = GetCurrentThreadId();
-    GetSystemTimeAsFileTime(&data.time);
+    //data.pid = GetCurrentProcessId();
+    //data.tid = GetCurrentThreadId();
+    //GetSystemTimeAsFileTime(&data.time);
+    
+    // We'll just fill the data with random bytes.
+    unsigned char data[16];
+    int ret = 0;
 
-    return ossl_rand_pool_add(pool, (unsigned char*)&data, sizeof(data), 0);
+    if (!sgxssl_read_rand(data, sizeof(data)))
+        ret = ossl_rand_pool_add(pool, data, sizeof(data), 0);
+    OPENSSL_cleanse(data, sizeof(data));
+    return ret;
 }
 
 int ossl_rand_pool_init(void)
