@@ -142,7 +142,6 @@ echo $SPACE_OPT
 sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
 cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
-cp prov_seed.c $OPENSSL_VERSION/crypto/rand/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
 # OpenSSL's OSSL_sleep() may call sleep() for the whole-second portion of a
