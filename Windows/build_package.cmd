@@ -148,7 +148,7 @@ if "%OSSL3ONLY%"=="1" (
 perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% ^
 				no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng ^
 				no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio ^
-				no-quic no-dgram no-sock no-tfo no-thread-pool ^
+				no-quic no-dgram no-sock no-tfo no-thread-pool no-threads ^
 				-FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" ^
 				-D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC ^
 				-DOPENSSL_USE_SLEEP_BUSYLOOP ^
