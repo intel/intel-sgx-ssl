@@ -94,7 +94,7 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
-REM copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
+
 copy /y  rand_win.c %OPENSSL_VERSION%\providers\implementations\rands\seeding\
 copy /y  prov_seed.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
@@ -125,7 +125,7 @@ rem empty for now
 
 cd %SGXSSL_ROOT%\..\openssl_source\%OPENSSL_VERSION%
 REM Visual Studio 2019
-REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" %VS_CMD_PLFM%
 
 if "%VS_CMD_PLFM%"=="x86" (
 	set PROCESSOR_ARCHITECTURE=x86
@@ -155,7 +155,8 @@ perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIG
 				--with-rand-seed=rdcpu ^
 				-I"%SGXSDKInstallPath%include"
 				
-call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
+REM In 3.5, you no longer replace this function name
+REM call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .
 if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
