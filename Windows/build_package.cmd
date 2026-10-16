@@ -94,9 +94,6 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
-
-copy /y  rand_win.c %OPENSSL_VERSION%\providers\implementations\rands\seeding\
-copy /y  prov_seed.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
 copy /y  x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
 copy /y  threads_win.c %OPENSSL_VERSION%\crypto\
@@ -152,7 +149,7 @@ perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIG
 				-FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" ^
 				-D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC ^
 				-DOPENSSL_USE_SLEEP_BUSYLOOP ^
-				--with-rand-seed=rdcpu ^
+				--with-rand-seed=rdcpu -DOPENSSL_RAND_SEED_OS -DUSE_BCRYPTGENRANDOM ^
 				-I"%SGXSDKInstallPath%include"
 				
 REM In 3.5, you no longer replace this function name
