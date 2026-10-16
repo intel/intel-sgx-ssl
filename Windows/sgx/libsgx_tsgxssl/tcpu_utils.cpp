@@ -41,7 +41,7 @@ extern "C" {
 
 // Recommended length is 4 bytes, as this is the basic chunk size used by sgx_read_rand implementation. 
 // Giving larger buffer size will result in concatenation of chunks each one of 4 bytes length 
-// and may cause entropy reduction.
+// and may cause entropy reduction. Returns 0 on success.
 int sgxssl_read_rand(unsigned char *rand_buf, int length_in_bytes)
 {
 	FSTART;

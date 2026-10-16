@@ -181,6 +181,7 @@ BOOL WINBASEAPI sgxssl_SystemTimeToFileTime(const _SYSTEMTIME *lpSystemTime, FIL
 
 void sgxssl_sleep(int seconds)
 {
+	(void)(seconds);
 	return;
 }
 
