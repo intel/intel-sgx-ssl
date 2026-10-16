@@ -142,9 +142,20 @@ echo $SPACE_OPT
 sed -i -- 's/OPENSSL_issetugid/OPENSSLd_issetugid/g' $OPENSSL_VERSION/crypto/uid.c || exit 1
 cp sgx_config.conf $OPENSSL_VERSION/ || exit 1
 cp x86_64-xlate.pl $OPENSSL_VERSION/crypto/perlasm/ || exit 1
-cp prov_seed.c $OPENSSL_VERSION/crypto/rand/ || exit 1
 
 cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
+# We intentionally removed the SGX-specific entropy path from prov_seed.c
+# and rand_lib.c and retained the upstream OpenSSL 3.5.9 implementation.
+#
+# With OPENSSL_RAND_SEED_RDCPU enabled, the standard seeding flow in
+# ossl_pool_acquire_entropy() already uses CPU entropy instructions
+# (RDSEED first, followed by RDRAND as a fallback) through the platform
+# seeding backend.
+#
+# This provides sufficient entropy for our target environment while
+# preserving upstream behavior, reducing maintenance overhead, and
+# avoiding duplicate entropy collection code.
+
 # OpenSSL's OSSL_sleep() may call sleep() for the whole-second portion of a
 # delay, while OPENSSL_USE_SLEEP_BUSYLOOP uses a busy loop for the remaining
 # interval. SGX SSL maps sleep() to sgxssl_sleep(), which is intentionally a
