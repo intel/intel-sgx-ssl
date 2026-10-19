@@ -94,9 +94,8 @@ call powershell -Command "tar xf %OPENSSL_VERSION%.tar.gz"
 REM Remove AESBS to support only AESNI and VPAES
 call powershell -Command "(get-content %OPENSSL_VERSION%\Configure) -replace ('BSAES_ASM','') | out-file %OPENSSL_VERSION%\Configure"
 
-copy /y  rand_lib.c %OPENSSL_VERSION%\crypto\rand\
 copy /y  sgx_config.conf %OPENSSL_VERSION%\
-copy /y x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
+copy /y  x86_64-xlate.pl %OPENSSL_VERSION%\crypto\perlasm
 copy /y  threads_win.c %OPENSSL_VERSION%\crypto\
 
 
@@ -142,8 +141,19 @@ set ADDITIONAL_CONF=
 if "%OSSL3ONLY%"=="1" (
 	set ADDITIONAL_CONF=--api=3.0 no-deprecated
 )
-perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio -FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" -D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC -arch:IA32
-call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
+
+perl Configure --config=sgx_config.conf %OPENSSL_CFG_PLFM%  %CVE_2020_0551_MITIGATIONS% %ADDITIONAL_CONF% ^
+				no-dtls no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-padlockeng ^
+				no-dso no-shared no-ui-console no-ssl3 no-md2 no-md4 no-stdio ^
+				no-quic no-dgram no-sock no-tfo no-thread-pool no-threads ^
+				-FI"%SGXSSL_ROOT%\..\openssl_source\bypass_to_sgxssl.h" ^
+				-D_NO_CRT_STDIO_INLINE -DOPENSSL_NO_SOCK -DOPENSSL_NO_DGRAM -DOPENSSL_NO_ASYNC ^
+				-DOPENSSL_USE_SLEEP_BUSYLOOP ^
+				--with-rand-seed=rdcpu -DOPENSSL_RAND_SEED_OS -DUSE_BCRYPTGENRANDOM ^
+				-I"%SGXSDKInstallPath%include"
+				
+REM In 3.5, you no longer replace this function name
+REM call powershell -Command "(Get-Content crypto\engine\tb_rand.c) |  Foreach-Object {$_ -replace 'ENGINE_set_default_RAND', 'dummy_ENGINE_set_default_RAND'} | Out-File crypto\engine\tb_rand.c"
 
 copy /y "%SGXSDKInstallPath%scripts\sgx-asm-pp.py" .
 if "%my_Configuration%"=="CVE-2020-0551-CF-Release" (
