@@ -223,6 +223,31 @@ int sgxssl_getaddrinfo(const char *node, const char *service,
 
 }
 
+#ifndef _POLL_H_
+#define _POLL_H_
+
+typedef unsigned long nfds_t;
+
+struct pollfd {
+    int   fd;
+    short events;
+    short revents;
+};
+
+#endif
+
+int sgxssl_poll(struct pollfd *fds, nfds_t nfds, int timeout)
+{
+    FSTART;
+    // It is unreachable under the assumption that TLS support is not required.
+    // Otherwise should be implemented as OCALL.
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    FEND;
+
+    return -1;
+
+}
+
 int sgxssl_ioctl (int fd, unsigned long int request, ...)
 {
 	FSTART;

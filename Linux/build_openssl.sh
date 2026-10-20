@@ -171,7 +171,7 @@ cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
 # A dedicated sleep OCALL can be considered if these paths become
 # performance-critical.
 RAND_SEED=rdcpu
-perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=$RAND_SEED $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng no-quic no-dgram no-sock no-tfo no-thread-pool -DOPENSSL_USE_SLEEP_BUSYLOOP -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -D_GNU_SOURCE -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
+perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=$RAND_SEED $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng no-quic no-dgram no-tfo no-thread-pool -DOPENSSL_USE_SLEEP_BUSYLOOP -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -D_GNU_SOURCE -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
 
 sed -i 's/return RUN_ONCE(&locale_base, ossl_init_locale_base);/return 1;/' crypto/ctype.c || exit 1
 sed -i '/RAND_get0_private/,+1d'  crypto/rsa/rsa_sp800_56b_gen.c || exit 1
