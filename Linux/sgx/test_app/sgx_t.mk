@@ -134,7 +134,7 @@ ifeq ($(FIPS), 1)
 SGXSSL_FIPS_TLIB = -lsgx_ossl_fips
 endif
 
-TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -Wl,--noinhibit-exec -nostdlib -nodefaultlibs -nostartfiles \
+TestEnclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles \
 	$(Security_Link_Flags) \
 	$(SgxSSL_Link_Libraries) -L$(SGX_LIBRARY_PATH) \
 	-Wl,--whole-archive -l$(Trts_Library_Name) $(SGXSSL_FIPS_TLIB) -Wl,--no-whole-archive \
