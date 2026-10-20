@@ -237,6 +237,7 @@
 #define freeaddrinfo sgxssl_freeaddrinfo
 #define gethostbyname sgxssl_gethostbyname
 #define getnameinfo sgxssl_getnameinfo
+#define __poll_alias sgxssl_poll
 #define ioctl sgxssl_ioctl
 #define __fdelt_chk sgxssl__fdelt_chk
 
