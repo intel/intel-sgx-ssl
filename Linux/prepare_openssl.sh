@@ -210,7 +210,7 @@ then
     # preserving upstream behavior, reducing maintenance overhead, and
     # avoiding duplicate entropy collection code.
 
-    # # OpenSSL's OSSL_sleep() may call sleep() for the whole-second portion of a
+    # OpenSSL's OSSL_sleep() may call sleep() for the whole-second portion of a
     # delay, while OPENSSL_USE_SLEEP_BUSYLOOP uses a busy loop for the remaining
     # interval. SGX SSL maps sleep() to sgxssl_sleep(), which is intentionally a
     # no-op because sleeping is not supported inside the enclave.
@@ -224,6 +224,20 @@ then
     #
     # A dedicated sleep OCALL can be considered if these paths become
     # performance-critical.
+
+    # Do not enable the OpenSSL no-sock configure option.
+    #
+    # SampleAttestedTLS and similar enclave TLS applications use SSL_set_fd(),
+    # which depends on OpenSSL's standard socket BIO infrastructure. Building
+    # OpenSSL with no-sock removes the required BIO functionality and breaks
+    # those TLS use cases.
+    #
+    # OpenSSL 3.5 additionally introduces a poll() dependency through
+    # BIO_socket_wait(). SGX SSL provides a dummy poll() shim, consistent with
+    # the historical SGX SSL model where socket-related APIs exist primarily to
+    # satisfy linkage and are not expected to execute in current enclave TLS
+    # flows.
+
     perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=rdcpu $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-shared no-ssl3 no-md2 no-md4 no-ui no-stdio no-afalgeng no-quic no-dgram no-tfo no-thread-pool -DOPENSSL_USE_SLEEP_BUSYLOOP -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -D_GNU_SOURCE -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h --prefix=$OPENSSL_INSTALL_DIR || exit 1
 
     make build_all_generated || exit 1

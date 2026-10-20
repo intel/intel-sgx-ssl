@@ -170,6 +170,20 @@ cd $SGXSSL_ROOT/../openssl_source/$OPENSSL_VERSION || exit 1
 #
 # A dedicated sleep OCALL can be considered if these paths become
 # performance-critical.
+
+# Do not enable the OpenSSL no-sock configure option.
+#
+# SampleAttestedTLS and similar enclave TLS applications use SSL_set_fd(),
+# which depends on OpenSSL's standard socket BIO infrastructure. Building
+# OpenSSL with no-sock removes the required BIO functionality and breaks
+# those TLS use cases.
+#
+# OpenSSL 3.5 additionally introduces a poll() dependency through
+# BIO_socket_wait(). SGX SSL provides a dummy poll() shim, consistent with
+# the historical SGX SSL model where socket-related APIs exist primarily to
+# satisfy linkage and are not expected to execute in current enclave TLS
+# flows.
+
 RAND_SEED=rdcpu
 perl Configure --config=sgx_config.conf sgx-linux-x86_64 --with-rand-seed=$RAND_SEED $ADDITIONAL_CONF $SPACE_OPT $MITIGATION_FLAGS no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-async no-padlockeng no-dso no-shared no-ssl3 no-md2 no-md4 no-ui-console no-stdio no-afalgeng no-quic no-dgram no-tfo no-thread-pool -DOPENSSL_USE_SLEEP_BUSYLOOP -D_FORTIFY_SOURCE=2 -DGETPID_IS_MEANINGLESS -DOPENSSL_NO_POSIX_IO -D_GNU_SOURCE -include$SGXSSL_ROOT/../openssl_source/bypass_to_sgxssl.h || exit 1
 
