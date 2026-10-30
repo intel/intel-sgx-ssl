@@ -37,7 +37,7 @@ enclave {
     from "sgxssl_file.edl" import *;
  
     untrusted {
-        void u_sgxssl_ftime([out, size=timeb_len] void * timeptr, uint32_t timeb_len);
+        void u_sgxssl_clock_gettime(int clk_id, [out, size=tp_len] void * tp, uint32_t tp_len);
         //void u_sgxssl_usleep(int micro_seconds);
     };
 

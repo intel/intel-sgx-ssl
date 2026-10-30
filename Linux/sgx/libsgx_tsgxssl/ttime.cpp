@@ -33,115 +33,104 @@
 #include "tcommon.h"
 #include <assert.h>
 
-extern sgx_status_t SGX_CDECL u_sgxssl_ftime(void* timeptr, uint32_t timeb_len) __attribute__((weak));
+extern sgx_status_t SGX_CDECL u_sgxssl_clock_gettime(int clk_id, void* tp, uint32_t tp_len) __attribute__((weak));
 
 extern "C" {
 
 #ifdef SGXSSL_FIPS
 time_t time (time_t *timer)
 {
-        FSTART;
+    FSTART;
 
-        struct timeb timeptr;
+    struct timespec tp;
 
-        assert(NULL != u_sgxssl_ftime && "u_sgxssl_ftime is NULL...");
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
 
-        sgx_status_t sgx_ret = u_sgxssl_ftime(&timeptr, sizeof(struct timeb));
-        if (sgx_ret != SGX_SUCCESS)
-        {
-                errno = EFAULT;
-                timeptr.time = (time_t)-1;
-        }
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(struct timespec));
+    if (sgx_ret != SGX_SUCCESS)
+    {
+        errno = EFAULT;
+        tp.tv_sec = (time_t)-1;
+    }
 
-        if (timer != NULL) {
-                *timer = timeptr.time;
-        }
+    if (timer != NULL) {
+        *timer = tp.tv_sec;
+    }
 
-        FEND;
-        return timeptr.time;
-
+    FEND;
+    return tp.tv_sec;
 }
 #endif
 
 time_t sgxssl_time (time_t *timer)
 {
-	FSTART;
+    FSTART;
 
-	struct timeb timeptr;
-	
-	assert(NULL != u_sgxssl_ftime && "u_sgxssl_ftime is NULL...");
-	
-	sgx_status_t sgx_ret = u_sgxssl_ftime(&timeptr, sizeof(struct timeb));
-	if (sgx_ret != SGX_SUCCESS)
-	{
-		errno = EFAULT;
-		timeptr.time = (time_t)-1;
-	}
+    struct timespec tp;
 
-	if (timer != NULL) {
-		*timer = timeptr.time;
-	}
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
 
-	FEND;
-	return timeptr.time;
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(struct timespec));
+    if (sgx_ret != SGX_SUCCESS)
+    {
+        errno = EFAULT;
+        tp.tv_sec = (time_t)-1;
+    }
 
+    if (timer != NULL) {
+        *timer = tp.tv_sec;
+    }
+
+    FEND;
+    return tp.tv_sec;
 }
 
 int sgxssl_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	FSTART;
+    FSTART;
 
-	if (tz != NULL) {
-		// It is unreachable based on the current OpenSSL usage.
-		SGX_UNREACHABLE_CODE(SET_ERRNO);
-		FEND;
-		return -1;
-	}
+    if (tz != NULL) {
+        // It is unreachable based on the current OpenSSL usage.
+        SGX_UNREACHABLE_CODE(SET_ERRNO);
+        FEND;
+        return -1;
+    }
 
-	struct timeb timeptr;
+    struct timespec tmp_tp;
 
-	assert(NULL != u_sgxssl_ftime && "u_sgxssl_ftime is NULL...");
-	
-	sgx_status_t sgx_ret = u_sgxssl_ftime(&timeptr, sizeof(struct timeb));
-	if (sgx_ret != SGX_SUCCESS)
-	{
-		errno = EFAULT;
-		FEND;
-		return -1;
-	}
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
 
-	if (tv != NULL) {
-		tv->tv_sec = timeptr.time;
-		tv->tv_usec = timeptr.millitm;
-	}
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tmp_tp, sizeof(struct timespec));
+    if (sgx_ret != SGX_SUCCESS)
+    {
+        errno = EFAULT;
+        FEND;
+        return -1;
+    }
 
-	FEND;
+    if (tv != NULL) {
+        tv->tv_sec = tmp_tp.tv_sec;
+        tv->tv_usec = tmp_tp.tv_nsec / 1000;
+    }
 
-	return 0;
+    FEND;
+    return 0;
 }
 
 int sgxssl_clock_gettime(int clk_id, struct timespec *tp)
 {
-	struct timeval temp_tv;
-	FSTART;
-	(void)(clk_id);
+    FSTART;
 
-	if (clk_id != CLOCK_REALTIME) {
-		errno = EINVAL;
-		SGX_UNREACHABLE_CODE(SET_ERRNO);
-		FEND;
-		return -1;
-	}
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
 
-	if (sgxssl_gettimeofday(&temp_tv, NULL) != 0) {
-		return -1;
-	}
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(clk_id, tp, sizeof(struct timespec));
+    if (sgx_ret != SGX_SUCCESS) {
+        errno = EFAULT;
+        return -1;
+    }
 
-	tp->tv_sec = temp_tv.tv_sec;
-	tp->tv_nsec = temp_tv.tv_usec / 1000;
-	FEND;
-
-	return 0;
+    FEND;
+    return 0;
 }
 
 /* Intentionally left as a no-op for the time being */

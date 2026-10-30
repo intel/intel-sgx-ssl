@@ -29,7 +29,6 @@
  *
  */
 
-#include <sys/timeb.h>
 #include <unistd.h>
 #include <ctime>
 
@@ -55,20 +54,15 @@ SGX_ACCESS_VERSION(ussl, 1);
 
 extern "C" {
 
-void u_sgxssl_ftime(void * timeptr, uint32_t timeb_len)
+void u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
 {
-	SGX_ASSERT_STRUCT_SIZE(struct timeb, timeb_len);
-    struct timespec ts;
-    struct timeb *tb = (struct timeb *)timeptr;
+    SGX_ASSERT_STRUCT_SIZE(struct timespec, tp_len);
+    struct timespec *tp = (struct timespec *)tpptr;
 
-    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-        tb->time = ts.tv_sec;
-        tb->millitm = ts.tv_nsec / 1000000;
+    if (clock_gettime(clk_id, tp) != 0) {
+        tp->tv_sec = (time_t)-1;
+        tp->tv_nsec = 0;
     }
-    else {
-        tb->time = (time_t)-1;
-    }
-
 }
 
 void u_sgxssl_usleep(int micro_seconds)
