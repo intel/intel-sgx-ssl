@@ -32,13 +32,32 @@
 #include "ucommon.h"
 
 #include <time.h>
-#include <sys/timeb.h>
+#include <stdint.h>
 #include <windows.h>
 
-void u_sgxssl_ftime64(void * timeptr, uint32_t timeb64Len)
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME 0
+#endif
+
+struct sgxssl_timespec {
+	int64_t tv_sec;
+	long tv_nsec;
+};
+
+void u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
 {
-	SGX_ASSERT_STRUCT_SIZE(struct __timeb64 , timeb64Len)
-	_ftime64_s((struct __timeb64 *) timeptr);
+	SGX_ASSERT_STRUCT_SIZE(struct sgxssl_timespec, tp_len)
+	sgxssl_timespec* tp = (sgxssl_timespec*)tpptr;
+	struct timespec ts;
+
+	if (clk_id != CLOCK_REALTIME || timespec_get(&ts, TIME_UTC) != TIME_UTC) {
+		tp->tv_sec = -1;
+		tp->tv_nsec = 0;
+	}
+	else {
+		tp->tv_sec = (int64_t)ts.tv_sec;
+		tp->tv_nsec = ts.tv_nsec;
+	}
 }
 
 void u_sgxssl_sleep(int seconds)

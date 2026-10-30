@@ -35,13 +35,17 @@
 #include "sgx_tsgxssl_t.h"
 #include "string.h"
 
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME 0
+#endif
 
-//Weak symbol u_sgxssl_ftime64
+
+//Weak symbol u_sgxssl_clock_gettime
 // 64-bit msvc will not prepend an underscore for symbols.
 #ifdef _M_X64
-#pragma comment(linker, "/alternatename:u_sgxssl_ftime64=default_u_sgxssl_ftime64")
+#pragma comment(linker, "/alternatename:u_sgxssl_clock_gettime=default_u_sgxssl_clock_gettime")
 #else
-#pragma comment(linker, "/alternatename:_u_sgxssl_ftime64=_default_u_sgxssl_ftime64")
+#pragma comment(linker, "/alternatename:_u_sgxssl_clock_gettime=_default_u_sgxssl_clock_gettime")
 #endif //_M_X64
 
 extern "C" {
@@ -53,6 +57,11 @@ struct __timeb64 {
     short timezone;
     short dstflag;
     };
+
+struct sgxssl_timespec {
+	__time64_t tv_sec;
+	long tv_nsec;
+};
 
 
 typedef struct _SYSTEMTIME {
@@ -66,10 +75,11 @@ typedef struct _SYSTEMTIME {
 	WORD wMilliseconds;
 }SYSTEMTIME;
 
-void default_u_sgxssl_ftime64(void * timeptr, uint32_t timeb64Len)
+void default_u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
 {
-    (void)(timeptr);
-    (void)(timeb64Len);
+	(void)(clk_id);
+	(void)(tpptr);
+	(void)(tp_len);
 }
 
 void sgxssl__ftime64( 
@@ -83,8 +93,14 @@ void sgxssl__ftime64(
 		return;
 	}
 
-	sgx_status_t sgx_ret = u_sgxssl_ftime64(timeptr, sizeof(struct __timeb64));
+	sgxssl_timespec tp = {0};
+	sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(sgxssl_timespec));
 	SGX_CHECK(sgx_ret);
+
+	timeptr->time = tp.tv_sec;
+	timeptr->millitm = static_cast<unsigned short>(tp.tv_nsec / 1000000);
+	timeptr->timezone = 0;
+	timeptr->dstflag = 0;
 
 	FEND;
 }
