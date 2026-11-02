@@ -54,19 +54,12 @@ SGX_ACCESS_VERSION(ussl, 1);
 
 extern "C" {
 
-void u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
+int u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
 {
     SGX_ASSERT_STRUCT_SIZE(struct timespec, tp_len);
     struct timespec *tp = (struct timespec *)tpptr;
 
-    if (clock_gettime(clk_id, tp) != 0) {
-        tp->tv_sec = (time_t)-1;
-        tp->tv_nsec = 0;
-    }
+    return clock_gettime(clk_id, tp);
 }
 
-void u_sgxssl_usleep(int micro_seconds)
-{
-	usleep(micro_seconds);
-}
 }

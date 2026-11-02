@@ -33,7 +33,7 @@
 #include "tcommon.h"
 #include <assert.h>
 
-extern sgx_status_t SGX_CDECL u_sgxssl_clock_gettime(int clk_id, void* tp, uint32_t tp_len) __attribute__((weak));
+extern sgx_status_t SGX_CDECL u_sgxssl_clock_gettime(int* retval, int clk_id, void* tp, uint32_t tp_len) __attribute__((weak));
 
 extern "C" {
 
@@ -44,12 +44,17 @@ time_t time (time_t *timer)
 
     struct timespec tp;
 
-    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL.");
 
-    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(struct timespec));
+    int host_ret = -1;
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(&host_ret, CLOCK_REALTIME, &tp, sizeof(struct timespec));
     if (sgx_ret != SGX_SUCCESS)
     {
         errno = EFAULT;
+        tp.tv_sec = (time_t)-1;
+    }
+    else if (host_ret != 0)
+    {
         tp.tv_sec = (time_t)-1;
     }
 
@@ -68,12 +73,17 @@ time_t sgxssl_time (time_t *timer)
 
     struct timespec tp;
 
-    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL.");
 
-    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(struct timespec));
+    int host_ret = -1;
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(&host_ret, CLOCK_REALTIME, &tp, sizeof(struct timespec));
     if (sgx_ret != SGX_SUCCESS)
     {
         errno = EFAULT;
+        tp.tv_sec = (time_t)-1;
+    }
+    else if (host_ret != 0)
+    {
         tp.tv_sec = (time_t)-1;
     }
 
@@ -96,41 +106,42 @@ int sgxssl_gettimeofday(struct timeval *tv, struct timezone *tz)
         return -1;
     }
 
-    struct timespec tmp_tp;
+    struct timespec tmp_tp = {-1, 0};
 
-    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL.");
 
-    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tmp_tp, sizeof(struct timespec));
+    int host_ret = -1;
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(&host_ret, CLOCK_REALTIME, &tmp_tp, sizeof(struct timespec));
     if (sgx_ret != SGX_SUCCESS)
     {
         errno = EFAULT;
-        FEND;
-        return -1;
+        host_ret = -1;
     }
 
-    if (tv != NULL) {
+    if (host_ret == 0 && tv != NULL) {
         tv->tv_sec = tmp_tp.tv_sec;
         tv->tv_usec = tmp_tp.tv_nsec / 1000;
     }
 
     FEND;
-    return 0;
+    return host_ret;
 }
 
 int sgxssl_clock_gettime(int clk_id, struct timespec *tp)
 {
     FSTART;
 
-    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL...");
+    assert(NULL != u_sgxssl_clock_gettime && "u_sgxssl_clock_gettime is NULL.");
 
-    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(clk_id, tp, sizeof(struct timespec));
+    int host_ret = -1;
+    sgx_status_t sgx_ret = u_sgxssl_clock_gettime(&host_ret, clk_id, tp, sizeof(struct timespec));
     if (sgx_ret != SGX_SUCCESS) {
         errno = EFAULT;
-        return -1;
+        host_ret = -1;
     }
 
     FEND;
-    return 0;
+    return host_ret;
 }
 
 /* Intentionally left as a no-op for the time being */

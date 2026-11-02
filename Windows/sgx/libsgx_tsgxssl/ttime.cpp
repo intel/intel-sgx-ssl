@@ -75,11 +75,12 @@ typedef struct _SYSTEMTIME {
 	WORD wMilliseconds;
 }SYSTEMTIME;
 
-void default_u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
+int default_u_sgxssl_clock_gettime(int clk_id, void * tpptr, uint32_t tp_len)
 {
 	(void)(clk_id);
 	(void)(tpptr);
 	(void)(tp_len);
+	return -1;
 }
 
 void sgxssl__ftime64( 
@@ -93,9 +94,21 @@ void sgxssl__ftime64(
 		return;
 	}
 
-	sgxssl_timespec tp = {0};
-	sgx_status_t sgx_ret = u_sgxssl_clock_gettime(CLOCK_REALTIME, &tp, sizeof(sgxssl_timespec));
-	SGX_CHECK(sgx_ret);
+	sgxssl_timespec tp = { (__time64_t)-1, 0 };
+	int host_ret = -1;
+	sgx_status_t sgx_ret = u_sgxssl_clock_gettime(&host_ret, CLOCK_REALTIME, &tp, sizeof(sgxssl_timespec));
+	if (sgx_ret != SGX_SUCCESS) {
+		errno = EFAULT;
+		host_ret = -1;
+	}
+	if (host_ret != 0) {
+		timeptr->time = (__time64_t)-1;
+		timeptr->millitm = 0;
+		timeptr->timezone = 0;
+		timeptr->dstflag = 0;
+		FEND;
+		return;
+	}
 
 	timeptr->time = tp.tv_sec;
 	timeptr->millitm = static_cast<unsigned short>(tp.tv_nsec / 1000000);

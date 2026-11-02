@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void u_sgxssl_clock_gettime(int clk_id, void * tp, uint32_t tp_len);
+int u_sgxssl_clock_gettime(int clk_id, void * tp, uint32_t tp_len);
 void u_sgxssl_sleep(int seconds);
 
 #ifdef __cplusplus
