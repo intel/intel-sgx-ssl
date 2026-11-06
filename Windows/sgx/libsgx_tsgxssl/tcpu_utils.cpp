@@ -39,50 +39,6 @@
 
 extern "C" {
 
-// Recommended length is 4 bytes, as this is the basic chunk size used by sgx_read_rand implementation. 
-// Giving larger buffer size will result in concatenation of chunks each one of 4 bytes length 
-// and may cause entropy reduction. Returns 0 on success.
-int sgxssl_read_rand(unsigned char *rand_buf, int length_in_bytes)
-{
-	FSTART;
-
-	sgx_status_t ret;
-
-	if (rand_buf == NULL ||
-		length_in_bytes <= 0) {
-		SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
-		FEND;
-		return 1;
-	}
-
-	ret = sgx_read_rand(rand_buf, length_in_bytes);
-	if (ret == SGX_SUCCESS) {
-		FEND;
-		return 0;
-	}
-
-	SGX_UNREACHABLE_CODE(SET_NO_ERRNO);
-	FEND;
-	return 1;
-}
-
-int sgx_rand_status(void)
-{
-    return 1;
-}
-
-int get_sgx_rand_bytes(unsigned char *buf, int num)
-{
-    if (sgxssl_read_rand(buf, num) == 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 extern uint64_t g_cpu_feature_indicator;
 
 #define CPU_FEATURE_UNAVAILABLE         0xFFFFFFFFULL // Denoting that CPU features information is unavailable
